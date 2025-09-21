@@ -133,6 +133,20 @@ public:
   }
 };
 
+class CastOp : public ArithOp {
+private:
+  Input m_input;
+public:
+  CastOp(DataType dataType, Input input):
+    ArithOp(GlobalOpcodes::CAST, dataType), m_input(input) {}
+
+  std::string_view getMnemonic() const override {
+    return "cast";
+  }
+
+  
+};
+
 } // namespace arith
 
 } // namespace iris

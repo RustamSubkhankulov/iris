@@ -10,7 +10,8 @@ enum GlobalOpcodes : opcode_t {
   SUB,
   MUL,
   DIV,
-  CONST
+  CONST,
+  CAST
 };
 
 } // namespace iris

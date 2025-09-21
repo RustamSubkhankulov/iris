@@ -6,7 +6,7 @@ project(
         LANGUAGES CXX
         )
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_EXTENSIONS False)
 
@@ -17,7 +17,7 @@ endif()
 
 string(APPEND CMAKE_CXX_FLAGS " -Wall -Wextra")
 string(APPEND CMAKE_CXX_FLAGS_DEBUG " -g -O0")
-string(APPEND CMAKE_CXX_FLAGS_RELEASE " -O3")
+string(APPEND CMAKE_CXX_FLAGS_RELEASE " -O2")
 
 set(SRC_DIR src)
 set(INC_DIR include)

@@ -1,18 +1,18 @@
-#ifndef INCLUDE_DIALECTS_BUILTIN_OPS_HPP
-#define INCLUDE_DIALECTS_BUILTIN_OPS_HPP
+#ifndef INCLUDE_DIALECTS_ARITH_OPS_HPP
+#define INCLUDE_DIALECTS_ARITH_OPS_HPP
 
 #include <iostream>
 #include <string>
 
 #include <common/operation.hpp>
 
-namespace {
+namespace iris {
+namespace builtin {
 
-using iris::DataType;
-using iris::Input;
+namespace detail {
 
-template<iris::opcode_t opcode>
-class BinaryArithOp : public iris::Operation {
+template <opcode_t opcode>
+class BinaryArithOp : public Operation {
 private:
   DataType m_dataType;
   Input m_inputX;
@@ -56,44 +56,34 @@ public:
   } 
 };
 
+} // namespace detail
 
-constexpr std::string_view MnemonicAdd = "ADD";
-constexpr std::string_view MnemonicSub = "SUB";
-constexpr std::string_view MnemonicMul = "MUL";
-constexpr std::string_view MnemonicDiv = "DIV";
-
-} // namespace 
-
-namespace iris {
-
-namespace builtin {
-
-enum BuiltinOpcode : opcode_t {
+enum ArithOpcode : opcode_t {
   ADD, SUB, MUL, DIV
 };
 
-class AddOp : public BinaryArithOp<BuiltinOpcode::ADD> {
+class AddOp : public detail::BinaryArithOp<ArithOpcode::ADD> {
 public:
   std::string_view getMnemonic() const override {
     return "add";
   }
 };
 
-class SubOp : public BinaryArithOp<BuiltinOpcode::SUB> {
+class SubOp : public detail::BinaryArithOp<ArithOpcode::SUB> {
 public:
   std::string_view getMnemonic() const override {
     return "sub";
   }
 };
 
-class MulOp : public BinaryArithOp<BuiltinOpcode::MUL> {
+class MulOp : public detail::BinaryArithOp<ArithOpcode::MUL> {
 public:
   std::string_view getMnemonic() const override {
     return "sub";
   }
 };
 
-class DivOp : public BinaryArithOp<BuiltinOpcode::DIV> {
+class DivOp : public detail::BinaryArithOp<ArithOpcode::DIV> {
 public:
   std::string_view getMnemonic() const override {
     return "div";

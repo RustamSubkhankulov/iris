@@ -59,6 +59,7 @@ public:
 
   // Mnemonis is unique string that corresponds to each operation
   virtual std::string_view getMnemonic() const = 0;
+  virtual std::string_view getDialectName() const = 0;
 
   virtual bool isTerminator() const = 0;
 

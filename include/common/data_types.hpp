@@ -3,28 +3,28 @@
 
 #include <iostream>
 
-namespace {
+namespace iris {
+
+namespace detail {
 
 constexpr uint8_t FloatFlag         = 0b10000000U;
 constexpr uint8_t UnsignedIntFlag   = 0b01000000U;
 constexpr uint8_t SignedIntFlag     = 0b00100000U;
 constexpr uint8_t BitWidthPowerMask = 0b00011111U;
 
-} // namespace
-
-namespace iris {
+} // namespace detail
 
 enum class DataType : uint8_t {
-  UI8  = UnsignedIntFlag | 3,
-  UI16 = UnsignedIntFlag | 4,
-  UI32 = UnsignedIntFlag | 5,
-  UI64 = UnsignedIntFlag | 6,
-  SI8  = SignedIntFlag | 3,
-  SI16 = SignedIntFlag | 4,
-  SI32 = SignedIntFlag | 5,
-  SI64 = SignedIntFlag | 6,
-  F32  = FloatFlag | 5,
-  F64  = FloatFlag | 6,
+  UI8  = detail::UnsignedIntFlag | 3,
+  UI16 = detail::UnsignedIntFlag | 4,
+  UI32 = detail::UnsignedIntFlag | 5,
+  UI64 = detail::UnsignedIntFlag | 6,
+  SI8  = detail::SignedIntFlag | 3,
+  SI16 = detail::SignedIntFlag | 4,
+  SI32 = detail::SignedIntFlag | 5,
+  SI64 = detail::SignedIntFlag | 6,
+  F32  = detail::FloatFlag | 5,
+  F64  = detail::FloatFlag | 6,
   NONE
 };
 
@@ -35,19 +35,19 @@ std::ostream& operator<<(std::ostream& out, DataType dataType) {
   }
 
   auto value = static_cast<uint8_t>(dataType);
-  if (FloatFlag & value) {
+  if (detail::FloatFlag & value) {
     out << "f";
   }
 
-  if (UnsignedIntFlag & value) {
+  if (detail::UnsignedIntFlag & value) {
     out << "ui";
   }
 
-  if (SignedIntFlag & value) {
+  if (detail::SignedIntFlag & value) {
     out << "si";
   }
 
-  uint8_t power = value & BitWidthPowerMask;
+  uint8_t power = value & detail::BitWidthPowerMask;
   out << (2 << power);
 
   return out;

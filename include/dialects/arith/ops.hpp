@@ -31,7 +31,7 @@ public:
 };
 
 class BinaryArithOp : public ArithOp {
-private:
+protected:
   Input m_inputX;
   Input m_inputY;
 
@@ -41,7 +41,17 @@ public:
 
   bool hasVerifier() const override { return true; }
   bool verify() const override {
-    return verifyInput("inputX", m_inputX) && verifyInput("inputY", m_inputY);
+    // Inputs are present
+    if (!verifyInputNonEmpty("inputX", m_inputX) || !verifyInputNonEmpty("inputY", m_inputY)) {
+      return false;
+    }
+
+    // Inputs have the same data types.
+    if (verifyInputsDTySame()) {
+      return false;
+    }
+
+    return true;
   }
 
   Input getInputX() const {
@@ -52,14 +62,18 @@ public:
     return m_inputY;
   }
 
- private:
-  bool verifyInput(std::string_view inputName, const Input& input) const {
+ protected:
+  bool verifyInputNonEmpty(std::string_view inputName, const Input& input) const {
     if (!input) {
       std::cerr << "Operation " << getMnemonic() << ": ";
       std::cerr << inputName << " is empty.\n";
       return false;
     }
+    return true;
+  }
 
+  bool verifyInputDTy(std::string_view inputName, const Input& input) const {
+    assert(!input);
     auto inputDataType = input.getDefiningOp()->getDataType();
     if (inputDataType != m_dataType) {
       std::cerr << "Operation " << getMnemonic() << ": ";
@@ -67,7 +81,18 @@ public:
       return false;
     }
     return true;
-  } 
+  }
+
+  bool verifyInputsDTySame() const {
+    auto inputXDTy = m_inputX.getDefiningOp()->getDataType();
+    auto inputYDTy = m_inputY.getDefiningOp()->getDataType();
+    if (inputXDTy != inputYDTy) {
+      std::cerr << "Operation " << getMnemonic() << ": ";
+      std::cerr << "inputs have different data types.\n";
+      return false;
+    }
+    return true;
+  }
 };
 
 class AddOp : public BinaryArithOp {
@@ -77,6 +102,18 @@ public:
 
   std::string_view getMnemonic() const override {
     return "add";
+  }
+
+  bool verify() const override {
+    if (!BinaryArithOp::verify()) {
+      return false;
+    }
+
+    if (!verifyInputDTy("inputX", m_inputX) || !verifyInputDTy("inputY", m_inputY)) {
+      return false;
+    }
+
+    return true;
   }
 };
 
@@ -88,6 +125,18 @@ public:
   std::string_view getMnemonic() const override {
     return "sub";
   }
+
+  bool verify() const override {
+    if (!BinaryArithOp::verify()) {
+      return false;
+    }
+
+    if (!verifyInputDTy("inputX", m_inputX) || !verifyInputDTy("inputY", m_inputY)) {
+      return false;
+    }
+
+    return true;
+  }
 };
 
 class MulOp : public BinaryArithOp {
@@ -96,7 +145,19 @@ public:
     BinaryArithOp(GlobalOpcodes::MUL, dataType, inputX, inputY) {}
 
   std::string_view getMnemonic() const override {
-    return "sub";
+    return "mul";
+  }
+
+  bool verify() const override {
+    if (!BinaryArithOp::verify()) {
+      return false;
+    }
+
+    if (!verifyInputDTy("inputX", m_inputX) || !verifyInputDTy("inputY", m_inputY)) {
+      return false;
+    }
+
+    return true;
   }
 };
 
@@ -107,6 +168,18 @@ public:
 
   std::string_view getMnemonic() const override {
     return "div";
+  }
+
+  bool verify() const override {
+    if (!BinaryArithOp::verify()) {
+      return false;
+    }
+
+    if (!verifyInputDTy("inputX", m_inputX) || !verifyInputDTy("inputY", m_inputY)) {
+      return false;
+    }
+
+    return true;
   }
 };
 
@@ -143,8 +216,16 @@ public:
   std::string_view getMnemonic() const override {
     return "cast";
   }
+};
 
-  
+class CmpOp : public BinaryArithOp {
+public:
+  CmpOp(Input inputX, Input inputY):
+    BinaryArithOp(GlobalOpcodes::CMP, DataType::BOOL, inputX, inputY) {}
+
+  std::string_view getMnemonic() const override {
+    return "cmp";
+  }
 };
 
 } // namespace arith

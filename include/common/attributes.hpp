@@ -82,6 +82,18 @@ using SInteger16ConstAttribute = detail::SIntegerConstAttribute<int16_t, DataTyp
 using SInteger32ConstAttribute = detail::SIntegerConstAttribute<int32_t, DataType::SI32>;
 using SInteger64ConstAttribute = detail::SIntegerConstAttribute<int64_t, DataType::SI64>;
 
+class BoolConstAttribute : public ConstAttribute {
+private:
+  bool m_data;
+public:
+  BoolConstAttribute(bool data):
+    ConstAttribute(DataType::BOOL), m_data(data) {}
+
+  bool getData() const {
+    return m_data;
+  }
+};
+
 } // namespace iris
 
 #endif // INCLUDE_COMMON_ATTRIBUTES_HPP

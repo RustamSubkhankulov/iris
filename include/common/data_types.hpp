@@ -7,10 +7,11 @@ namespace iris {
 
 namespace detail {
 
-constexpr uint8_t FloatFlag         = 0b10000000U;
-constexpr uint8_t UnsignedIntFlag   = 0b01000000U;
-constexpr uint8_t SignedIntFlag     = 0b00100000U;
-constexpr uint8_t BitWidthPowerMask = 0b00011111U;
+constexpr uint8_t BoolFlag          = 0b10000000U;
+constexpr uint8_t FloatFlag         = 0b01000000U;
+constexpr uint8_t UnsignedIntFlag   = 0b00100000U;
+constexpr uint8_t SignedIntFlag     = 0b00010000U;
+constexpr uint8_t BitWidthPowerMask = 0b00001111U;
 
 } // namespace detail
 
@@ -25,8 +26,13 @@ enum class DataType : uint8_t {
   SI64 = detail::SignedIntFlag | 6,
   F32  = detail::FloatFlag | 5,
   F64  = detail::FloatFlag | 6,
+  BOOL = detail::BoolFlag,
   NONE
 };
+
+consteval bool isBool(DataType DTy) {
+  return static_cast<uint8_t>(DTy) & detail::BoolFlag;
+}
 
 consteval bool isFloatingPoint(DataType DTy) {
   return static_cast<uint8_t>(DTy) & detail::FloatFlag;
@@ -47,6 +53,11 @@ consteval bool isSignedInteger(DataType DTy) {
 std::ostream& operator<<(std::ostream& out, DataType dataType) {
   if (dataType == DataType::NONE) {
     out << "none";
+    return out;
+  }
+
+  if (dataType == DataType::BOOL) {
+    out << "bool";
     return out;
   }
 

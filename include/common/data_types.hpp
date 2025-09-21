@@ -1,5 +1,5 @@
-#ifndef INC_COMMON_DATA_TYPE_HPP
-#define INC_COMMON_DATA_TYPE_HPP
+#ifndef INCLUDE_COMMON_DATA_TYPE_HPP
+#define INCLUDE_COMMON_DATA_TYPE_HPP
 
 #include <iostream>
 
@@ -24,10 +24,16 @@ enum class DataType : uint8_t {
   SI32 = SignedIntFlag | 5,
   SI64 = SignedIntFlag | 6,
   F32  = FloatFlag | 5,
-  F64  = FloatFlag | 6
+  F64  = FloatFlag | 6,
+  NONE
 };
 
 std::ostream& operator<<(std::ostream& out, DataType dataType) {
+  if (dataType == DataType::NONE) {
+    out << "none";
+    return out;
+  }
+
   auto value = static_cast<uint8_t>(dataType);
   if (FloatFlag & value) {
     out << "f";
@@ -49,4 +55,4 @@ std::ostream& operator<<(std::ostream& out, DataType dataType) {
 
 } // namespace iris
 
-#endif // INC_COMMON_DATA_TYPE_HPP
+#endif // INCLUDE_COMMON_DATA_TYPE_HPP

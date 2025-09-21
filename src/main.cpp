@@ -1,5 +1,5 @@
 #include <iostream>
-#include <dialects/arith/ops.hpp>
+#include <ops/dialects/arith/ops.hpp>
 
 int main() {
   std::cout << iris::DataType::F32 << std::endl;
@@ -20,6 +20,7 @@ int main() {
   iris::arith::ConstantOp constOp2(iris::DataType::F32, attr2);
 
   iris::arith::AddOp addOp(iris::DataType::F32, &constOp1, &constOp2);
+  iris::arith::CastOp castOp(iris::DataType::SI32, &addOp);
 
   return 0;
 }

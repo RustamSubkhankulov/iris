@@ -1,7 +1,7 @@
 #ifndef INCLUDE_DIALECTS_OPCODES_HPP
 #define INCLUDE_DIALECTS_OPCODES_HPP
 
-#include <common/types.hpp>
+#include <ops/types.hpp>
 
 namespace iris {
 

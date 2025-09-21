@@ -7,11 +7,11 @@
 #include <utility>
 #include <span>
 
-#include <common/types.hpp>
-#include <common/utils.hpp>
-#include <common/data_types.hpp>
-#include <common/user.hpp>
-#include <common/input.hpp>
+#include <ops/types.hpp>
+#include <ops/generic/utils.hpp>
+#include <ops/generic/data_types.hpp>
+#include <ops/generic/user.hpp>
+#include <ops/generic/input.hpp>
 
 namespace iris {
 

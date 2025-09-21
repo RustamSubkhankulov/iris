@@ -4,10 +4,10 @@
 #include <iostream>
 #include <string>
 
-#include <common/operation.hpp>
-#include <common/attributes.hpp>
+#include <ops/generic/operation.hpp>
+#include <ops/generic/attributes.hpp>
 
-#include <dialects/opcodes.hpp>
+#include <ops/dialects/opcodes.hpp>
 
 namespace iris {
 namespace arith {

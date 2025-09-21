@@ -28,6 +28,22 @@ enum class DataType : uint8_t {
   NONE
 };
 
+consteval bool isFloatingPoint(DataType DTy) {
+  return static_cast<uint8_t>(DTy) & detail::FloatFlag;
+}
+
+consteval bool isInteger(DataType DTy) {
+  return static_cast<uint8_t>(DTy) & (detail::UnsignedIntFlag | detail::SignedIntFlag);
+}
+
+consteval bool isUnsignedInteger(DataType DTy) {
+  return static_cast<uint8_t>(DTy) & (detail::UnsignedIntFlag);
+}
+
+consteval bool isSignedInteger(DataType DTy) {
+  return static_cast<uint8_t>(DTy) & (detail::SignedIntFlag);
+}
+
 std::ostream& operator<<(std::ostream& out, DataType dataType) {
   if (dataType == DataType::NONE) {
     out << "none";
@@ -48,7 +64,7 @@ std::ostream& operator<<(std::ostream& out, DataType dataType) {
   }
 
   uint8_t power = value & detail::BitWidthPowerMask;
-  out << (2 << power);
+  out << (1 << power);
 
   return out;
 }

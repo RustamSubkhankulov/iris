@@ -7,6 +7,7 @@
 #include <utility>
 #include <span>
 
+#include <common/types.hpp>
 #include <common/utils.hpp>
 #include <common/data_types.hpp>
 #include <common/user.hpp>
@@ -15,9 +16,6 @@
 namespace iris {
 
 class BasicBlock;
-
-using opcode_t = uint8_t;
-constexpr opcode_t nullopcode = 0U;
 
 // Operation base class
 class Operation : public ListNode {
@@ -59,6 +57,7 @@ public:
 
   // Mnemonis is unique string that corresponds to each operation
   virtual std::string_view getMnemonic() const = 0;
+  
   virtual std::string_view getDialectName() const = 0;
 
   virtual bool isTerminator() const = 0;

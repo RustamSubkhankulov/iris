@@ -12,13 +12,13 @@ class ConstAttribute {
 protected:
   DataType m_dataType;
 
-  ConstAttribute(DataType dataType):
+  constexpr ConstAttribute(DataType dataType):
     m_dataType(dataType) {}
 
 public:
   virtual ~ConstAttribute() = default;
 
-  DataType getDataType() const {
+  constexpr DataType getDataType() const {
     return m_dataType;
   }
 };
@@ -31,10 +31,10 @@ class FloatConstAttribute : public ConstAttribute {
 private:
   F m_data;
 public:
-  FloatConstAttribute(F data):
+  constexpr FloatConstAttribute(F data):
     ConstAttribute(DTy), m_data(data) {}
 
-  F getData() const {
+  constexpr F getData() const {
     return m_data;
   }
 };
@@ -45,10 +45,10 @@ class SIntegerConstAttribute : public ConstAttribute {
 private:
   S m_data;
 public:
-  SIntegerConstAttribute(S data):
+  constexpr SIntegerConstAttribute(S data):
     ConstAttribute(DTy), m_data(data) {}
 
-  S getData() const {
+  constexpr S getData() const {
     return m_data;
   }
 };
@@ -59,10 +59,10 @@ class UIntegerConstAttribute : public ConstAttribute {
 private:
   U m_data;
 public:
-  UIntegerConstAttribute(U data):
+  constexpr UIntegerConstAttribute(U data):
     ConstAttribute(DTy), m_data(data) {}
 
-  U getData() const {
+  constexpr U getData() const {
     return m_data;
   }
 };
@@ -86,13 +86,58 @@ class BoolConstAttribute : public ConstAttribute {
 private:
   bool m_data;
 public:
-  BoolConstAttribute(bool data):
+  constexpr BoolConstAttribute(bool data):
     ConstAttribute(DataType::BOOL), m_data(data) {}
 
-  bool getData() const {
+  constexpr bool getData() const {
     return m_data;
   }
 };
+
+
+constexpr Float32ConstAttribute makeConstAttribute(float value) {
+  return Float32ConstAttribute{value};
+}
+
+constexpr Float64ConstAttribute makeConstAttribute(double value) {
+  return Float64ConstAttribute{value};
+}
+
+constexpr SInteger8ConstAttribute makeConstAttribute(int8_t value) {
+  return SInteger8ConstAttribute{value};
+}
+
+constexpr SInteger16ConstAttribute makeConstAttribute(int16_t value) {
+  return SInteger16ConstAttribute{value};
+}
+
+constexpr SInteger32ConstAttribute makeConstAttribute(int32_t value) {
+  return SInteger32ConstAttribute{value};
+}
+
+constexpr SInteger64ConstAttribute makeConstAttribute(int64_t value) {
+  return SInteger64ConstAttribute{value};
+}
+
+constexpr UInteger8ConstAttribute makeConstAttribute(uint8_t value) {
+  return UInteger8ConstAttribute{value};
+}
+
+constexpr UInteger16ConstAttribute makeConstAttribute(uint16_t value) {
+  return UInteger16ConstAttribute{value};
+}
+
+constexpr UInteger32ConstAttribute makeConstAttribute(uint32_t value) {
+  return UInteger32ConstAttribute{value};
+}
+
+constexpr UInteger64ConstAttribute makeConstAttribute(uint64_t value) {
+  return UInteger64ConstAttribute{value};
+}
+
+constexpr BoolConstAttribute makeConstAttribute(bool value) {
+  return BoolConstAttribute{value};
+}
 
 } // namespace iris
 

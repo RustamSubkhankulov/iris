@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 
+#include <cassert>
+
 namespace iris {
 
 namespace detail {
@@ -30,6 +32,21 @@ enum class DataType : uint8_t {
   BOOL = detail::BoolFlag,
   NONE
 };
+
+constexpr DataType getFloatDataType(uint8_t bidWidth) {
+  assert(bidWidth <= detail::BitWidthPowerMask);
+  return static_cast<DataType>(detail::FloatFlag | bidWidth);
+}
+
+constexpr DataType getUIntegerDataType(uint8_t bidWidth) {
+  assert(bidWidth <= detail::BitWidthPowerMask);
+  return static_cast<DataType>(detail::UnsignedIntFlag | bidWidth);
+}
+
+constexpr DataType getSIntegerDataType(uint8_t bidWidth) {
+  assert(bidWidth <= detail::BitWidthPowerMask);
+  return static_cast<DataType>(detail::SignedIntFlag | bidWidth);
+}
 
 constexpr bool isBool(DataType DTy) {
   return static_cast<uint8_t>(DTy) & detail::BoolFlag;

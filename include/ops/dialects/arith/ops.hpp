@@ -4,8 +4,8 @@
 #include <iostream>
 #include <string>
 
-#include <ops/generic/operation.hpp>
 #include <ops/generic/attributes.hpp>
+#include <ops/generic/operation.hpp>
 
 #include <ops/dialects/opcodes.hpp>
 
@@ -17,17 +17,24 @@ protected:
   DataType m_dataType;
 
 public:
-  ArithOp(opcode_t opcode, DataType dataType):
-    Operation(opcode), m_dataType(dataType) {}
+  ArithOp(opcode_t opcode, DataType dataType)
+    : Operation(opcode)
+    , m_dataType(dataType) {}
 
-  bool isTerminator() const override { return false; }
-  
+  bool isTerminator() const override {
+    return false;
+  }
+
   std::string_view getDialectName() const override {
     return "arith";
   }
 
-  bool hasResult() const override { return true; }
-  DataType getDataType() const override { return m_dataType; }
+  bool hasResult() const override {
+    return true;
+  }
+  DataType getDataType() const override {
+    return m_dataType;
+  }
 };
 
 class BinaryArithOp : public ArithOp {
@@ -36,10 +43,14 @@ protected:
   Input m_inputY;
 
 public:
-  BinaryArithOp(opcode_t opcode, DataType dataType, Input inputX, Input inputY):
-    ArithOp(opcode, dataType), m_inputX(inputX), m_inputY(inputY) {}
+  BinaryArithOp(opcode_t opcode, DataType dataType, Input inputX, Input inputY)
+    : ArithOp(opcode, dataType)
+    , m_inputX(inputX)
+    , m_inputY(inputY) {}
 
-  bool hasVerifier() const override { return true; }
+  bool hasVerifier() const override {
+    return true;
+  }
   bool verify() const override {
     // Inputs are present
     bool verX = verifyInputNonEmpty("inputX", m_inputX);
@@ -62,8 +73,9 @@ public:
     return m_inputY;
   }
 
- protected:
-  bool verifyInputNonEmpty(std::string_view inputName, const Input& input) const {
+protected:
+  bool verifyInputNonEmpty(std::string_view inputName,
+                           const Input& input) const {
     if (!input) {
       std::cerr << "Operation " << getMnemonic() << ": ";
       std::cerr << inputName << " is empty.\n";
@@ -89,8 +101,9 @@ using HeterogenArithOp = BinaryArithOp;
 
 class HomogenBinaryArithOp : public BinaryArithOp {
 public:
-  HomogenBinaryArithOp(opcode_t opcode, DataType dataType, Input inputX, Input inputY):
-    BinaryArithOp(opcode, dataType, inputX, inputY) {}
+  HomogenBinaryArithOp(opcode_t opcode, DataType dataType, Input inputX,
+                       Input inputY)
+    : BinaryArithOp(opcode, dataType, inputX, inputY) {}
 
   bool verify() const override {
     if (!BinaryArithOp::verify()) {
@@ -104,6 +117,7 @@ public:
     }
     return true;
   }
+
 private:
   bool verifyInputDTy(std::string_view inputName, const Input& input) const {
     assert(!input);
@@ -119,8 +133,8 @@ private:
 
 class AddOp : public HomogenBinaryArithOp {
 public:
-  AddOp(DataType dataType, Input inputX, Input inputY):
-    HomogenBinaryArithOp(GlobalOpcodes::ADD, dataType, inputX, inputY) {}
+  AddOp(DataType dataType, Input inputX, Input inputY)
+    : HomogenBinaryArithOp(GlobalOpcodes::ADD, dataType, inputX, inputY) {}
 
   std::string_view getMnemonic() const override {
     return "add";
@@ -129,8 +143,8 @@ public:
 
 class SubOp : public HomogenBinaryArithOp {
 public:
-  SubOp(DataType dataType, Input inputX, Input inputY):
-    HomogenBinaryArithOp(GlobalOpcodes::SUB, dataType, inputX, inputY) {}
+  SubOp(DataType dataType, Input inputX, Input inputY)
+    : HomogenBinaryArithOp(GlobalOpcodes::SUB, dataType, inputX, inputY) {}
 
   std::string_view getMnemonic() const override {
     return "sub";
@@ -139,8 +153,8 @@ public:
 
 class MulOp : public HomogenBinaryArithOp {
 public:
-  MulOp(DataType dataType, Input inputX, Input inputY):
-    HomogenBinaryArithOp(GlobalOpcodes::MUL, dataType, inputX, inputY) {}
+  MulOp(DataType dataType, Input inputX, Input inputY)
+    : HomogenBinaryArithOp(GlobalOpcodes::MUL, dataType, inputX, inputY) {}
 
   std::string_view getMnemonic() const override {
     return "mul";
@@ -149,8 +163,8 @@ public:
 
 class DivOp : public HomogenBinaryArithOp {
 public:
-  DivOp(DataType dataType, Input inputX, Input inputY):
-    HomogenBinaryArithOp(GlobalOpcodes::DIV, dataType, inputX, inputY) {}
+  DivOp(DataType dataType, Input inputX, Input inputY)
+    : HomogenBinaryArithOp(GlobalOpcodes::DIV, dataType, inputX, inputY) {}
 
   std::string_view getMnemonic() const override {
     return "div";
@@ -160,15 +174,19 @@ public:
 class ConstantOp : public ArithOp {
 private:
   ConstAttribute m_attr;
+
 public:
-  ConstantOp(DataType dataType, ConstAttribute attr):
-    ArithOp(GlobalOpcodes::CONST, dataType), m_attr(attr) {}
+  ConstantOp(DataType dataType, ConstAttribute attr)
+    : ArithOp(GlobalOpcodes::CONST, dataType)
+    , m_attr(attr) {}
 
   std::string_view getMnemonic() const override {
     return "const";
   }
 
-  bool hasVerifier() const override { return true; }
+  bool hasVerifier() const override {
+    return true;
+  }
   bool verify() const override {
     auto attrDataType = m_attr.getDataType();
     if (attrDataType != m_dataType) {
@@ -183,9 +201,11 @@ public:
 class CastOp : public ArithOp {
 private:
   Input m_input;
+
 public:
-  CastOp(DataType dataType, Input input):
-    ArithOp(GlobalOpcodes::CAST, dataType), m_input(input) {}
+  CastOp(DataType dataType, Input input)
+    : ArithOp(GlobalOpcodes::CAST, dataType)
+    , m_input(input) {}
 
   std::string_view getMnemonic() const override {
     return "cast";
@@ -194,8 +214,8 @@ public:
 
 class CmpOp : public BinaryArithOp {
 public:
-  CmpOp(Input inputX, Input inputY):
-    BinaryArithOp(GlobalOpcodes::CMP, DataType::BOOL, inputX, inputY) {}
+  CmpOp(Input inputX, Input inputY)
+    : BinaryArithOp(GlobalOpcodes::CMP, DataType::BOOL, inputX, inputY) {}
 
   std::string_view getMnemonic() const override {
     return "cmp";

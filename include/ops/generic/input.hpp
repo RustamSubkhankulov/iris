@@ -12,15 +12,15 @@ private:
   Operation* m_op;
 
 public:
-  explicit Input(Operation* op = nullptr):
-    m_op(op) {}
+  explicit Input(Operation* op = nullptr)
+    : m_op(op) {}
 
   Input(const Input&) = default;
   Input& operator=(const Input&) = default;
 
-  Input(Input&& other):
-    m_op(std::exchange(other.m_op, nullptr)) {}
-  
+  Input(Input&& other)
+    : m_op(std::exchange(other.m_op, nullptr)) {}
+
   Input& operator=(Input&& other) {
     std::swap(m_op, other.m_op);
     return *this;

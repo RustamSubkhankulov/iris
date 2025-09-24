@@ -1,6 +1,6 @@
 #include <iostream>
-#include <ops/generic/operation.hpp>
 #include <ops/generic/attributes.hpp>
+#include <ops/generic/operation.hpp>
 
 int main() {
   std::cout << iris::DataType::F32 << std::endl;

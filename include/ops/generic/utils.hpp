@@ -13,13 +13,13 @@ private:
 
 public:
   ListNode() = default;
-  
+
   ListNode(const ListNode&) = delete;
   ListNode& operator=(const ListNode&) = delete;
-  
-  ListNode(ListNode&& other):
-    m_next(std::exchange(other.m_next, nullptr)),
-    m_prev(std::exchange(other.m_prev, nullptr)) {}
+
+  ListNode(ListNode&& other)
+    : m_next(std::exchange(other.m_next, nullptr))
+    , m_prev(std::exchange(other.m_prev, nullptr)) {}
 
   ListNode& operator=(ListNode&& other) {
     m_next = other.m_next;
@@ -33,15 +33,16 @@ public:
 
   virtual ~ListNode() = default;
 
-  ListNode(ListNode* next, ListNode* prev):
-    m_next(next), m_prev(prev) {}
+  ListNode(ListNode* next, ListNode* prev)
+    : m_next(next)
+    , m_prev(prev) {}
 
   void insert_after(ListNode* node) {
     assert(node != nullptr);
 
     auto next = m_next;
     m_next = node;
-    
+
     node->m_prev = this;
     node->m_next = next;
 

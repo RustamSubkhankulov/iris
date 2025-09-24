@@ -62,12 +62,6 @@ public:
       return false;
     }
 
-    // Inputs are present
-    bool verX = verifyInputNonEmpty("inputX", m_inputX);
-    bool verY = verifyInputNonEmpty("inputY", m_inputY);
-    if (!verX || !verY) {
-      return false;
-    }
     // Inputs have the same data types.
     if (verifyInputsDTySame()) {
       return false;
@@ -92,16 +86,6 @@ public:
   }
 
 private:
-  bool verifyInputNonEmpty(std::string_view inputName,
-                           const Input& input) const {
-    if (!input) {
-      std::cerr << "Operation " << getMnemonic() << ": ";
-      std::cerr << inputName << " is empty.\n";
-      return false;
-    }
-    return true;
-  }
-
   bool verifyInputsDTySame() const {
     auto inputXDTy = m_inputX.getDefiningOp()->getDataType();
     auto inputYDTy = m_inputY.getDefiningOp()->getDataType();
@@ -266,7 +250,6 @@ public:
 };
 
 } // namespace arith
-
 } // namespace iris
 
-#endif // INCLUDE_DIALECTS_BUILTIN_OPS_HPP
+#endif // INCLUDE_DIALECTS_ARITH_OPS_HPP

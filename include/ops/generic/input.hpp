@@ -3,6 +3,9 @@
 
 #include <cassert>
 
+#include <ops/generic/data_types.hpp>
+#include <utility>
+
 namespace iris {
 
 class Operation;
@@ -12,8 +15,10 @@ private:
   Operation* m_op;
 
 public:
-  Input(Operation* op = nullptr)
-    : m_op(op) {}
+  Input(Operation* op)
+    : m_op(op) {
+    assert(m_op != nullptr && "Empty operation");
+  }
 
   Input(const Input&) = default;
   Input& operator=(const Input&) = default;
@@ -27,10 +32,6 @@ public:
   }
 
   virtual ~Input() = default;
-
-  operator bool() const {
-    return (m_op != nullptr);
-  }
 
   Operation* getDefiningOp() const {
     return m_op;

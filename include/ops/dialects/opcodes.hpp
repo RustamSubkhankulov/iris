@@ -12,7 +12,9 @@ enum GlobalOpcodes : opcode_t {
   DIV,
   CONST,
   CAST,
-  CMP
+  CMP,
+  PARAM,
+  COPY
 };
 
 } // namespace iris

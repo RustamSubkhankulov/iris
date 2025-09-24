@@ -1,5 +1,5 @@
-#ifndef INC_COMMON_UTILS_HPP
-#define INC_COMMON_UTILS_HPP
+#ifndef INCLUDE_OPS_GENERIC_UTILS_HPP
+#define INCLUDE_OPS_GENERIC_UTILS_HPP
 
 #include <cassert>
 #include <utility>
@@ -67,4 +67,4 @@ public:
 
 } // namespace iris
 
-#endif // INC_COMMON_UTILS_HPP
+#endif // INCLUDE_OPS_GENERIC_UTILS_HPP

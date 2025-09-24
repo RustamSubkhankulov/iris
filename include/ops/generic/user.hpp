@@ -1,5 +1,5 @@
-#ifndef INCLUDE_COMMON_USER_HPP
-#define INCLUDE_COMMON_USER_HPP
+#ifndef INCLUDE_OPS_GENERIC_USER_HPP
+#define INCLUDE_OPS_GENERIC_USER_HPP
 
 namespace iris {
 
@@ -37,4 +37,4 @@ public:
 
 } // namespace iris
 
-#endif // INCLUDE_COMMON_USER_HPP
+#endif // INCLUDE_OPS_GENERIC_USER_HPP

@@ -1,5 +1,5 @@
-#ifndef INCLUDE_COMMON_INPUT_HPP
-#define INCLUDE_COMMON_INPUT_HPP
+#ifndef INCLUDE_OPS_GENERIC_INPUT_HPP
+#define INCLUDE_OPS_GENERIC_INPUT_HPP
 
 namespace iris {
 
@@ -37,4 +37,4 @@ public:
 
 } // namespace iris
 
-#endif // INCLUDE_COMMON_INPUT_HPP
+#endif // INCLUDE_OPS_GENERIC_INPUT_HPP

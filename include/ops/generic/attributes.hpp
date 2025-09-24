@@ -1,5 +1,5 @@
-#ifndef INCLUDE_COMMON_ATTRIBUTES_HPP
-#define INCLUDE_COMMON_ATTRIBUTES_HPP
+#ifndef INCLUDE_OPS_GENERIC_ATTRIBUTES_HPP
+#define INCLUDE_OPS_GENERIC_ATTRIBUTES_HPP
 
 #include <concepts>
 #include <cstdint>
@@ -96,4 +96,4 @@ public:
 
 } // namespace iris
 
-#endif // INCLUDE_COMMON_ATTRIBUTES_HPP
+#endif // INCLUDE_OPS_GENERIC_ATTRIBUTES_HPP

@@ -1,7 +1,8 @@
-#ifndef INCLUDE_COMMON_DATA_TYPE_HPP
-#define INCLUDE_COMMON_DATA_TYPE_HPP
+#ifndef INCLUDE_OPS_GENERIC_DATA_TYPE_HPP
+#define INCLUDE_OPS_GENERIC_DATA_TYPE_HPP
 
 #include <iostream>
+#include <string>
 
 namespace iris {
 
@@ -16,70 +17,96 @@ constexpr uint8_t BitWidthPowerMask = 0b00001111U;
 } // namespace detail
 
 enum class DataType : uint8_t {
-  UI8  = detail::UnsignedIntFlag | 3,
-  UI16 = detail::UnsignedIntFlag | 4,
-  UI32 = detail::UnsignedIntFlag | 5,
-  UI64 = detail::UnsignedIntFlag | 6,
-  SI8  = detail::SignedIntFlag | 3,
-  SI16 = detail::SignedIntFlag | 4,
-  SI32 = detail::SignedIntFlag | 5,
-  SI64 = detail::SignedIntFlag | 6,
-  F32  = detail::FloatFlag | 5,
-  F64  = detail::FloatFlag | 6,
+  UI8  = detail::UnsignedIntFlag | 3U,
+  UI16 = detail::UnsignedIntFlag | 4U,
+  UI32 = detail::UnsignedIntFlag | 5U,
+  UI64 = detail::UnsignedIntFlag | 6U,
+  SI8  = detail::SignedIntFlag | 3U,
+  SI16 = detail::SignedIntFlag | 4U,
+  SI32 = detail::SignedIntFlag | 5U,
+  SI64 = detail::SignedIntFlag | 6U,
+  F32  = detail::FloatFlag | 5U,
+  F64  = detail::FloatFlag | 6U,
   BOOL = detail::BoolFlag,
   NONE
 };
 
-consteval bool isBool(DataType DTy) {
+constexpr bool isBool(DataType DTy) {
   return static_cast<uint8_t>(DTy) & detail::BoolFlag;
 }
 
-consteval bool isFloatingPoint(DataType DTy) {
+constexpr bool isFloatingPoint(DataType DTy) {
   return static_cast<uint8_t>(DTy) & detail::FloatFlag;
 }
 
-consteval bool isInteger(DataType DTy) {
+constexpr bool isInteger(DataType DTy) {
   return static_cast<uint8_t>(DTy) & (detail::UnsignedIntFlag | detail::SignedIntFlag);
 }
 
-consteval bool isUnsignedInteger(DataType DTy) {
+constexpr bool isUnsignedInteger(DataType DTy) {
   return static_cast<uint8_t>(DTy) & (detail::UnsignedIntFlag);
 }
 
-consteval bool isSignedInteger(DataType DTy) {
+constexpr bool isSignedInteger(DataType DTy) {
   return static_cast<uint8_t>(DTy) & (detail::SignedIntFlag);
 }
 
-std::ostream& operator<<(std::ostream& out, DataType dataType) {
+constexpr uint8_t getBitWidth(DataType DTy) {
+    return 1U << (static_cast<uint8_t>(DTy) & detail::BitWidthPowerMask);
+}
+
+constexpr size_t getSizeInBytes(DataType DTy) {
+    if (DTy == DataType::BOOL) return 1U;
+    return getBitWidth(DTy) / 8U;
+}
+
+constexpr bool isValidDataType(DataType DTy) {
+    return DTy != DataType::NONE && (isBool(DTy) || isFloatingPoint(DTy) || isInteger(DTy)) && (getBitWidth(DTy) != 0);
+}
+
+static_assert(isValidDataType(DataType::UI8), "DataType is not valid, fatal");
+static_assert(isValidDataType(DataType::UI16), "DataType is not valid, fatal");
+static_assert(isValidDataType(DataType::UI32), "DataType is not valid, fatal");
+static_assert(isValidDataType(DataType::UI64), "DataType is not valid, fatal");
+
+static_assert(isValidDataType(DataType::SI8), "DataType is not valid, fatal");
+static_assert(isValidDataType(DataType::SI16), "DataType is not valid, fatal");
+static_assert(isValidDataType(DataType::SI32), "DataType is not valid, fatal");
+static_assert(isValidDataType(DataType::SI64), "DataType is not valid, fatal");
+
+static_assert(isValidDataType(DataType::F32), "DataType is not valid, fatal");
+static_assert(isValidDataType(DataType::F64), "DataType is not valid, fatal");
+
+static_assert(isValidDataType(DataType::BOOL), "DataType is not valid, fatal");
+
+std::string toString(DataType dataType) {
   if (dataType == DataType::NONE) {
-    out << "none";
-    return out;
+    return "none";
   }
 
   if (dataType == DataType::BOOL) {
-    out << "bool";
-    return out;
+    return "bool";
   }
+
+  std::string prefix;
 
   auto value = static_cast<uint8_t>(dataType);
   if (detail::FloatFlag & value) {
-    out << "f";
+    prefix = "f";
+  } else if (detail::UnsignedIntFlag & value) {
+    prefix = "ui";
+  } else if (detail::SignedIntFlag & value) {
+    prefix =  "si";
   }
 
-  if (detail::UnsignedIntFlag & value) {
-    out << "ui";
-  }
+  return prefix + std::to_string(getBitWidth(dataType));
+}
 
-  if (detail::SignedIntFlag & value) {
-    out << "si";
-  }
-
-  uint8_t power = value & detail::BitWidthPowerMask;
-  out << (1 << power);
-
+std::ostream& operator<<(std::ostream& out, DataType dataType) {
+  out << toString(dataType);
   return out;
 }
 
 } // namespace iris
 
-#endif // INCLUDE_COMMON_DATA_TYPE_HPP
+#endif // INCLUDE_OPS_GENERIC_DATA_TYPE_HPP

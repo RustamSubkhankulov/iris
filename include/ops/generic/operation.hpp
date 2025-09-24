@@ -1,5 +1,5 @@
-#ifndef INCLUDE_COMMON_OPERATION_HPP
-#define INCLUDE_COMMON_OPERATION_HPP
+#ifndef INCLUDE_OPS_GENERIC_OPERATION_HPP
+#define INCLUDE_OPS_GENERIC_OPERATION_HPP
 
 #include <cstdint>
 #include <list>
@@ -8,6 +8,7 @@
 #include <span>
 
 #include <ops/types.hpp>
+#include <ops/common.hpp>
 #include <ops/generic/utils.hpp>
 #include <ops/generic/data_types.hpp>
 #include <ops/generic/user.hpp>
@@ -94,4 +95,4 @@ public:
 
 } // namespace iris
 
-#endif // INCLUDE_COMMON_OPERATION_HPP
+#endif // INCLUDE_OPS_GENERIC_OPERATION_HPP

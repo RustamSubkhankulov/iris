@@ -35,7 +35,11 @@ public:
 
   virtual ~User() = default;
 
-  Operation* getUserOp() const {
+  const Operation* getUserOp() const {
+    return m_op;
+  }
+
+  Operation* getUserOp() {
     return m_op;
   }
 

@@ -31,7 +31,11 @@ public:
 
   virtual ~Input() = default;
 
-  Operation* getDefiningOp() const {
+  const Operation* getDefiningOp() const {
+    return m_op;
+  }
+
+  Operation* getDefiningOp() {
     return m_op;
   }
 

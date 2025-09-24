@@ -4,7 +4,8 @@
 #include <cassert>
 #include <cstdint>
 #include <list>
-#include <string_view>
+#include <ostream>
+#include <string>
 #include <utility>
 
 #include <data_types.hpp>
@@ -37,6 +38,9 @@ protected:
 
   // Number of inputs of the operation
   std::size_t m_inputsNumber = 0LLU;
+
+  // Idenditier of the operation
+  std::size_t m_ID = 0LLU;
 
 public:
   // Default constructor - constructs an empty op.
@@ -121,6 +125,14 @@ public:
     return m_users;
   }
 
+  std::size_t getUsersNum() const {
+    return m_users.size();
+  }
+
+  bool hasUsers() const {
+    return (getUsersNum() != 0);
+  }
+
   void setUsers(const std::list<User>& users) {
     m_users = users;
   }
@@ -151,6 +163,52 @@ public:
 
   bool isa(const Operation& other) const {
     return isa(other.m_opcode);
+  }
+
+  void setID(std::size_t id) {
+    m_ID = id;
+  }
+
+  void print(std::ostream& os) const {
+    if (hasResult()) {
+      printID(os);
+      os << "." << m_dataType << " ";
+    }
+    os << getDialectName() << "." << getMnemonic() << " ";
+
+    if (hasInputs()) {
+      os << "(";
+      for (std::size_t inputIndex = 0; inputIndex < m_inputsNumber;
+           ++inputIndex) {
+        const Input* input = getInputAt(inputIndex);
+        input->getDefiningOp()->printID(os);
+
+        if (inputIndex != m_inputsNumber - 1) {
+          os << ",";
+        }
+      }
+      os << ") ";
+    }
+
+    std::size_t userIndex = 0;
+    std::size_t usersNumber = getUsersNum();
+
+    if (usersNumber) {
+      os << "-> (";
+      for (const User& user : m_users) {
+        user.getUserOp()->printID(os);
+
+        if (userIndex++ != usersNumber - 1) {
+          os << ",";
+        }
+      }
+      os << ")";
+    }
+  }
+
+protected:
+  virtual void printID(std::ostream& os) const {
+    os << "v" << m_ID;
   }
 };
 

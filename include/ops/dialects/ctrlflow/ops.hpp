@@ -200,6 +200,11 @@ private:
     }
     return true;
   }
+
+protected:
+  void printID(std::ostream& os) const override {
+    os << "v" << m_ID << "p";
+  }
 };
 
 } // namespace ctrlflow

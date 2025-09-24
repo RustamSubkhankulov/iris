@@ -106,7 +106,7 @@ std::string toString(DataType dataType) {
   }
 
   if (dataType == DataType::BOOL) {
-    return "bool";
+    return "b";
   }
 
   std::string prefix;

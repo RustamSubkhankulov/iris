@@ -1,6 +1,7 @@
 #ifndef INCLUDE_DIALECTS_ARITH_OPS_HPP
 #define INCLUDE_DIALECTS_ARITH_OPS_HPP
 
+#include <cassert>
 #include <iostream>
 #include <string>
 
@@ -13,13 +14,8 @@ namespace iris {
 namespace arith {
 
 class ArithOp : public Operation {
-protected:
-  DataType m_dataType;
-
 public:
-  ArithOp(opcode_t opcode, DataType dataType)
-    : Operation(opcode)
-    , m_dataType(dataType) {}
+  using Operation::Operation;
 
   bool isTerminator() const override {
     return false;
@@ -29,12 +25,7 @@ public:
     return "arith";
   }
 
-  bool hasResult() const override {
-    return true;
-  }
-  DataType getDataType() const override {
-    return m_dataType;
-  }
+  using Operation::verify;
 };
 
 class BinaryArithOp : public ArithOp {
@@ -44,14 +35,33 @@ protected:
 
 public:
   BinaryArithOp(opcode_t opcode, DataType dataType, Input inputX, Input inputY)
-    : ArithOp(opcode, dataType)
+    : ArithOp(opcode, dataType, 2LLU)
     , m_inputX(inputX)
     , m_inputY(inputY) {}
 
-  bool hasVerifier() const override {
-    return true;
+  const Input* getInputAt(std::size_t index) const override {
+    if (index == 0LLU) {
+      return &m_inputX;
+    } else if (index == 1LLU) {
+      return &m_inputY;
+    }
+    return nullptr;
   }
+
+  Input* getInputAt(std::size_t index) override {
+    if (index == 0LLU) {
+      return &m_inputX;
+    } else if (index == 1LLU) {
+      return &m_inputY;
+    }
+    return nullptr;
+  }
+
   bool verify() const override {
+    if (!ArithOp::verify()) {
+      return false;
+    }
+
     // Inputs are present
     bool verX = verifyInputNonEmpty("inputX", m_inputX);
     bool verY = verifyInputNonEmpty("inputY", m_inputY);
@@ -65,15 +75,23 @@ public:
     return true;
   }
 
-  Input getInputX() const {
+  const Input& getInputX() const {
     return m_inputX;
   }
 
-  Input getInputY() const {
+  const Input& getInputY() const {
     return m_inputY;
   }
 
-protected:
+  Input& getInputX() {
+    return m_inputX;
+  }
+
+  Input& getInputY() {
+    return m_inputY;
+  }
+
+private:
   bool verifyInputNonEmpty(std::string_view inputName,
                            const Input& input) const {
     if (!input) {
@@ -98,6 +116,16 @@ protected:
 
 // Inputs does not have to be the same data type as operation's data type
 using HeterogenArithOp = BinaryArithOp;
+
+class CmpOp : public HeterogenArithOp {
+public:
+  CmpOp(Input inputX, Input inputY)
+    : BinaryArithOp(GlobalOpcodes::CMP, DataType::BOOL, inputX, inputY) {}
+
+  std::string_view getMnemonic() const override {
+    return "cmp";
+  }
+};
 
 class HomogenBinaryArithOp : public BinaryArithOp {
 public:
@@ -131,7 +159,7 @@ private:
   }
 };
 
-class AddOp : public HomogenBinaryArithOp {
+class AddOp final : public HomogenBinaryArithOp {
 public:
   AddOp(DataType dataType, Input inputX, Input inputY)
     : HomogenBinaryArithOp(GlobalOpcodes::ADD, dataType, inputX, inputY) {}
@@ -141,7 +169,7 @@ public:
   }
 };
 
-class SubOp : public HomogenBinaryArithOp {
+class SubOp final : public HomogenBinaryArithOp {
 public:
   SubOp(DataType dataType, Input inputX, Input inputY)
     : HomogenBinaryArithOp(GlobalOpcodes::SUB, dataType, inputX, inputY) {}
@@ -151,7 +179,7 @@ public:
   }
 };
 
-class MulOp : public HomogenBinaryArithOp {
+class MulOp final : public HomogenBinaryArithOp {
 public:
   MulOp(DataType dataType, Input inputX, Input inputY)
     : HomogenBinaryArithOp(GlobalOpcodes::MUL, dataType, inputX, inputY) {}
@@ -161,7 +189,7 @@ public:
   }
 };
 
-class DivOp : public HomogenBinaryArithOp {
+class DivOp final : public HomogenBinaryArithOp {
 public:
   DivOp(DataType dataType, Input inputX, Input inputY)
     : HomogenBinaryArithOp(GlobalOpcodes::DIV, dataType, inputX, inputY) {}
@@ -171,23 +199,32 @@ public:
   }
 };
 
-class ConstantOp : public ArithOp {
+class ConstantOp final : public ArithOp {
 private:
   ConstAttribute m_attr;
 
 public:
   ConstantOp(DataType dataType, ConstAttribute attr)
-    : ArithOp(GlobalOpcodes::CONST, dataType)
+    : ArithOp(GlobalOpcodes::CONST, dataType, 0LLU)
     , m_attr(attr) {}
 
   std::string_view getMnemonic() const override {
     return "const";
   }
 
-  bool hasVerifier() const override {
-    return true;
+  Input* getInputAt([[maybe_unused]] std::size_t inputIndex) override {
+    return nullptr;
   }
+  const Input*
+  getInputAt([[maybe_unused]] std::size_t inputIndex) const override {
+    return nullptr;
+  }
+
   bool verify() const override {
+    if (!ArithOp::verify()) {
+      return false;
+    }
+
     auto attrDataType = m_attr.getDataType();
     if (attrDataType != m_dataType) {
       std::cerr << "Operation " << getMnemonic() << ": ";
@@ -204,21 +241,27 @@ private:
 
 public:
   CastOp(DataType dataType, Input input)
-    : ArithOp(GlobalOpcodes::CAST, dataType)
+    : ArithOp(GlobalOpcodes::CAST, dataType, 1LLU)
     , m_input(input) {}
 
   std::string_view getMnemonic() const override {
     return "cast";
   }
-};
 
-class CmpOp : public BinaryArithOp {
-public:
-  CmpOp(Input inputX, Input inputY)
-    : BinaryArithOp(GlobalOpcodes::CMP, DataType::BOOL, inputX, inputY) {}
+  Input* getInputAt(std::size_t inputIndex) override {
+    return (inputIndex == 0) ? &m_input : nullptr;
+  }
 
-  std::string_view getMnemonic() const override {
-    return "cmp";
+  const Input* getInputAt(std::size_t inputIndex) const override {
+    return (inputIndex == 0) ? &m_input : nullptr;
+  }
+
+  Input& getInput() {
+    return m_input;
+  }
+
+  const Input& getInput() const {
+    return m_input;
   }
 };
 

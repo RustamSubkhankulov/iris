@@ -23,19 +23,30 @@ class Operation : public ListNode {
 private:
   // Operation code - unique for each operation
   // (type of operation, not an instance)
-  opcode_t m_opcode;
+  opcode_t m_opcode = nullopcode;
+
+  std::list<User> m_users;
 
   BasicBlock* m_ParentBlockPtr = nullptr;
   friend class BasicBlock;
 
+protected:
+  // Resulting data type of the operation
+  // DataType::NONE if operation has no result
+  DataType m_dataType = DataType::NONE;
+
+  // Number of inputs of the operation
+  std::size_t m_inputsNumber = 0LLU;
+
 public:
   // Default constructor - constructs an empty op.
   // Opcode 'nullopcode' is reserved to represent an empty op.
-  Operation()
-    : m_opcode(nullopcode) {}
+  Operation() = default;
 
-  explicit Operation(opcode_t opcode)
-    : m_opcode(opcode) {}
+  Operation(opcode_t opcode, DataType dataType, std::size_t inputsNumber)
+    : m_opcode(opcode)
+    , m_dataType(dataType)
+    , m_inputsNumber(inputsNumber) {}
 
   // Copying is prohibited, new operations must be created,
   // and old operation will be replaced with new one explicitly
@@ -43,7 +54,24 @@ public:
 
   Operation(Operation&& other)
     : m_opcode(std::exchange(other.m_opcode, nullopcode))
-    , m_ParentBlockPtr(std::exchange(other.m_ParentBlockPtr, nullptr)) {}
+    , m_users(std::move(other.m_users))
+    , m_ParentBlockPtr(std::exchange(other.m_ParentBlockPtr, nullptr))
+    , m_dataType(std::exchange(other.m_dataType, DataType::NONE))
+    , m_inputsNumber(std::exchange(other.m_inputsNumber, 0LLU)) {
+    for (auto& user : m_users) {
+      assert(user && "Empty user");
+
+      std::size_t inputIndex = user.getInputIndex();
+      Operation* userOp = user.getUserOp();
+
+      assert(inputIndex < userOp->getInputsNum &&
+             "Input index exceeds number of operation's inputs");
+
+      // Update defining operation
+      Input* input = userOp->getInputAt(inputIndex);
+      input->setDefiningOp(this);
+    }
+  }
 
   operator bool() {
     return (m_opcode != nullopcode);
@@ -83,60 +111,28 @@ public:
 
   virtual bool isTerminator() const = 0;
 
-  virtual DataType getDataType() const {
-    return DataType::NONE;
+  DataType getDataType() const {
+    return m_dataType;
   }
   bool hasResult() const {
     return (getDataType() != DataType::NONE);
   }
 
-  virtual bool hasInputs() const {
-    return false;
+  std::size_t getInputsNum() const {
+    return m_inputsNumber;
   }
-  virtual std::size_t getInputsNum() const {
-    return 0LLU;
-  }
-
-  virtual const Input& getInputAt(std::size_t index) const = 0;
-  virtual Input& getInputAt(std::size_t index) = 0;
-
-  //--- Operation type identification ---
-
-  bool isa(opcode_t opcode) const {
-    return m_opcode == opcode;
+  bool hasInputs() const {
+    return (getInputsNum() != 0);
   }
 
-  bool isa(const Operation& other) const {
-    return isa(other.m_opcode);
-  }
-};
+  // Returns nullptr if specified index does not correspond
+  // to an operation's input
+  virtual Input* getInputAt(std::size_t inputIndex) = 0;
+  virtual const Input* getInputAt(std::size_t inputIndex) const = 0;
 
-class MaterialOperation : public Operation {
-private:
-  DataType m_dataType;
-  std::list<User> m_users;
-
-public:
-  MaterialOperation(opcode_t opcode, DataType dataType)
-    : Operation(opcode)
-    , m_dataType(dataType) {}
-
-  MaterialOperation(MaterialOperation&& that)
-    : Operation(std::move(that))
-    , m_dataType(that.m_dataType)
-    , m_users(std::move(that.m_users)) {
-    for (auto& user : m_users) {
-      assert(user);
-
-      std::size_t inputIndex = user.getInputIndex();
-      Operation* userOp = user.getUserOp();
-
-      userOp->getInputAt(inputIndex).setDefiningOp(this);
-    }
-  }
-
-  DataType getDataType() const override {
-    return m_dataType;
+  virtual bool verify() const {
+    // TODO: check that all users are unique
+    return true;
   }
 
   //--- Operation result's users ---
@@ -148,7 +144,6 @@ public:
   void setUsers(const std::list<User>& users) {
     m_users = users;
   }
-
   void setUsers(std::list<User>&& users) {
     m_users = std::move(users);
   }
@@ -157,7 +152,6 @@ public:
   void removeUser(IterType iter) {
     m_users.erase(iter);
   }
-
   void removeUser(std::size_t pos) {
     m_users.erase(std::next(m_users.begin(), pos));
   }
@@ -165,9 +159,18 @@ public:
   void addUser(const User& user) {
     m_users.push_back(user);
   }
-
   void addUser(User&& user) {
     m_users.push_back(std::move(user));
+  }
+
+  //--- Operation type identification ---
+
+  bool isa(opcode_t opcode) const {
+    return m_opcode == opcode;
+  }
+
+  bool isa(const Operation& other) const {
+    return isa(other.m_opcode);
   }
 };
 

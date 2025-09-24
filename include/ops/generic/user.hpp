@@ -17,6 +17,10 @@ public:
   // Constructs an empty input
   User() = default;
 
+  User(Operation* op, int64_t inputIndex)
+    : m_op(op)
+    , m_inputIndex(inputIndex) {}
+
   User(const User&) = default;
   User& operator=(const User&) = default;
 

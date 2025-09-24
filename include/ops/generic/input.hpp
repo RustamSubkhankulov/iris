@@ -12,7 +12,7 @@ private:
   Operation* m_op;
 
 public:
-  explicit Input(Operation* op = nullptr)
+  Input(Operation* op = nullptr)
     : m_op(op) {}
 
   Input(const Input&) = default;

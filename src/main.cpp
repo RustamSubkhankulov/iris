@@ -19,13 +19,14 @@ int main() {
   iris::Float32ConstAttribute attr1(3.14f);
   iris::Float32ConstAttribute attr2(2.27f);
 
-  iris::arith::ConstantOp constOp(iris::DataType::F32, attr1);
+  iris::arith::ConstantOp constOp(attr1);
   iris::builtin::ParamOp paramOp(iris::DataType::F32);
 
-  iris::arith::AddOp addOp(iris::DataType::F32, &constOp, &paramOp);
+  iris::arith::AddOp addOp(&constOp, &paramOp);
   iris::arith::CastOp castOp(iris::DataType::SI32, &addOp);
 
   iris::builtin::CopyOp copyOp(&castOp);
+  iris::ctrlflow::PhiOp phiOp(&castOp, &copyOp);
 
   iris::ctrlflow::ReturnOp returnOp;
 

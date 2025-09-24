@@ -18,6 +18,7 @@ enum GlobalOpcodes : opcode_t {
   CALL,
   JUMP,
   RETURN,
+  PHI,
 };
 
 } // namespace iris

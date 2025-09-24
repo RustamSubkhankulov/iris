@@ -108,42 +108,18 @@ public:
   }
 };
 
+// Operation's result datat type is the same as data type of the inputs
 class HomogenBinaryArithOp : public BinaryArithOp {
 public:
-  HomogenBinaryArithOp(opcode_t opcode, DataType dataType, Input inputX,
-                       Input inputY)
-    : BinaryArithOp(opcode, dataType, inputX, inputY) {}
-
-  bool verify() const override {
-    if (!BinaryArithOp::verify()) {
-      return false;
-    }
-    // Check that inputs have the same data type as operation's data type.
-    bool verX = verifyInputDTy("inputX", m_inputX);
-    bool verY = verifyInputDTy("inputY", m_inputY);
-    if (!verX || !verY) {
-      return false;
-    }
-    return true;
-  }
-
-private:
-  bool verifyInputDTy(std::string_view inputName, const Input& input) const {
-    assert(!input);
-    auto inputDataType = input.getDefiningOp()->getDataType();
-    if (inputDataType != m_dataType) {
-      std::cerr << "Operation " << getMnemonic() << ": ";
-      std::cerr << inputName << " has incompatible data type.\n";
-      return false;
-    }
-    return true;
-  }
+  HomogenBinaryArithOp(opcode_t opcode, Input inputX, Input inputY)
+    : BinaryArithOp(opcode, inputX.getDefiningOp()->getDataType(), inputX,
+                    inputY) {}
 };
 
 class AddOp final : public HomogenBinaryArithOp {
 public:
-  AddOp(DataType dataType, Input inputX, Input inputY)
-    : HomogenBinaryArithOp(GlobalOpcodes::ADD, dataType, inputX, inputY) {}
+  AddOp(Input inputX, Input inputY)
+    : HomogenBinaryArithOp(GlobalOpcodes::ADD, inputX, inputY) {}
 
   std::string_view getMnemonic() const override {
     return "add";
@@ -152,8 +128,8 @@ public:
 
 class SubOp final : public HomogenBinaryArithOp {
 public:
-  SubOp(DataType dataType, Input inputX, Input inputY)
-    : HomogenBinaryArithOp(GlobalOpcodes::SUB, dataType, inputX, inputY) {}
+  SubOp(Input inputX, Input inputY)
+    : HomogenBinaryArithOp(GlobalOpcodes::SUB, inputX, inputY) {}
 
   std::string_view getMnemonic() const override {
     return "sub";
@@ -162,8 +138,8 @@ public:
 
 class MulOp final : public HomogenBinaryArithOp {
 public:
-  MulOp(DataType dataType, Input inputX, Input inputY)
-    : HomogenBinaryArithOp(GlobalOpcodes::MUL, dataType, inputX, inputY) {}
+  MulOp(Input inputX, Input inputY)
+    : HomogenBinaryArithOp(GlobalOpcodes::MUL, inputX, inputY) {}
 
   std::string_view getMnemonic() const override {
     return "mul";
@@ -172,8 +148,8 @@ public:
 
 class DivOp final : public HomogenBinaryArithOp {
 public:
-  DivOp(DataType dataType, Input inputX, Input inputY)
-    : HomogenBinaryArithOp(GlobalOpcodes::DIV, dataType, inputX, inputY) {}
+  DivOp(Input inputX, Input inputY)
+    : HomogenBinaryArithOp(GlobalOpcodes::DIV, inputX, inputY) {}
 
   std::string_view getMnemonic() const override {
     return "div";
@@ -185,8 +161,8 @@ private:
   ConstAttribute m_attr;
 
 public:
-  ConstantOp(DataType dataType, ConstAttribute attr)
-    : ArithOp(GlobalOpcodes::CONST, dataType, 0LLU)
+  ConstantOp(ConstAttribute attr)
+    : ArithOp(GlobalOpcodes::CONST, attr.getDataType(), 0LLU)
     , m_attr(attr) {}
 
   std::string_view getMnemonic() const override {
@@ -199,20 +175,6 @@ public:
   const Input*
   getInputAt([[maybe_unused]] std::size_t inputIndex) const override {
     return nullptr;
-  }
-
-  bool verify() const override {
-    if (!ArithOp::verify()) {
-      return false;
-    }
-
-    auto attrDataType = m_attr.getDataType();
-    if (attrDataType != m_dataType) {
-      std::cerr << "Operation " << getMnemonic() << ": ";
-      std::cerr << "attribute has incompatible data type.\n";
-      return false;
-    }
-    return true;
   }
 };
 

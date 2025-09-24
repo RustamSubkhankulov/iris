@@ -107,6 +107,10 @@ public:
            "Invalid pointer to target basic block");
   }
 
+  std::string_view getMnemonic() const override {
+    return "call";
+  }
+
   Input* getInputAt(std::size_t inputIndex) override {
     return (inputIndex < m_inputsNumber) ? &m_inputs[inputIndex] : nullptr;
   }
@@ -120,6 +124,81 @@ public:
 
   BasicBlock* getTargetBasicBlock() {
     return m_targetBasicBlock;
+  }
+};
+
+class PhiOp : public CtrFlowOp {
+protected:
+  Input m_inputX;
+  Input m_inputY;
+
+public:
+  PhiOp(Input inputX, Input inputY)
+    : CtrFlowOp(GlobalOpcodes::PHI, inputX.getDefiningOp()->getDataType(), 2LLU)
+    , m_inputX(inputX)
+    , m_inputY(inputY) {}
+
+  std::string_view getMnemonic() const override {
+    return "phi";
+  }
+
+  const Input* getInputAt(std::size_t index) const override {
+    if (index == 0LLU) {
+      return &m_inputX;
+    } else if (index == 1LLU) {
+      return &m_inputY;
+    }
+    return nullptr;
+  }
+
+  Input* getInputAt(std::size_t index) override {
+    if (index == 0LLU) {
+      return &m_inputX;
+    } else if (index == 1LLU) {
+      return &m_inputY;
+    }
+    return nullptr;
+  }
+
+  bool verify() const override {
+    if (!CtrFlowOp::verify()) {
+      return false;
+    }
+
+    // Inputs have the same data types.
+    if (verifyInputsDTySame()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  const Input& getInputX() const {
+    return m_inputX;
+  }
+
+  const Input& getInputY() const {
+    return m_inputY;
+  }
+
+  Input& getInputX() {
+    return m_inputX;
+  }
+
+  Input& getInputY() {
+    return m_inputY;
+  }
+
+private:
+  bool verifyInputsDTySame() const {
+    auto inputXDTy = m_inputX.getDefiningOp()->getDataType();
+    auto inputYDTy = m_inputY.getDefiningOp()->getDataType();
+    if (inputXDTy != inputYDTy) {
+      std::cerr << "Operation " << getMnemonic() << ": ";
+      std::cerr << "inputs have different data types.\n";
+      return false;
+    }
+    return true;
   }
 };
 

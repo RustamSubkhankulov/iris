@@ -1,6 +1,8 @@
 #ifndef INCLUDE_OPS_GENERIC_INPUT_HPP
 #define INCLUDE_OPS_GENERIC_INPUT_HPP
 
+#include <cassert>
+
 namespace iris {
 
 class Operation;
@@ -10,7 +12,7 @@ private:
   Operation* m_op;
 
 public:
-  Input(Operation* op = nullptr):
+  explicit Input(Operation* op = nullptr):
     m_op(op) {}
 
   Input(const Input&) = default;
@@ -32,6 +34,11 @@ public:
 
   Operation* getDefiningOp() const {
     return m_op;
+  }
+
+  void setDefiningOp(Operation* newOp) {
+    assert(newOp != nullptr);
+    m_op = newOp;
   }
 };
 

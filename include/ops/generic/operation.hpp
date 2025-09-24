@@ -5,7 +5,7 @@
 #include <list>
 #include <string_view>
 #include <utility>
-#include <span>
+#include <cassert>
 
 #include <ops/types.hpp>
 #include <ops/common.hpp>
@@ -25,8 +25,6 @@ private:
   // (type of operation, not an instance)
   opcode_t m_opcode;
 
-  std::list<User> m_users;
-
   BasicBlock* m_ParentBlockPtr = nullptr;
   friend class BasicBlock;
 
@@ -39,57 +37,126 @@ public:
   explicit Operation(opcode_t opcode):
     m_opcode(opcode) {}
 
-  Operation(const Operation&) = delete;
-  Operation& operator=(const Operation&) = delete;
-
+  // Copying is prohibited, new operations must be created,
+  // and old operation will be replaced with new one explicitly
+  Operation(const Operation& that) = delete;
+  
   Operation(Operation&& other):
     m_opcode(std::exchange(other.m_opcode, nullopcode)),
-    m_users(std::move(other.m_users)),
     m_ParentBlockPtr(std::exchange(other.m_ParentBlockPtr, nullptr)) {}
 
-  Operation& operator=(Operation&& other) {
-    m_opcode = std::exchange(other.m_opcode, nullopcode);
-    m_users = std::move(other.m_users);
-    m_ParentBlockPtr = std::exchange(other.m_ParentBlockPtr, nullptr);
-    return *this;
+  operator bool() {
+    return (m_opcode != nullopcode);
   }
 
+  // Assignment is prohibited, since it will implicitly
+  // override previous state of the operation.
+  // Operation must be removed / replaced explicitly.
+  Operation& operator=(const Operation&) = delete;
+  Operation& operator=(Operation&& other) = delete;
+
   virtual ~Operation() = default;
+
+  //--- Mnemonics of the operation ---
 
   // Mnemonis is unique string that corresponds to each operation
   virtual std::string_view getMnemonic() const = 0;
   
+  // Name of the dialect - group of operations that this operation belongs to
   virtual std::string_view getDialectName() const = 0;
 
-  virtual bool isTerminator() const = 0;
-
-  const std::list<User>& getUsers() const { return m_users; }
-  std::list<User>& getUsers() { return m_users; }
+  //--- Operation's parent basic block
 
   bool hasParentBasicBlock() const {
     return (m_ParentBlockPtr != nullptr);
   }
 
-  BasicBlock* getParentBasicBlock() const {
+  BasicBlock* getParentBasicBlock() {
     return m_ParentBlockPtr;
   }
 
-  void addUser(User user) {
-    m_users.push_back(user);
+  const BasicBlock* getParentBasicBlock() const {
+    return m_ParentBlockPtr;
   }
 
-  virtual bool hasResult() const { return false; }
-  virtual DataType getDataType() const { return DataType::NONE; }
+  //--- General properties of the operation ---
 
-  virtual bool hasVerifier() const { return false; }
-  virtual bool verify() const { return true; }
+  virtual bool isTerminator() const = 0;
+
+  virtual DataType getDataType() const { return DataType::NONE; }
+  bool hasResult() const {
+    return (getDataType() != DataType::NONE);
+  }
+
+  virtual bool hasInputs() const { return false; }
+  virtual std::size_t getInputsNum() const { return 0LLU; }
+  
+  virtual const Input& getInputAt(std::size_t index) const = 0;
+  virtual Input& getInputAt(std::size_t index) = 0;
+
+  //--- Operation type identification ---
 
   bool isa(opcode_t opcode) const {
     return m_opcode == opcode;
   }
 
   bool isa(const Operation& other) const {
-    return m_opcode == other.m_opcode;
+    return isa(other.m_opcode);
+  }
+};
+
+class MaterialOperation : public Operation {
+private:
+  DataType m_dataType;
+  std::list<User> m_users;
+
+public:
+  MaterialOperation(opcode_t opcode, DataType dataType):
+    Operation(opcode), m_dataType(dataType) {}
+
+  MaterialOperation(MaterialOperation&& that):
+    Operation(std::move(that)),
+    m_dataType(that.m_dataType),
+    m_users(std::move(that.m_users)) {
+      for (auto& user : m_users) {
+        assert(user);
+        
+        std::size_t inputIndex = user.getInputIndex();
+        Operation* userOp = user.getUserOp();
+
+        userOp->getInputAt(inputIndex).setDefiningOp(this);
+      }
+    }
+
+  DataType getDataType() const override { return m_dataType; }
+
+  //--- Operation result's users ---
+
+  const std::list<User>& getUsers() const { return m_users; }
+
+  void setUsers(const std::list<User>& users) {
+    m_users = users;
+  }
+
+  void setUsers(std::list<User>&& users) {
+    m_users = std::move(users);
+  }
+
+  template<typename IterType>
+  void removeUser(IterType iter) {
+    m_users.erase(iter);
+  }
+
+  void removeUser(std::size_t pos) {
+    m_users.erase(std::next(m_users.begin(), pos));
+  }
+
+  void addUser(const User& user) {
+    m_users.push_back(user); 
+  }
+
+  void addUser(User&& user) {
+    m_users.push_back(std::move(user)); 
   }
 };
 

@@ -7,12 +7,12 @@
 #include <string_view>
 #include <utility>
 
+#include <data_types.hpp>
 #include <ops/common.hpp>
-#include <ops/generic/data_types.hpp>
 #include <ops/generic/input.hpp>
 #include <ops/generic/user.hpp>
-#include <ops/generic/utils.hpp>
 #include <ops/types.hpp>
+#include <utils.hpp>
 
 namespace iris {
 
@@ -48,34 +48,9 @@ public:
     , m_dataType(dataType)
     , m_inputsNumber(inputsNumber) {}
 
-  // Copying is prohibited, new operations must be created,
-  // and old operation will be replaced with new one explicitly
+  // TODO: implement
   Operation(const Operation& that) = delete;
-
-  Operation(Operation&& other)
-    : m_opcode(std::exchange(other.m_opcode, nullopcode))
-    , m_users(std::move(other.m_users))
-    , m_ParentBlockPtr(std::exchange(other.m_ParentBlockPtr, nullptr))
-    , m_dataType(std::exchange(other.m_dataType, DataType::NONE))
-    , m_inputsNumber(std::exchange(other.m_inputsNumber, 0LLU)) {
-    for (auto& user : m_users) {
-      assert(user && "Empty user");
-
-      std::size_t inputIndex = user.getInputIndex();
-      Operation* userOp = user.getUserOp();
-
-      assert(inputIndex < userOp->getInputsNum &&
-             "Input index exceeds number of operation's inputs");
-
-      // Update defining operation
-      Input* input = userOp->getInputAt(inputIndex);
-      input->setDefiningOp(this);
-    }
-  }
-
-  operator bool() {
-    return (m_opcode != nullopcode);
-  }
+  Operation(Operation&& other) = delete;
 
   // Assignment is prohibited, since it will implicitly
   // override previous state of the operation.
@@ -84,6 +59,10 @@ public:
   Operation& operator=(Operation&& other) = delete;
 
   virtual ~Operation() = default;
+
+  operator bool() {
+    return (m_opcode != nullopcode);
+  }
 
   //--- Mnemonics of the operation ---
 
@@ -132,6 +111,7 @@ public:
 
   virtual bool verify() const {
     // TODO: check that all users are unique
+    // TODO: check that all user indexes are valid
     return true;
   }
 

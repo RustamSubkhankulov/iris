@@ -2,8 +2,6 @@
 #define INCLUDE_OPS_GENERIC_INPUT_HPP
 
 #include <cassert>
-
-#include <ops/generic/data_types.hpp>
 #include <utility>
 
 namespace iris {
@@ -17,7 +15,7 @@ private:
 public:
   Input(Operation* op)
     : m_op(op) {
-    assert(m_op != nullptr && "Empty operation");
+    assert(m_op != nullptr && "Invalid pointer to source operation");
   }
 
   Input(const Input&) = default;

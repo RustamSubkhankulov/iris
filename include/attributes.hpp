@@ -4,7 +4,7 @@
 #include <concepts>
 #include <cstdint>
 
-#include <ops/generic/data_types.hpp>
+#include <data_types.hpp>
 
 namespace iris {
 

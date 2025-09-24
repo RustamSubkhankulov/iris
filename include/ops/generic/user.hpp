@@ -10,16 +10,15 @@ class Operation;
 
 class User {
 private:
-  Operation* m_op = nullptr;
-  int64_t m_inputIndex = -1;
+  Operation* m_op;
+  std::size_t m_inputIndex;
 
 public:
-  // Constructs an empty input
-  User() = default;
-
-  User(Operation* op, int64_t inputIndex)
+  User(Operation* op, std::size_t inputIndex)
     : m_op(op)
-    , m_inputIndex(inputIndex) {}
+    , m_inputIndex(inputIndex) {
+    assert(m_op != nullptr && "Invalid pointer to user operation");
+  }
 
   User(const User&) = default;
   User& operator=(const User&) = default;
@@ -36,15 +35,11 @@ public:
 
   virtual ~User() = default;
 
-  operator bool() const {
-    return (m_op != nullptr);
-  }
-
   Operation* getUserOp() const {
     return m_op;
   }
 
-  int64_t getInputIndex() const {
+  std::size_t getInputIndex() const {
     return m_inputIndex;
   }
 

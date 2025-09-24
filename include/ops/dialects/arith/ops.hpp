@@ -1,14 +1,11 @@
 #ifndef INCLUDE_DIALECTS_ARITH_OPS_HPP
 #define INCLUDE_DIALECTS_ARITH_OPS_HPP
 
-#include <cassert>
 #include <iostream>
-#include <string>
 
-#include <ops/generic/attributes.hpp>
-#include <ops/generic/operation.hpp>
-
+#include <attributes.hpp>
 #include <ops/dialects/opcodes.hpp>
+#include <ops/generic/operation.hpp>
 
 namespace iris {
 namespace arith {

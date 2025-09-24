@@ -1,9 +1,8 @@
 #ifndef INCLUDE_DIALECTS_BUILIN_OPS_HPP
 #define INCLUDE_DIALECTS_BUILIN_OPS_HPP
 
-#include <ops/generic/operation.hpp>
-
 #include <ops/dialects/opcodes.hpp>
+#include <ops/generic/operation.hpp>
 
 namespace iris {
 namespace builtin {

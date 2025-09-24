@@ -1,7 +1,7 @@
 #ifndef INCLUDE_DIALECTS_OPCODES_HPP
 #define INCLUDE_DIALECTS_OPCODES_HPP
 
-#include <ops/types.hpp>
+#include <ops/common.hpp>
 
 namespace iris {
 
@@ -14,7 +14,10 @@ enum GlobalOpcodes : opcode_t {
   CAST,
   CMP,
   PARAM,
-  COPY
+  COPY,
+  CALL,
+  JUMP,
+  RETURN,
 };
 
 } // namespace iris

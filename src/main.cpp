@@ -1,10 +1,8 @@
 #include <iostream>
 
-#include <ops/generic/attributes.hpp>
-#include <ops/generic/operation.hpp>
-
 #include <ops/dialects/arith/ops.hpp>
 #include <ops/dialects/builtin/ops.hpp>
+#include <ops/dialects/ctrlflow/ops.hpp>
 
 int main() {
   std::cout << iris::DataType::F32 << std::endl;
@@ -28,6 +26,8 @@ int main() {
   iris::arith::CastOp castOp(iris::DataType::SI32, &addOp);
 
   iris::builtin::CopyOp copyOp(&castOp);
+
+  iris::ctrlflow::ReturnOp returnOp;
 
   return 0;
 }

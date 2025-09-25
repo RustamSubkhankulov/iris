@@ -1,7 +1,7 @@
 #ifndef INCLUDE_OPS_GENERIC_USER_HPP
 #define INCLUDE_OPS_GENERIC_USER_HPP
 
-#include <cstdint>
+#include <cassert>
 #include <utility>
 
 namespace iris {

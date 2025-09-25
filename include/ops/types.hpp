@@ -1,6 +1,8 @@
 #ifndef INCLUDE_OPS_TYPES_HPP
 #define INCLUDE_OPS_TYPES_HPP
 
+#include <cstdint>
+
 namespace iris {
 
 // Type for representing operation's code

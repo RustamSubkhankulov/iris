@@ -22,7 +22,8 @@ string(APPEND CMAKE_CXX_FLAGS_RELEASE " -O2")
 set(SRC_DIR src)
 set(INC_DIR include)
 
-file(GLOB SOURCES CONFIGURE_DEPENDS ${SRC_DIR}/*.cpp)
+
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${SRC_DIR}/*.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${INC_DIR})

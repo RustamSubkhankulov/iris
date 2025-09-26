@@ -5,7 +5,9 @@
 
 #include <attributes.hpp>
 #include <ops/dialects/opcodes.hpp>
+#include <ops/generic/input.hpp>
 #include <ops/generic/operation.hpp>
+#include <ops/generic/user.hpp>
 
 namespace iris {
 namespace arith {
@@ -26,33 +28,9 @@ public:
 };
 
 class BinaryArithOp : public ArithOp {
-protected:
-  Input m_inputX;
-  Input m_inputY;
-
 public:
   BinaryArithOp(opcode_t opcode, DataType dataType, Input inputX, Input inputY)
-    : ArithOp(opcode, dataType, 2LLU)
-    , m_inputX(inputX)
-    , m_inputY(inputY) {}
-
-  const Input* getInputAt(std::size_t index) const override {
-    if (index == 0LLU) {
-      return &m_inputX;
-    } else if (index == 1LLU) {
-      return &m_inputY;
-    }
-    return nullptr;
-  }
-
-  Input* getInputAt(std::size_t index) override {
-    if (index == 0LLU) {
-      return &m_inputX;
-    } else if (index == 1LLU) {
-      return &m_inputY;
-    }
-    return nullptr;
-  }
+    : ArithOp(opcode, dataType, {inputX, inputY}) {}
 
   bool verify() const override {
     if (!ArithOp::verify()) {
@@ -67,25 +45,23 @@ public:
   }
 
   const Input& getInputX() const {
-    return m_inputX;
+    return getInput(0);
   }
-
   const Input& getInputY() const {
-    return m_inputY;
+    return getInput(1);
   }
 
   Input& getInputX() {
-    return m_inputX;
+    return getInput(0);
   }
-
   Input& getInputY() {
-    return m_inputY;
+    return getInput(1);
   }
 
 private:
   bool verifyInputsDTySame() const {
-    auto inputXDTy = m_inputX.getDefiningOp()->getDataType();
-    auto inputYDTy = m_inputY.getDefiningOp()->getDataType();
+    auto inputXDTy = getInputX().getDefiningOp()->getDataType();
+    auto inputYDTy = getInputY().getDefiningOp()->getDataType();
     if (inputXDTy != inputYDTy) {
       std::cerr << "Operation " << getMnemonic() << ": ";
       std::cerr << "inputs have different data types.\n";
@@ -162,49 +138,29 @@ private:
 
 public:
   ConstantOp(ConstAttribute attr)
-    : ArithOp(GlobalOpcodes::CONST, attr.getDataType(), 0LLU)
+    : ArithOp(GlobalOpcodes::CONST, attr.getDataType())
     , m_attr(attr) {}
 
   std::string_view getMnemonic() const override {
     return "const";
   }
-
-  Input* getInputAt([[maybe_unused]] std::size_t inputIndex) override {
-    return nullptr;
-  }
-  const Input*
-  getInputAt([[maybe_unused]] std::size_t inputIndex) const override {
-    return nullptr;
-  }
 };
 
 class CastOp : public ArithOp {
-private:
-  Input m_input;
-
 public:
   CastOp(DataType dataType, Input input)
-    : ArithOp(GlobalOpcodes::CAST, dataType, 1LLU)
-    , m_input(input) {}
+    : ArithOp(GlobalOpcodes::CAST, dataType, {input}) {}
 
   std::string_view getMnemonic() const override {
     return "cast";
   }
 
-  Input* getInputAt(std::size_t inputIndex) override {
-    return (inputIndex == 0) ? &m_input : nullptr;
-  }
-
-  const Input* getInputAt(std::size_t inputIndex) const override {
-    return (inputIndex == 0) ? &m_input : nullptr;
-  }
-
   Input& getInput() {
-    return m_input;
+    return Operation::getInput(0);
   }
 
   const Input& getInput() const {
-    return m_input;
+    return Operation::getInput(0);
   }
 };
 

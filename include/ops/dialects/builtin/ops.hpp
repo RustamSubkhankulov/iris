@@ -2,7 +2,9 @@
 #define INCLUDE_DIALECTS_BUILIN_OPS_HPP
 
 #include <ops/dialects/opcodes.hpp>
+#include <ops/generic/input.hpp>
 #include <ops/generic/operation.hpp>
+#include <ops/generic/user.hpp>
 
 namespace iris {
 namespace builtin {
@@ -23,48 +25,29 @@ public:
 class ParamOp : public BuiltinOp {
 public:
   ParamOp(DataType dataType)
-    : BuiltinOp(GlobalOpcodes::PARAM, dataType, 0LLU) {}
+    : BuiltinOp(GlobalOpcodes::PARAM, dataType) {}
 
   std::string_view getMnemonic() const override {
     return "param";
   }
-
-  Input* getInputAt([[maybe_unused]] std::size_t inputIndex) override {
-    return nullptr;
-  }
-  const Input*
-  getInputAt([[maybe_unused]] std::size_t inputIndex) const override {
-    return nullptr;
-  }
 };
 
 class CopyOp : public BuiltinOp {
-private:
-  Input m_input;
-
 public:
   CopyOp(Input input)
-    : BuiltinOp(GlobalOpcodes::COPY, input.getDefiningOp()->getDataType(), 1LLU)
-    , m_input(input) {}
+    : BuiltinOp(GlobalOpcodes::COPY, input.getDefiningOp()->getDataType(),
+                {input}) {}
 
   std::string_view getMnemonic() const override {
     return "copy";
   }
 
-  Input* getInputAt(std::size_t inputIndex) override {
-    return (inputIndex == 0) ? &m_input : nullptr;
-  }
-
-  const Input* getInputAt(std::size_t inputIndex) const override {
-    return (inputIndex == 0) ? &m_input : nullptr;
-  }
-
   Input& getInput() {
-    return m_input;
+    return Operation::getInput(0);
   }
 
   const Input& getInput() const {
-    return m_input;
+    return Operation::getInput(1);
   }
 };
 

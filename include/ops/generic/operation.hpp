@@ -1,20 +1,22 @@
 #ifndef INCLUDE_OPS_GENERIC_OPERATION_HPP
 #define INCLUDE_OPS_GENERIC_OPERATION_HPP
 
-#include <cassert>
+#include <initializer_list>
 #include <list>
 #include <ostream>
 #include <utility>
+#include <vector>
 
 #include <data_types.hpp>
+#include <utils.hpp>
+
 #include <ops/common.hpp>
 #include <ops/generic/input.hpp>
-#include <ops/generic/user.hpp>
 #include <ops/types.hpp>
-#include <utils.hpp>
 
 namespace iris {
 
+class User;
 class BasicBlock;
 
 // Operation base class
@@ -22,8 +24,9 @@ class Operation : public ListNode {
 private:
   // Operation code - unique for each operation
   // (type of operation, not an instance)
-  opcode_t m_opcode = nullopcode;
+  const opcode_t m_opcode = nullopcode;
 
+  // List of operation's users
   std::list<User> m_users;
 
   BasicBlock* m_ParentBlockPtr = nullptr;
@@ -32,12 +35,18 @@ private:
 protected:
   // Resulting data type of the operation
   // DataType::NONE if operation has no result
-  DataType m_dataType = DataType::NONE;
+  const DataType m_dataType = DataType::NONE;
+
+private:
+  // Vector of operation's inputs
+  std::vector<Input> m_inputs;
 
   // Number of inputs of the operation
-  std::size_t m_inputsNumber = 0LLU;
+  const std::size_t m_inputsNumber = 0LLU;
 
+protected:
   // Idenditier of the operation
+  // TODO make ID provided
   std::size_t m_ID = 0LLU;
 
 public:
@@ -45,18 +54,33 @@ public:
   // Opcode 'nullopcode' is reserved to represent an empty op.
   Operation() = default;
 
-  Operation(opcode_t opcode, DataType dataType, std::size_t inputsNumber)
+  template <typename... Args>
+  Operation(opcode_t opcode, DataType dataType, Args&&... args)
     : m_opcode(opcode)
     , m_dataType(dataType)
-    , m_inputsNumber(inputsNumber) {}
+    , m_inputs(std::forward<Args>(args)...)
+    , m_inputsNumber(m_inputs.size()) {}
 
-  // TODO: implement
+  Operation(opcode_t opcode, DataType dataType, std::initializer_list<Input> il)
+    : m_opcode(opcode)
+    , m_dataType(dataType)
+    , m_inputs(il)
+    , m_inputsNumber(m_inputs.size()) {}
+
+  // Operations cannot be copied or moved
   Operation(const Operation& that) = delete;
-  Operation(Operation&& other) = delete;
+
+  Operation(Operation&& other)
+    : m_opcode(other.m_opcode)
+    , m_ParentBlockPtr(other.m_ParentBlockPtr)
+    , m_dataType(other.m_dataType)
+    , m_inputsNumber(other.m_inputsNumber) {
+    replaceUses(std::move(other));
+  }
 
   // Assignment is prohibited, since it will implicitly
   // override previous state of the operation.
-  // Operation must be removed / replaced explicitly.
+  // Operation must be removed explicitly first.
   Operation& operator=(const Operation&) = delete;
   Operation& operator=(Operation&& other) = delete;
 
@@ -99,6 +123,8 @@ public:
     return (getDataType() != DataType::NONE);
   }
 
+  //--- Operation's inputs ---
+
   std::size_t getInputsNum() const {
     return m_inputsNumber;
   }
@@ -106,14 +132,28 @@ public:
     return (getInputsNum() != 0);
   }
 
-  // Returns nullptr if specified index does not correspond
-  // to an operation's input
-  virtual Input* getInputAt(std::size_t inputIndex) = 0;
-  virtual const Input* getInputAt(std::size_t inputIndex) const = 0;
+  const std::vector<Input>& getInputs() const {
+    return m_inputs;
+  }
+
+  const Input& getInput(std::size_t index) const {
+    return m_inputs[index];
+  }
+  Input& getInput(std::size_t index) {
+    return m_inputs[index];
+  }
+
+  const Input& getInputAt(std::size_t index) const {
+    return m_inputs.at(index);
+  }
+  Input& getInputAt(std::size_t index) {
+    return m_inputs.at(index);
+  }
+
+  //--- Verification ---
 
   virtual bool verify() const {
-    // TODO: check that all users are unique
-    // TODO: check that all user indexes are valid
+    // TODO
     return true;
   }
 
@@ -132,9 +172,11 @@ public:
   }
 
   void setUsers(const std::list<User>& users) {
+    // TODO verify
     m_users = users;
   }
   void setUsers(std::list<User>&& users) {
+    // TODO verify
     m_users = std::move(users);
   }
 
@@ -147,9 +189,11 @@ public:
   }
 
   void addUser(const User& user) {
+    // TODO verify
     m_users.push_back(user);
   }
   void addUser(User&& user) {
+    // TODO verify
     m_users.push_back(std::move(user));
   }
 
@@ -167,42 +211,9 @@ public:
     m_ID = id;
   }
 
-  void print(std::ostream& os) const {
-    if (hasResult()) {
-      printID(os);
-      os << "." << m_dataType << " ";
-    }
-    os << getDialectName() << "." << getMnemonic() << " ";
+  void replaceUses(Operation&& other) noexcept;
 
-    if (hasInputs()) {
-      os << "(";
-      for (std::size_t inputIndex = 0; inputIndex < m_inputsNumber;
-           ++inputIndex) {
-        const Input* input = getInputAt(inputIndex);
-        input->getDefiningOp()->printID(os);
-
-        if (inputIndex != m_inputsNumber - 1) {
-          os << ",";
-        }
-      }
-      os << ") ";
-    }
-
-    std::size_t userIndex = 0;
-    std::size_t usersNumber = getUsersNum();
-
-    if (usersNumber) {
-      os << "-> (";
-      for (const User& user : m_users) {
-        user.getUserOp()->printID(os);
-
-        if (userIndex++ != usersNumber - 1) {
-          os << ",";
-        }
-      }
-      os << ")";
-    }
-  }
+  void print(std::ostream& os) const;
 
 protected:
   virtual void printID(std::ostream& os) const {

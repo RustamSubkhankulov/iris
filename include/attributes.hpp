@@ -1,5 +1,5 @@
-#ifndef INCLUDE_OPS_GENERIC_ATTRIBUTES_HPP
-#define INCLUDE_OPS_GENERIC_ATTRIBUTES_HPP
+#ifndef INCLUDE_ATTRIBUTES_HPP
+#define INCLUDE_ATTRIBUTES_HPP
 
 #include <concepts>
 #include <cstdint>
@@ -157,4 +157,4 @@ constexpr BoolConstAttribute makeConstAttribute(bool value) {
 
 } // namespace iris
 
-#endif // INCLUDE_OPS_GENERIC_ATTRIBUTES_HPP
+#endif // INCLUDE_ATTRIBUTES_HPP

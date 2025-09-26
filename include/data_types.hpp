@@ -1,5 +1,5 @@
-#ifndef INCLUDE_OPS_GENERIC_DATA_TYPE_HPP
-#define INCLUDE_OPS_GENERIC_DATA_TYPE_HPP
+#ifndef INCLUDE_DATA_TYPE_HPP
+#define INCLUDE_DATA_TYPE_HPP
 
 #include <iostream>
 #include <string>
@@ -100,34 +100,13 @@ static_assert(isValidDataType(DataType::F64), "DataType is not valid, fatal");
 
 static_assert(isValidDataType(DataType::BOOL), "DataType is not valid, fatal");
 
-std::string toString(DataType dataType) {
-  if (dataType == DataType::NONE) {
-    return "none";
-  }
+std::string toString(DataType dataType);
 
-  if (dataType == DataType::BOOL) {
-    return "b";
-  }
-
-  std::string prefix;
-
-  auto value = static_cast<uint8_t>(dataType);
-  if (detail::FloatFlag & value) {
-    prefix = "f";
-  } else if (detail::UnsignedIntFlag & value) {
-    prefix = "ui";
-  } else if (detail::SignedIntFlag & value) {
-    prefix = "si";
-  }
-
-  return prefix + std::to_string(getBitWidth(dataType));
-}
-
-std::ostream& operator<<(std::ostream& out, DataType dataType) {
+inline std::ostream& operator<<(std::ostream& out, DataType dataType) {
   out << toString(dataType);
   return out;
 }
 
 } // namespace iris
 
-#endif // INCLUDE_OPS_GENERIC_DATA_TYPE_HPP
+#endif // INCLUDE_DATA_TYPE_HPP

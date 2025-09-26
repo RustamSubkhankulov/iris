@@ -1,8 +1,9 @@
 #ifndef INCLUDE_OPS_GENERIC_INPUT_HPP
 #define INCLUDE_OPS_GENERIC_INPUT_HPP
 
-#include <cassert>
 #include <utility>
+
+#include <exception.hpp>
 
 namespace iris {
 
@@ -15,7 +16,9 @@ private:
 public:
   Input(Operation* op)
     : m_op(op) {
-    assert(m_op != nullptr && "Invalid pointer to source operation");
+    if (m_op == nullptr) {
+      throw IrisException("Invalid pointer to defining operation!");
+    }
   }
 
   Input(const Input&) = default;
@@ -40,7 +43,9 @@ public:
   }
 
   void setDefiningOp(Operation* newOp) {
-    assert(newOp != nullptr);
+    if (newOp == nullptr) {
+      throw IrisException("Invalid pointer to defining operation!");
+    }
     m_op = newOp;
   }
 };

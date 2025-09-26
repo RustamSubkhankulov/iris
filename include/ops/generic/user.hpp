@@ -1,12 +1,12 @@
 #ifndef INCLUDE_OPS_GENERIC_USER_HPP
 #define INCLUDE_OPS_GENERIC_USER_HPP
 
-#include <cassert>
 #include <utility>
 
-namespace iris {
+#include <exception.hpp>
+#include <ops/generic/operation.hpp>
 
-class Operation;
+namespace iris {
 
 class User {
 private:
@@ -17,7 +17,13 @@ public:
   User(Operation* op, std::size_t inputIndex)
     : m_op(op)
     , m_inputIndex(inputIndex) {
-    assert(m_op != nullptr && "Invalid pointer to user operation");
+    if (m_op == nullptr) {
+      throw IrisException("Invalid pointer to using operation!");
+    }
+
+    if (inputIndex >= m_op->getInputsNum()) {
+      throw IrisException("Invalid operation's input index!");
+    }
   }
 
   User(const User&) = default;

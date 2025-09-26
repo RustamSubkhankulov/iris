@@ -23,14 +23,17 @@ int main() {
   castOp.setID(3);
   addOp.addUser(iris::User(&castOp, 0));
 
-  iris::builtin::CopyOp copyOp(&castOp);
-  copyOp.setID(4);
-  castOp.addUser(iris::User(&copyOp, 0));
+  iris::builtin::CopyOp copyOpOld(&castOp);
+  copyOpOld.setID(4);
+  castOp.addUser(iris::User(&copyOpOld, 0));
 
-  iris::ctrlflow::PhiOp phiOp(&castOp, &copyOp);
+  iris::builtin::CopyOp copyOpNew(std::move(copyOpOld));
+  copyOpOld.setID(7);
+
+  iris::ctrlflow::PhiOp phiOp(&castOp, &copyOpNew);
   phiOp.setID(5);
   castOp.addUser(iris::User(&phiOp, 0));
-  copyOp.addUser(iris::User(&phiOp, 1));
+  copyOpNew.addUser(iris::User(&phiOp, 1));
 
   iris::ctrlflow::ReturnOp returnOp;
   returnOp.setID(6);
@@ -43,11 +46,13 @@ int main() {
   std::cout << std::endl;
   castOp.print(std::cout);
   std::cout << std::endl;
-  copyOp.print(std::cout);
+  copyOpOld.print(std::cout);
   std::cout << std::endl;
   phiOp.print(std::cout);
   std::cout << std::endl;
   returnOp.print(std::cout);
+  std::cout << std::endl;
+  copyOpNew.print(std::cout);
   std::cout << std::endl;
 
   return 0;

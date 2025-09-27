@@ -13,22 +13,31 @@ int main() {
 
   iris::arith::AddOp addOp(&constOp, &paramOp);
 
-  iris::arith::CastOp castOp(iris::DataType::SI32, &addOp);
+  // iris::arith::CastOp castOp(iris::DataType::SI32, &addOp);
+  iris::Operation* castOpPtr =
+    new iris::arith::CastOp{iris::DataType::SI32, &addOp};
 
-  iris::builtin::CopyOp copyOpOld(&castOp);
+  // iris::builtin::CopyOp copyOpOld(&castOp);
+  iris::builtin::CopyOp copyOpOld(castOpPtr);
   iris::builtin::CopyOp copyOpNew(std::move(copyOpOld));
 
-  iris::ctrlflow::PhiOp phiOp(&castOp, &copyOpNew);
+  // iris::ctrlflow::PhiOp phiOp(&castOp, &copyOpNew);
+  iris::ctrlflow::PhiOp phiOp(castOpPtr, &copyOpNew);
   iris::ctrlflow::ReturnOp returnOp;
+
+  delete castOpPtr;
 
   std::cout << paramOp << std::endl
             << constOp << std::endl
-            << addOp << std::endl
-            << castOp << std::endl
+            << addOp
+            << std::endl
+            // << *castOpPtr << std::endl
             << copyOpOld << std::endl
             << phiOp << std::endl
             << returnOp << std::endl
             << copyOpNew << std::endl;
+
+  // delete castOpPtr;
 
   return 0;
 }

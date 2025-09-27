@@ -11,23 +11,66 @@ void Operation::replaceAllUsesOf(Operation&& other) noexcept {
   }
 }
 
+void Operation::removeAllUses() noexcept {
+  // Nulify all inputs for every user of this operation
+  for (auto& user : m_users) {
+    auto* userOp = user.getUserOp();
+    userOp->setInputAt(user.getInputIndex(), Input{});
+  }
+  m_users.clear();
+}
+
+// void Operation::preProcessNewInput(std::size_t inputIdx, const Input&
+// newInput) {
+//   if (newInput.isEmpty()) {
+//     // If new input is empty, than we need to
+//     // remove current operation from as user
+//     // from the previous input, that will be
+//     // overriden.
+//     removeAsUserFromInput(inputIdx);
+//   }
+// }
+
+// void Operation::postProcessNewInput(std::size_t inputIdx, Input& newInput) {
+//   if (!newInput.isEmpty()) {
+//     // If new input is not empty, than we need to
+//     // add current operation as user for the defining
+//     // operation of this input.
+//     addAsUserToInput(inputIdx, newInput);
+//   }
+// }
+
 void Operation::addAsUserToInputs() {
   for (std::size_t inputIdx = 0; inputIdx < m_inputsNumber; ++inputIdx) {
-    addAsUserToInput(inputIdx);
+    auto& input = m_inputs[inputIdx];
+    if (!input.isEmpty()) {
+      addAsUserToInput(inputIdx, input);
+    }
   }
 }
 
-void Operation::addAsUserToInput(std::size_t inputIdx) {
+void Operation::addAsUserToInput(std::size_t inputIdx, Input& input) {
+  auto* defOp = input.getDefiningOp();
+  auto res = defOp->addUser(User{this, inputIdx});
+
+  if (!res) {
+    std::clog << "Warning: operation was not added to the users list "
+              << "since it is already present in it.\n";
+  }
+}
+
+void Operation::removeAsUserFromInputs() {
+  for (std::size_t inputIdx = 0; inputIdx < m_inputsNumber; ++inputIdx) {
+    removeAsUserFromInput(inputIdx);
+  }
+}
+
+void Operation::removeAsUserFromInput(std::size_t inputIdx) {
   auto& input = m_inputs.at(inputIdx);
 
   if (!input.isEmpty()) {
     auto* defOp = input.getDefiningOp();
-    auto res = defOp->addUser(User{this, inputIdx});
-
-    if (!res) {
-      std::clog << "Warning: operation was not added to the users list "
-                << "since it is already present in it.\n";
-    }
+    defOp->removeUser(User{this, inputIdx});
   }
 }
 

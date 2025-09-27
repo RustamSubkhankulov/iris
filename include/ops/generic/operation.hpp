@@ -97,7 +97,10 @@ public:
   Operation& operator=(const Operation&) = delete;
   Operation& operator=(Operation&& other) = delete;
 
-  virtual ~Operation() = default;
+  virtual ~Operation() {
+    removeAllUses();
+    removeAsUserFromInputs();
+  }
 
   operator bool() const {
     return (m_opcode != nullopcode);
@@ -157,24 +160,6 @@ public:
     return m_inputs.at(index);
   }
 
-  void setInput(std::size_t index, const Input& input) {
-    m_inputs[index] = input;
-    addAsUserToInput(index);
-  }
-  void setInput(std::size_t index, Input&& input) {
-    m_inputs[index] = std::move(input);
-    addAsUserToInput(index);
-  }
-
-  void setInputAt(std::size_t index, const Input& input) {
-    m_inputs.at(index) = input;
-    addAsUserToInput(index);
-  }
-  void setInputAt(std::size_t index, Input&& input) {
-    m_inputs.at(index) = std::move(input);
-    addAsUserToInput(index);
-  }
-
   //--- Verification ---
 
   virtual bool verify() const {
@@ -203,27 +188,36 @@ public:
     return (getUsersNum() != 0);
   }
 
-  void setUsers(const std::list<User>& users) {
-    if (!areUsersUnique(users.begin(), users.end())) {
-      throw IrisException("Provided users are not unique!");
-    }
-    m_users = users;
+  //--- Operation type identification ---
+
+  bool isa(opcode_t opcode) const {
+    return m_opcode == opcode;
   }
 
-  void setUsers(std::list<User>&& users) {
-    if (!areUsersUnique(users.begin(), users.end())) {
-      throw IrisException("Provided users are not unique!");
-    }
-    m_users = std::move(users);
+  bool isa(const Operation& other) const {
+    return isa(other.m_opcode);
   }
 
-  template <typename IterType>
-  void removeUser(IterType iter) {
-    m_users.erase(iter);
+  void setID(std::size_t id) {
+    m_ID = id;
   }
 
-  void removeUser(std::size_t pos) {
-    m_users.erase(std::next(m_users.begin(), pos));
+  void print(std::ostream& os) const;
+
+private:
+  void replaceAllUsesOf(Operation&& other) noexcept;
+  void removeAllUses() noexcept;
+
+  void setInputAt(std::size_t index, const Input& newInput) {
+    // preProcessNewInput(index, newInput);
+    m_inputs.at(index) = newInput;
+    // postProcessNewInput(index, m_inputs[index]);
+  }
+
+  void setInputAt(std::size_t index, Input&& newInput) {
+    // preProcessNewInput(index, newInput);
+    m_inputs.at(index) = std::move(newInput);
+    // postProcessNewInput(index, m_inputs[index]);
   }
 
   bool addUser(const User& user) {
@@ -244,26 +238,27 @@ public:
     return true;
   }
 
-  //--- Operation type identification ---
-
-  bool isa(opcode_t opcode) const {
-    return m_opcode == opcode;
+  template <typename IterType>
+  void removeUser(IterType iter) {
+    m_users.erase(iter);
   }
 
-  bool isa(const Operation& other) const {
-    return isa(other.m_opcode);
+  void removeUser(std::size_t pos) {
+    m_users.erase(std::next(m_users.begin(), pos));
   }
 
-  void setID(std::size_t id) {
-    m_ID = id;
+  void removeUser(const User& user) {
+    m_users.remove(user);
   }
 
-  void replaceAllUsesOf(Operation&& other) noexcept;
-  void print(std::ostream& os) const;
+  // void preProcessNewInput(std::size_t inputIdx, const Input& newInput);
+  // void postProcessNewInput(std::size_t inputIdx, Input& newInput);
 
-private:
   void addAsUserToInputs();
-  void addAsUserToInput(std::size_t inputIdx);
+  void addAsUserToInput(std::size_t inputIdx, Input& input);
+
+  void removeAsUserFromInputs();
+  void removeAsUserFromInput(std::size_t inputIdx);
 
   template <typename UserIt>
   bool isUserUniqueWith(const User& user, UserIt usersBegin, UserIt usersEnd);

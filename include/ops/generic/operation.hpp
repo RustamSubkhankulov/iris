@@ -128,6 +128,10 @@ public:
     return m_ParentBlock;
   }
 
+  void setParentBasicBlock(BasicBlock* basicBlock) {
+    m_ParentBlock = basicBlock;
+  }
+
   //--- General properties of the operation ---
 
   virtual bool isTerminator() const = 0;

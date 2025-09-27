@@ -93,11 +93,12 @@ public:
   //--- Operation ---
 
   void addPhiInstr(std::unique_ptr<ctrlflow::PhiOp>&& phiOp) {
-    Operation* op = phiOp.release();
-    m_PhiInstr.append_back(op);
+    phiOp->setParentBasicBlock(this);
+    m_PhiInstr.append_back(phiOp.release());
   }
 
   void addRegInstr(std::unique_ptr<Operation>&& op) {
+    op->setParentBasicBlock(this);
     m_PhiInstr.append_back(op.release());
   }
 };

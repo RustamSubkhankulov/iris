@@ -9,7 +9,7 @@
 
 namespace iris {
 
-class Region {
+class Region final {
 private:
   std::vector<std::unique_ptr<BasicBlock>> m_BasicBlocks;
   BasicBlock* m_startBB = nullptr;
@@ -18,22 +18,13 @@ private:
 public:
   void addBasicBlock(std::unique_ptr<BasicBlock>&& basicBlock) {
     m_BasicBlocks.push_back(std::move(basicBlock));
+    if (m_BasicBlocks.size() == 1) {
+      m_startBB = m_BasicBlocks.front().get();
+    }
   }
 
-  void addStartBasicBlock(std::unique_ptr<BasicBlock>&& basicBlock) {
-    if (m_startBB != nullptr) {
-      throw IrisException("Start basic block has been already added!");
-    }
-    m_startBB = basicBlock.get();
-    m_BasicBlocks.push_back(std::move(basicBlock));
-  }
-
-  void addEndBasicBlock(std::unique_ptr<BasicBlock>&& basicBlock) {
-    if (m_endBB != nullptr) {
-      throw IrisException("Start basic block has been already added!");
-    }
-    m_endBB = basicBlock.get();
-    m_BasicBlocks.push_back(std::move(basicBlock));
+  void finalize() {
+    m_endBB = m_BasicBlocks.back().get();
   }
 
   const BasicBlock& getStartBasicBlock() const {

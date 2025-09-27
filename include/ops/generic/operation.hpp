@@ -1,6 +1,7 @@
 #ifndef INCLUDE_OPS_GENERIC_OPERATION_HPP
 #define INCLUDE_OPS_GENERIC_OPERATION_HPP
 
+#include <cstdint>
 #include <initializer_list>
 #include <iostream>
 #include <list>
@@ -14,7 +15,6 @@
 #include <ops/common.hpp>
 #include <ops/generic/input.hpp>
 #include <ops/generic/user.hpp>
-#include <ops/id_provider.hpp>
 #include <ops/types.hpp>
 
 namespace iris {
@@ -23,7 +23,7 @@ class User;
 class BasicBlock;
 
 // Operation base class
-class Operation : public ListNode {
+class Operation : private ListNode {
 private:
   // Operation code - unique for each operation
   // (type of operation, not an instance)
@@ -49,7 +49,7 @@ private:
 
 protected:
   // Idenditier of the operation
-  std::size_t m_ID = detail::IDProvider::get().obtainID();
+  uint32_t m_ID = 0U;
 
 public:
   // Default constructor - constructs an empty op.
@@ -87,6 +87,7 @@ public:
     , m_inputs(other.m_inputs) // Do not move, just copy
     , m_inputsNumber(other.m_inputsNumber) {
 
+    // TODO: what to do with ID at this point?
     addAsUserToInputs();
     replaceAllUsesOf(std::move(other));
   }
@@ -202,7 +203,9 @@ public:
     return isa(other.m_opcode);
   }
 
-  void setID(std::size_t id) {
+  //--- Misc ---
+
+  void setID(uint32_t id) {
     m_ID = id;
   }
 

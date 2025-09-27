@@ -1,7 +1,10 @@
 #ifndef INCLUDE_GRAPH_BASIC_BLOCK_HPP
 #define INCLUDE_GRAPH_BASIC_BLOCK_HPP
 
+#include <cstdint>
 #include <memory>
+
+#include <ops/dialects/opcodes.hpp>
 
 #include <ops/dialects/ctrlflow/ops.hpp>
 #include <ops/generic/operation.hpp>
@@ -10,16 +13,19 @@ namespace iris {
 
 class Region;
 
-class BasicBlock {
+class BasicBlock final {
 private:
   std::list<BasicBlock*> m_preds;
   BasicBlock* m_succTrue = nullptr;
   BasicBlock* m_succFalse = nullptr;
 
-  List m_PhiInstr;
-  List m_RegInstr;
+  List m_PhiOps;
+  List m_RegOps;
 
   Region* m_ParentRegion;
+
+  // Identifier of the basic block
+  uint32_t m_ID = 0U;
 
 public:
   BasicBlock() = default;
@@ -92,14 +98,18 @@ public:
 
   //--- Operation ---
 
-  void addPhiInstr(std::unique_ptr<ctrlflow::PhiOp>&& phiOp) {
-    phiOp->setParentBasicBlock(this);
-    m_PhiInstr.append_back(phiOp.release());
+  void addOp(std::unique_ptr<Operation>&& op) {
+    op->setParentBasicBlock(this);
+    if (op->isa(GlobalOpcodes::PHI)) {
+      m_PhiOps.append_back(op.release());
+    } else {
+      m_RegOps.append_back(op.release());
+    }
   }
 
-  void addRegInstr(std::unique_ptr<Operation>&& op) {
-    op->setParentBasicBlock(this);
-    m_PhiInstr.append_back(op.release());
+  //--- Misc ---
+  void setID(std::size_t id) {
+    m_ID = id;
   }
 };
 

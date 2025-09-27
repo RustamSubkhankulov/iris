@@ -13,6 +13,7 @@
 #include <ops/common.hpp>
 #include <ops/generic/input.hpp>
 #include <ops/generic/user.hpp>
+#include <ops/id_provider.hpp>
 #include <ops/types.hpp>
 
 namespace iris {
@@ -47,8 +48,7 @@ private:
 
 protected:
   // Idenditier of the operation
-  // TODO make ID provided
-  std::size_t m_ID = 0LLU;
+  std::size_t m_ID = IDProvider::get().obtainID();
 
 public:
   // Default constructor - constructs an empty op.
@@ -162,6 +162,7 @@ public:
     return m_inputs.at(index);
   }
 
+  // TODO: add user here
   void setInput(std::size_t index, const Input& input) {
     m_inputs[index] = input;
   }
@@ -257,6 +258,11 @@ protected:
     os << "v" << m_ID;
   }
 };
+
+inline std::ostream& operator<<(std::ostream& os, const Operation& operation) {
+  operation.print(os);
+  return os;
+}
 
 } // namespace iris
 

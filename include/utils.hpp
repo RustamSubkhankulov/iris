@@ -66,6 +66,22 @@ public:
   }
 };
 
+template <typename Derived>
+class Singleton {
+protected:
+  Singleton() = default;
+  ~Singleton() = default;
+
+public:
+  Singleton(const Singleton&) = delete;
+  Singleton& operator=(const Singleton&) = delete;
+
+  static Derived& get() {
+    static Derived m_instance;
+    return m_instance;
+  }
+};
+
 } // namespace iris
 
 #endif // INCLUDE_UTILS_HPP

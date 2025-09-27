@@ -9,45 +9,26 @@ int main() {
   iris::Float32ConstAttribute attr2(2.27f);
 
   iris::builtin::ParamOp paramOp(iris::DataType::F32);
-  paramOp.setID(0);
-
   iris::arith::ConstantOp constOp(attr1);
-  constOp.setID(1);
 
   iris::arith::AddOp addOp(&constOp, &paramOp);
-  addOp.setID(2);
 
   iris::arith::CastOp castOp(iris::DataType::SI32, &addOp);
-  castOp.setID(3);
 
   iris::builtin::CopyOp copyOpOld(&castOp);
-  copyOpOld.setID(4);
-
   iris::builtin::CopyOp copyOpNew(std::move(copyOpOld));
-  copyOpOld.setID(7);
 
   iris::ctrlflow::PhiOp phiOp(&castOp, &copyOpNew);
-  phiOp.setID(5);
-
   iris::ctrlflow::ReturnOp returnOp;
-  returnOp.setID(6);
 
-  paramOp.print(std::cout);
-  std::cout << std::endl;
-  constOp.print(std::cout);
-  std::cout << std::endl;
-  addOp.print(std::cout);
-  std::cout << std::endl;
-  castOp.print(std::cout);
-  std::cout << std::endl;
-  copyOpOld.print(std::cout);
-  std::cout << std::endl;
-  phiOp.print(std::cout);
-  std::cout << std::endl;
-  returnOp.print(std::cout);
-  std::cout << std::endl;
-  copyOpNew.print(std::cout);
-  std::cout << std::endl;
+  std::cout << paramOp << std::endl
+            << constOp << std::endl
+            << addOp << std::endl
+            << castOp << std::endl
+            << copyOpOld << std::endl
+            << phiOp << std::endl
+            << returnOp << std::endl
+            << copyOpNew << std::endl;
 
   return 0;
 }

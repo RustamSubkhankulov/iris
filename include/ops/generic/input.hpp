@@ -1,6 +1,7 @@
 #ifndef INCLUDE_OPS_GENERIC_INPUT_HPP
 #define INCLUDE_OPS_GENERIC_INPUT_HPP
 
+#include <initializer_list>
 #include <utility>
 
 #include <data_types.hpp>
@@ -53,6 +54,8 @@ public:
 
   DataType getDataType() const;
 };
+
+using InputList = std::initializer_list<Input>;
 
 } // namespace iris
 

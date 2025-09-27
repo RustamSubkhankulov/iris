@@ -137,6 +137,11 @@ public:
   std::string_view getMnemonic() const override {
     return "const";
   }
+
+protected:
+  void printID(std::ostream& os) const override {
+    os << "c" << m_ID;
+  }
 };
 
 class CastOp : public ArithOp {

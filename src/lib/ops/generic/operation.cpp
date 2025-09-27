@@ -76,10 +76,11 @@ bool Operation::areUsersUnique(UserIt usersBegin, UserIt usersEnd) {
 }
 
 void Operation::print(std::ostream& os) const {
+  printID(os);
   if (hasResult()) {
-    printID(os);
-    os << "." << m_dataType << " ";
+    os << "." << m_dataType;
   }
+  os << " ";
 
   os << getDialectName() << "." << getMnemonic() << " ";
   printSpecifics(os);

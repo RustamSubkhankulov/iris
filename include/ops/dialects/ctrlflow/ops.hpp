@@ -29,8 +29,8 @@ public:
 
 class ReturnOp : public CtrFlowOp {
 public:
-  ReturnOp()
-    : CtrFlowOp(GlobalOpcodes::RETURN, DataType::NONE) {}
+  ReturnOp(Input input)
+    : CtrFlowOp(GlobalOpcodes::RETURN, DataType::NONE, {input}) {}
 
   std::string_view getMnemonic() const override {
     return "return";
@@ -38,6 +38,10 @@ public:
 
   bool isTerminator() const override {
     return true;
+  }
+
+  const Input& getInput() const {
+    return Operation::getInput(0);
   }
 };
 
@@ -87,7 +91,7 @@ public:
   }
 
   void printSpecifics(std::ostream& os) const override {
-    os << "bb" << m_targetBbID << " ";
+    os << "^bb" << m_targetBbID << " ";
   }
 };
 
@@ -120,7 +124,7 @@ public:
   }
 
   void printSpecifics(std::ostream& os) const override {
-    os << m_funcName << " ";
+    os << "@" << m_funcName << " ";
   }
 };
 

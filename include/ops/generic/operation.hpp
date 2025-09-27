@@ -64,7 +64,7 @@ public:
     addAsUserToInputs();
   }
 
-  Operation(opcode_t opcode, DataType dataType, std::initializer_list<Input> il)
+  Operation(opcode_t opcode, DataType dataType, InputList il)
     : m_opcode(opcode)
     , m_dataType(dataType)
     , m_inputs(il)
@@ -261,7 +261,7 @@ private:
 
 protected:
   virtual void printID(std::ostream& os) const {
-    os << "v" << m_ID;
+    os << ((hasResult()) ? "v" : "n") << m_ID;
   }
 
   virtual void printSpecifics([[maybe_unused]] std::ostream& os) const {

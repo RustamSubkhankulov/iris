@@ -126,6 +126,7 @@ public:
       return false;
     }
 
+    op->setID(m_opIDProvider.obtainID());
     m_currBasicBlock->addOp(std::move(op));
     return true;
   }
@@ -139,6 +140,8 @@ public:
 
     auto op = std::make_unique<OpTy>(std::forward<Args>(args)...);
     auto* opPtr = op.get();
+
+    op->setID(m_opIDProvider.obtainID());
     m_currBasicBlock->addOp(std::move(op));
     return opPtr;
   }

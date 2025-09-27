@@ -30,6 +30,11 @@ public:
   std::string_view getMnemonic() const override {
     return "param";
   }
+
+protected:
+  void printID(std::ostream& os) const override {
+    os << "a" << m_ID;
+  }
 };
 
 class CopyOp : public BuiltinOp {

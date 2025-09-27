@@ -39,7 +39,9 @@ int main() {
 
   // bb4
   builder.startNewBasicBlock(done);
-  builder.createAndAddOp<ctrlflow::ReturnOp>();
+  auto* bar = builder.createAndAddOp<ctrlflow::CallOp>("bar", DataType::BOOL,
+                                                       InputList{v0, v1});
+  builder.createAndAddOp<ctrlflow::ReturnOp>(bar);
   builder.finalizeBasicBlock();
 
   auto regionPtr = builder.obtainRegion();

@@ -5,7 +5,7 @@
 int main() {
   using namespace iris;
 
-  Builder builder;
+  IRBuilder builder;
   builder.startNewRegion();
 
   // bb0: parameters & constants basic block

@@ -31,7 +31,7 @@ public:
 };
 } // namespace detail
 
-class Builder final {
+class IRBuilder final {
 private:
   Region* m_currRegion = nullptr;
   BasicBlock* m_currBasicBlock = nullptr;
@@ -40,9 +40,9 @@ private:
   detail::IDProvider<op_id_t> m_opIDProvider;
 
 public:
-  Builder() = default;
+  IRBuilder() = default;
 
-  ~Builder() {
+  ~IRBuilder() {
     delete m_currRegion;
     delete m_currBasicBlock;
   }

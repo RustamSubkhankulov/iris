@@ -80,7 +80,9 @@ void Operation::print(std::ostream& os) const {
     printID(os);
     os << "." << m_dataType << " ";
   }
+
   os << getDialectName() << "." << getMnemonic() << " ";
+  printSpecifics(os);
 
   if (hasInputs()) {
     os << "(";

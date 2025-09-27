@@ -1,6 +1,8 @@
 #ifndef INCLUDE_BUILDER
 #define INCLUDE_BUILDER
 
+#include "ops/types.hpp"
+#include <concepts>
 #include <memory>
 
 #include <exception.hpp>
@@ -11,21 +13,23 @@
 namespace iris {
 
 namespace detail {
+
+template <std::unsigned_integral IdType>
 class IDProvider {
 private:
-  uint32_t m_curID = 0LLU;
+  IdType m_curID = 0;
 
 public:
-  uint32_t obtainID() {
+  IdType obtainID() {
     return m_curID++;
   }
 
-  uint32_t getLastID() const {
+  IdType getLastID() const {
     return m_curID;
   }
 
   void reset() {
-    m_curID = 0LLU;
+    m_curID = 0;
   }
 };
 } // namespace detail
@@ -35,8 +39,8 @@ private:
   Region* m_currRegion = nullptr;
   BasicBlock* m_currBasicBlock = nullptr;
 
-  detail::IDProvider m_basicBlockIDProvider;
-  detail::IDProvider m_opIDProvider;
+  detail::IDProvider<bb_id_t> m_bbIDProvider;
+  detail::IDProvider<op_id_t> m_opIDProvider;
 
 public:
   Builder() = default;
@@ -53,7 +57,7 @@ public:
     m_currRegion = nullptr;
     m_currBasicBlock = nullptr;
 
-    m_basicBlockIDProvider.reset();
+    m_bbIDProvider.reset();
     m_opIDProvider.reset();
   }
 
@@ -94,7 +98,7 @@ public:
     }
 
     m_currBasicBlock = new BasicBlock;
-    m_currBasicBlock->setID(m_basicBlockIDProvider.obtainID());
+    m_currBasicBlock->setID(m_bbIDProvider.obtainID());
     return true;
   }
 
@@ -131,7 +135,7 @@ public:
       return -1;
     }
 
-    return static_cast<int64_t>(m_basicBlockIDProvider.getLastID());
+    return static_cast<int64_t>(m_bbIDProvider.getLastID());
   }
 
   bool finalizeBasicBlock() {

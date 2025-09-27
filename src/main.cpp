@@ -39,5 +39,10 @@ int main() {
 
   // delete castOpPtr;
 
+  iris::ctrlflow::JumpOp jumpOp(12);
+  iris::ctrlflow::CallOp callOp("foo", iris::DataType::BOOL);
+
+  std::cout << jumpOp << std::endl << callOp << std::endl;
+
   return 0;
 }

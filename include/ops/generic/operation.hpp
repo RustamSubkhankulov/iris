@@ -1,7 +1,6 @@
 #ifndef INCLUDE_OPS_GENERIC_OPERATION_HPP
 #define INCLUDE_OPS_GENERIC_OPERATION_HPP
 
-#include <cstdint>
 #include <initializer_list>
 #include <iostream>
 #include <list>
@@ -49,7 +48,7 @@ private:
 
 protected:
   // Idenditier of the operation
-  uint32_t m_ID = 0U;
+  op_id_t m_ID = 0U;
 
 public:
   // Default constructor - constructs an empty op.
@@ -205,7 +204,7 @@ public:
 
   //--- Misc ---
 
-  void setID(uint32_t id) {
+  void setID(op_id_t id) {
     m_ID = id;
   }
 
@@ -264,6 +263,10 @@ private:
 protected:
   virtual void printID(std::ostream& os) const {
     os << "v" << m_ID;
+  }
+
+  virtual void printSpecifics([[maybe_unused]] std::ostream& os) const {
+    return;
   }
 };
 

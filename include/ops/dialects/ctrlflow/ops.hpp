@@ -1,9 +1,12 @@
 #ifndef INCLUDE_DIALECTS_CTRLFLOW_OPS_HPP
 #define INCLUDE_DIALECTS_CTRLFLOW_OPS_HPP
 
+#include <string_view>
 #include <vector>
 
 #include <exception.hpp>
+#include <ops/types.hpp>
+
 #include <ops/dialects/opcodes.hpp>
 #include <ops/generic/input.hpp>
 #include <ops/generic/operation.hpp>
@@ -15,10 +18,6 @@ namespace ctrlflow {
 class CtrFlowOp : public Operation {
 public:
   using Operation::Operation;
-
-  bool isTerminator() const override {
-    return true;
-  }
 
   std::string_view getDialectName() const override {
     return "ctrlflow";
@@ -35,48 +34,51 @@ public:
   std::string_view getMnemonic() const override {
     return "return";
   }
+
+  bool isTerminator() const override {
+    return true;
+  }
 };
 
 class JumpOp : public CtrFlowOp {
 private:
-  BasicBlock* m_targetBasicBlock;
+  bb_id_t m_targetBbID;
 
 public:
-  JumpOp(BasicBlock* targetBasicBlock)
+  JumpOp(bb_id_t targetBbID)
     : CtrFlowOp(GlobalOpcodes::JUMP, DataType::NONE)
-    , m_targetBasicBlock(targetBasicBlock) {
-
-    if (m_targetBasicBlock == nullptr) {
-      throw IrisException("Invalid pointer to target basic block!");
-    }
-  }
+    , m_targetBbID(targetBbID) {}
 
   std::string_view getMnemonic() const override {
     return "jump";
   }
 
-  const BasicBlock* getTargetBasicBlock() const {
-    return m_targetBasicBlock;
+  bool isTerminator() const override {
+    return true;
   }
 
-  BasicBlock* getTargetBasicBlock() {
-    return m_targetBasicBlock;
+  bb_id_t getTargetBbID() const {
+    return m_targetBbID;
+  }
+
+  void printSpecifics(std::ostream& os) const override {
+    os << "bb" << m_targetBbID << " ";
   }
 };
 
 class CallOp : public CtrFlowOp {
 private:
   std::vector<Input> m_inputs;
-  BasicBlock* m_targetBasicBlock;
+  std::string m_funcName;
 
 public:
   template <typename... Args>
-  CallOp(BasicBlock* targetBasicBlock, DataType dataType, Args&&... args)
+  CallOp(std::string_view funcName, DataType dataType, Args&&... args)
     : CtrFlowOp(GlobalOpcodes::CALL, dataType, args...)
-    , m_targetBasicBlock(targetBasicBlock) {
+    , m_funcName(funcName) {
 
-    if (m_targetBasicBlock == nullptr) {
-      throw IrisException("Invalid pointer to target basic block!");
+    if (m_funcName.empty()) {
+      throw IrisException("Invalid function name!");
     }
   }
 
@@ -84,12 +86,16 @@ public:
     return "call";
   }
 
-  const BasicBlock* getTargetBasicBlock() const {
-    return m_targetBasicBlock;
+  bool isTerminator() const override {
+    return false;
   }
 
-  BasicBlock* getTargetBasicBlock() {
-    return m_targetBasicBlock;
+  std::string_view getFuncName() const {
+    return m_funcName;
+  }
+
+  void printSpecifics(std::ostream& os) const override {
+    os << m_funcName << " ";
   }
 };
 
@@ -101,6 +107,10 @@ public:
 
   std::string_view getMnemonic() const override {
     return "phi";
+  }
+
+  bool isTerminator() const override {
+    return false;
   }
 
   bool verify() const override {

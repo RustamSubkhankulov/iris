@@ -1,12 +1,12 @@
 #ifndef INCLUDE_GRAPH_BASIC_BLOCK_HPP
 #define INCLUDE_GRAPH_BASIC_BLOCK_HPP
 
-#include <cstdint>
 #include <memory>
 
-#include <ops/dialects/opcodes.hpp>
+#include <ops/types.hpp>
 
 #include <ops/dialects/ctrlflow/ops.hpp>
+#include <ops/dialects/opcodes.hpp>
 #include <ops/generic/operation.hpp>
 
 namespace iris {
@@ -25,7 +25,7 @@ private:
   Region* m_ParentRegion;
 
   // Identifier of the basic block
-  uint32_t m_ID = 0U;
+  bb_id_t m_ID = 0U;
 
 public:
   BasicBlock() = default;
@@ -108,7 +108,7 @@ public:
   }
 
   //--- Misc ---
-  void setID(std::size_t id) {
+  void setID(bb_id_t id) {
     m_ID = id;
   }
 };

@@ -4,6 +4,7 @@
 #include <utils.hpp>
 
 namespace iris {
+namespace detail {
 
 class IDProvider : public Singleton<IDProvider> {
 private:
@@ -19,6 +20,7 @@ public:
   }
 };
 
+} // namespace detail
 } // namespace iris
 
 #endif // INCLUDE_OSP_ID_PROVIDER_HPP

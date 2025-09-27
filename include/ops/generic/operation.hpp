@@ -32,7 +32,7 @@ private:
   // List of operation's users
   std::list<User> m_users;
 
-  BasicBlock* m_ParentBlockPtr = nullptr;
+  BasicBlock* m_ParentBlock = nullptr;
   friend class BasicBlock;
 
 protected:
@@ -49,7 +49,7 @@ private:
 
 protected:
   // Idenditier of the operation
-  std::size_t m_ID = IDProvider::get().obtainID();
+  std::size_t m_ID = detail::IDProvider::get().obtainID();
 
 public:
   // Default constructor - constructs an empty op.
@@ -82,7 +82,7 @@ public:
   // and replace all uses of it with newly constructed operation
   Operation(Operation&& other)
     : m_opcode(other.m_opcode)
-    , m_ParentBlockPtr(other.m_ParentBlockPtr)
+    , m_ParentBlock(other.m_ParentBlock)
     , m_dataType(other.m_dataType)
     , m_inputs(other.m_inputs) // Do not move, just copy
     , m_inputsNumber(other.m_inputsNumber) {
@@ -117,15 +117,15 @@ public:
   //--- Operation's parent basic block
 
   bool hasParentBasicBlock() const {
-    return (m_ParentBlockPtr != nullptr);
+    return (m_ParentBlock != nullptr);
   }
 
   BasicBlock* getParentBasicBlock() {
-    return m_ParentBlockPtr;
+    return m_ParentBlock;
   }
 
   const BasicBlock* getParentBasicBlock() const {
-    return m_ParentBlockPtr;
+    return m_ParentBlock;
   }
 
   //--- General properties of the operation ---

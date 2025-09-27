@@ -42,10 +42,6 @@ public:
     return "copy";
   }
 
-  Input& getInput() {
-    return Operation::getInput(0);
-  }
-
   const Input& getInput() const {
     return Operation::getInput(1);
   }

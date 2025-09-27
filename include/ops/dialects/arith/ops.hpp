@@ -51,13 +51,6 @@ public:
     return getInput(1);
   }
 
-  Input& getInputX() {
-    return getInput(0);
-  }
-  Input& getInputY() {
-    return getInput(1);
-  }
-
 private:
   bool verifyInputsDTySame() const {
     auto inputXDTy = getInputX().getDefiningOp()->getDataType();
@@ -153,10 +146,6 @@ public:
 
   std::string_view getMnemonic() const override {
     return "cast";
-  }
-
-  Input& getInput() {
-    return Operation::getInput(0);
   }
 
   const Input& getInput() const {

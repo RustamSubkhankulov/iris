@@ -8,6 +8,7 @@
 #include <vector>
 
 #include <data_types.hpp>
+#include <exception.hpp>
 #include <utils.hpp>
 
 #include <ops/common.hpp>
@@ -87,7 +88,7 @@ public:
     , m_inputsNumber(other.m_inputsNumber) {
 
     addAsUserToInputs();
-    replaceUsesOf(std::move(other));
+    replaceAllUsesOf(std::move(other));
   }
 
   // Assignment is prohibited, since it will implicitly
@@ -151,36 +152,33 @@ public:
   const Input& getInput(std::size_t index) const {
     return m_inputs[index];
   }
-  Input& getInput(std::size_t index) {
-    return m_inputs[index];
-  }
 
   const Input& getInputAt(std::size_t index) const {
     return m_inputs.at(index);
   }
-  Input& getInputAt(std::size_t index) {
-    return m_inputs.at(index);
-  }
 
-  // TODO: add user here
   void setInput(std::size_t index, const Input& input) {
     m_inputs[index] = input;
+    addAsUserToInput(index);
   }
   void setInput(std::size_t index, Input&& input) {
     m_inputs[index] = std::move(input);
+    addAsUserToInput(index);
   }
 
   void setInputAt(std::size_t index, const Input& input) {
     m_inputs.at(index) = input;
+    addAsUserToInput(index);
   }
   void setInputAt(std::size_t index, Input&& input) {
     m_inputs.at(index) = std::move(input);
+    addAsUserToInput(index);
   }
 
   //--- Verification ---
 
   virtual bool verify() const {
-
+    // Verify that all of the inputs are non-empty.
     bool vres = true;
     for (const auto& input : m_inputs) {
       if (input.isEmpty()) {
@@ -206,11 +204,16 @@ public:
   }
 
   void setUsers(const std::list<User>& users) {
-    // TODO verify
+    if (!areUsersUnique(users.begin(), users.end())) {
+      throw IrisException("Provided users are not unique!");
+    }
     m_users = users;
   }
+
   void setUsers(std::list<User>&& users) {
-    // TODO verify
+    if (!areUsersUnique(users.begin(), users.end())) {
+      throw IrisException("Provided users are not unique!");
+    }
     m_users = std::move(users);
   }
 
@@ -218,17 +221,27 @@ public:
   void removeUser(IterType iter) {
     m_users.erase(iter);
   }
+
   void removeUser(std::size_t pos) {
     m_users.erase(std::next(m_users.begin(), pos));
   }
 
-  void addUser(const User& user) {
-    // TODO verify
+  bool addUser(const User& user) {
+    if (!isUserUniqueWith(user, m_users.begin(), m_users.end())) {
+      // Provided user is already in the users list
+      return false;
+    }
     m_users.push_back(user);
+    return true;
   }
-  void addUser(User&& user) {
-    // TODO verify
+
+  bool addUser(User&& user) {
+    if (!isUserUniqueWith(user, m_users.begin(), m_users.end())) {
+      // Provided user is already in the users list
+      return false;
+    }
     m_users.push_back(std::move(user));
+    return true;
   }
 
   //--- Operation type identification ---
@@ -245,13 +258,18 @@ public:
     m_ID = id;
   }
 
-  void replaceUsesOf(Operation&& other) noexcept;
-
+  void replaceAllUsesOf(Operation&& other) noexcept;
   void print(std::ostream& os) const;
 
 private:
-  // Add this operation as an user to every input
   void addAsUserToInputs();
+  void addAsUserToInput(std::size_t inputIdx);
+
+  template <typename UserIt>
+  bool isUserUniqueWith(const User& user, UserIt usersBegin, UserIt usersEnd);
+
+  template <typename UserIt>
+  bool areUsersUnique(UserIt usersBegin, UserIt usersEnd);
 
 protected:
   virtual void printID(std::ostream& os) const {

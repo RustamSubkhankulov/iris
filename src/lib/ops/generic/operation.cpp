@@ -7,7 +7,7 @@ void Operation::replaceAllUsesOf(Operation&& other) noexcept {
   m_users = std::move(other.m_users);
   for (auto& user : m_users) {
     auto* userOp = user.getUserOp();
-    userOp->setInputAt(user.getInputIndex(), Input{this});
+    userOp->m_inputs.at(user.getInputIndex()) = Input{this};
   }
 }
 
@@ -15,30 +15,10 @@ void Operation::removeAllUses() noexcept {
   // Nulify all inputs for every user of this operation
   for (auto& user : m_users) {
     auto* userOp = user.getUserOp();
-    userOp->setInputAt(user.getInputIndex(), Input{});
+    userOp->m_inputs.at(user.getInputIndex()) = Input{};
   }
   m_users.clear();
 }
-
-// void Operation::preProcessNewInput(std::size_t inputIdx, const Input&
-// newInput) {
-//   if (newInput.isEmpty()) {
-//     // If new input is empty, than we need to
-//     // remove current operation from as user
-//     // from the previous input, that will be
-//     // overriden.
-//     removeAsUserFromInput(inputIdx);
-//   }
-// }
-
-// void Operation::postProcessNewInput(std::size_t inputIdx, Input& newInput) {
-//   if (!newInput.isEmpty()) {
-//     // If new input is not empty, than we need to
-//     // add current operation as user for the defining
-//     // operation of this input.
-//     addAsUserToInput(inputIdx, newInput);
-//   }
-// }
 
 void Operation::addAsUserToInputs() {
   for (std::size_t inputIdx = 0; inputIdx < m_inputsNumber; ++inputIdx) {

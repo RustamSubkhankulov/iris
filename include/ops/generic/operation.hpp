@@ -208,18 +208,6 @@ private:
   void replaceAllUsesOf(Operation&& other) noexcept;
   void removeAllUses() noexcept;
 
-  void setInputAt(std::size_t index, const Input& newInput) {
-    // preProcessNewInput(index, newInput);
-    m_inputs.at(index) = newInput;
-    // postProcessNewInput(index, m_inputs[index]);
-  }
-
-  void setInputAt(std::size_t index, Input&& newInput) {
-    // preProcessNewInput(index, newInput);
-    m_inputs.at(index) = std::move(newInput);
-    // postProcessNewInput(index, m_inputs[index]);
-  }
-
   bool addUser(const User& user) {
     if (!isUserUniqueWith(user, m_users.begin(), m_users.end())) {
       // Provided user is already in the users list

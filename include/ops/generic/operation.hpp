@@ -14,7 +14,6 @@
 #include <ops/common.hpp>
 #include <ops/generic/input.hpp>
 #include <ops/generic/user.hpp>
-#include <ops/types.hpp>
 
 namespace iris {
 

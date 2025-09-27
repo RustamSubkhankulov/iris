@@ -2,6 +2,7 @@
 #define INCLUDE_GRAPH_REGION_HPP
 
 #include <memory>
+#include <ostream>
 #include <vector>
 
 #include <exception.hpp>
@@ -39,6 +40,12 @@ public:
       throw IrisException("No end basic block specified!");
     }
     return *m_endBB;
+  }
+
+  void dump(std::ostream& os) {
+    for (const auto& bbPtr : m_BasicBlocks) {
+      bbPtr->dump(os);
+    }
   }
 };
 

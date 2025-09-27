@@ -5,9 +5,6 @@
 #include <concepts>
 #include <memory>
 
-#include <exception.hpp>
-
-#include <graph/basic_block.hpp>
 #include <graph/region.hpp>
 
 namespace iris {
@@ -90,6 +87,10 @@ public:
     return std::unique_ptr<Region>(tmp);
   }
 
+  bb_id_t obtainIdForBasicBlock() {
+    return m_bbIDProvider.obtainID();
+  }
+
   bool startNewBasicBlock() {
     if (m_currBasicBlock != nullptr || m_currRegion == nullptr) {
       // Current basic block is still building,
@@ -99,6 +100,18 @@ public:
 
     m_currBasicBlock = new BasicBlock;
     m_currBasicBlock->setID(m_bbIDProvider.obtainID());
+    return true;
+  }
+
+  bool startNewBasicBlock(bb_id_t id) {
+    if (m_currBasicBlock != nullptr || m_currRegion == nullptr) {
+      // Current basic block is still building,
+      // or no region is building
+      return false;
+    }
+
+    m_currBasicBlock = new BasicBlock;
+    m_currBasicBlock->setID(id);
     return true;
   }
 

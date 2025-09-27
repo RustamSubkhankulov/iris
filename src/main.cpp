@@ -1,48 +1,49 @@
-#include <iostream>
+#include <cstdint>
 
-#include <ops/dialects/arith/ops.hpp>
-#include <ops/dialects/builtin/ops.hpp>
-#include <ops/dialects/ctrlflow/ops.hpp>
+#include <iris.hpp>
 
 int main() {
-  iris::Float32ConstAttribute attr1(3.14f);
-  iris::Float32ConstAttribute attr2(2.27f);
+  using namespace iris;
 
-  iris::builtin::ParamOp paramOp(iris::DataType::F32);
-  iris::arith::ConstantOp constOp(attr1);
+  Builder builder;
+  builder.startNewRegion();
 
-  iris::arith::AddOp addOp(&constOp, &paramOp);
+  // bb0: parameters & constants basic block
+  builder.startNewBasicBlock();
+  auto* a0 = builder.createAndAddOp<builtin::ParamOp>(DataType::UI32);
+  auto* v0 = builder.createAndAddOp<arith::ConstantOp>(
+    makeConstAttribute(static_cast<uint64_t>(1)));
+  auto* v1 = builder.createAndAddOp<arith::ConstantOp>(
+    makeConstAttribute(static_cast<uint64_t>(2)));
+  builder.finalizeBasicBlock();
 
-  // iris::arith::CastOp castOp(iris::DataType::SI32, &addOp);
-  iris::Operation* castOpPtr =
-    new iris::arith::CastOp{iris::DataType::SI32, &addOp};
+  // bb1
+  builder.startNewBasicBlock();
+  auto* v2 = builder.createAndAddOp<arith::CastOp>(DataType::UI64, a0);
+  builder.finalizeBasicBlock();
 
-  // iris::builtin::CopyOp copyOpOld(&castOp);
-  iris::builtin::CopyOp copyOpOld(castOpPtr);
-  iris::builtin::CopyOp copyOpNew(std::move(copyOpOld));
+  // bb2
+  builder.startNewBasicBlock();
+  auto loop = builder.getCurBasicBlockID();
+  builder.createAndAddOp<arith::CmpOp>(v1, v2);
+  auto done = builder.obtainIdForBasicBlock();
+  builder.createAndAddOp<ctrlflow::JumpOp>(done);
+  builder.finalizeBasicBlock();
 
-  // iris::ctrlflow::PhiOp phiOp(&castOp, &copyOpNew);
-  iris::ctrlflow::PhiOp phiOp(castOpPtr, &copyOpNew);
-  iris::ctrlflow::ReturnOp returnOp;
+  // bb3
+  builder.startNewBasicBlock();
+  auto* res = builder.createAndAddOp<arith::MulOp>(a0, v1);
+  builder.createAndAddOp<arith::AddOp>(res, v0);
+  builder.createAndAddOp<ctrlflow::JumpOp>(loop);
+  builder.finalizeBasicBlock();
 
-  delete castOpPtr;
+  // bb4
+  builder.startNewBasicBlock(done);
+  builder.createAndAddOp<ctrlflow::ReturnOp>();
+  builder.finalizeBasicBlock();
 
-  std::cout << paramOp << std::endl
-            << constOp << std::endl
-            << addOp
-            << std::endl
-            // << *castOpPtr << std::endl
-            << copyOpOld << std::endl
-            << phiOp << std::endl
-            << returnOp << std::endl
-            << copyOpNew << std::endl;
-
-  // delete castOpPtr;
-
-  iris::ctrlflow::JumpOp jumpOp(12);
-  iris::ctrlflow::CallOp callOp("foo", iris::DataType::BOOL);
-
-  std::cout << jumpOp << std::endl << callOp << std::endl;
+  auto regionPtr = builder.obtainRegion();
+  regionPtr->dump(std::cout);
 
   return 0;
 }

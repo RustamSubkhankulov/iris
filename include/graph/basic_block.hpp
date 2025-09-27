@@ -2,8 +2,7 @@
 #define INCLUDE_GRAPH_BASIC_BLOCK_HPP
 
 #include <memory>
-
-#include <ops/types.hpp>
+#include <ostream>
 
 #include <ops/dialects/ctrlflow/ops.hpp>
 #include <ops/dialects/opcodes.hpp>
@@ -110,6 +109,19 @@ public:
   //--- Misc ---
   void setID(bb_id_t id) {
     m_ID = id;
+  }
+
+  void dump(std::ostream& os) {
+    os << "^bb" << m_ID << std::endl;
+    std::string_view ident = "   ";
+    for (auto phiOpIt = m_PhiOps.begin(); phiOpIt != m_PhiOps.end();
+         ++phiOpIt) {
+      os << ident << static_cast<Operation&>(*phiOpIt) << std::endl;
+    }
+    for (auto regOpIt = m_RegOps.begin(); regOpIt != m_RegOps.end();
+         ++regOpIt) {
+      os << ident << static_cast<Operation&>(*regOpIt) << std::endl;
+    }
   }
 };
 

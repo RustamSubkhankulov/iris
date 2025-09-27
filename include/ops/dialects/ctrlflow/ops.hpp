@@ -2,6 +2,7 @@
 #define INCLUDE_DIALECTS_CTRLFLOW_OPS_HPP
 
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include <exception.hpp>
@@ -41,16 +42,40 @@ public:
 };
 
 class JumpOp : public CtrFlowOp {
+public:
+  enum class Pred : uint8_t {
+    NONE, // Unconditional
+    EQ,   // Equal
+    NEQ,  // Not equal
+    A,    // Above
+    B,    // Below
+    AE,   // Above or greater
+    BE,   // Below or greater
+  };
+
 private:
   bb_id_t m_targetBbID;
+  Pred m_pred;
 
 public:
-  JumpOp(bb_id_t targetBbID)
+  JumpOp(bb_id_t targetBbID, Pred pred = Pred::NONE)
     : CtrFlowOp(GlobalOpcodes::JUMP, DataType::NONE)
-    , m_targetBbID(targetBbID) {}
+    , m_targetBbID(targetBbID)
+    , m_pred(pred) {}
 
   std::string_view getMnemonic() const override {
-    return "jump";
+    // clang-format off
+    switch (m_pred) {
+      case Pred::NONE: return "jmp";     break;
+      case Pred::EQ:   return "jmp.eq";  break;
+      case Pred::NEQ:  return "jmp.neq"; break;
+      case Pred::A:    return "jmp.a";   break;
+      case Pred::B:    return "jmp.b";   break;
+      case Pred::AE:   return "jmp.ae";  break;
+      case Pred::BE:   return "jmp.be";  break;
+    }
+    std::unreachable();
+    // clang-format on
   }
 
   bool isTerminator() const override {

@@ -27,7 +27,7 @@ int main() {
   auto loop = builder.getCurBasicBlockID();
   builder.createAndAddOp<arith::CmpOp>(v1, v2);
   auto done = builder.obtainIdForBasicBlock();
-  builder.createAndAddOp<ctrlflow::JumpOp>(done);
+  builder.createAndAddOp<ctrlflow::JumpOp>(done, ctrlflow::JumpOp::Pred::EQ);
   builder.finalizeBasicBlock();
 
   // bb3

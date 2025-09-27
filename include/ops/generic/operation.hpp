@@ -2,8 +2,8 @@
 #define INCLUDE_OPS_GENERIC_OPERATION_HPP
 
 #include <initializer_list>
+#include <iostream>
 #include <list>
-#include <ostream>
 #include <utility>
 #include <vector>
 
@@ -12,6 +12,7 @@
 
 #include <ops/common.hpp>
 #include <ops/generic/input.hpp>
+#include <ops/generic/user.hpp>
 #include <ops/types.hpp>
 
 namespace iris {
@@ -59,23 +60,34 @@ public:
     : m_opcode(opcode)
     , m_dataType(dataType)
     , m_inputs(std::forward<Args>(args)...)
-    , m_inputsNumber(m_inputs.size()) {}
+    , m_inputsNumber(m_inputs.size()) {
+
+    addAsUserToInputs();
+  }
 
   Operation(opcode_t opcode, DataType dataType, std::initializer_list<Input> il)
     : m_opcode(opcode)
     , m_dataType(dataType)
     , m_inputs(il)
-    , m_inputsNumber(m_inputs.size()) {}
+    , m_inputsNumber(m_inputs.size()) {
+
+    addAsUserToInputs();
+  }
 
   // Operations cannot be copied or moved
   Operation(const Operation& that) = delete;
 
+  // Make a copy of the operation with the same inputs
+  // and replace all uses of it with newly constructed operation
   Operation(Operation&& other)
     : m_opcode(other.m_opcode)
     , m_ParentBlockPtr(other.m_ParentBlockPtr)
     , m_dataType(other.m_dataType)
+    , m_inputs(other.m_inputs) // Do not move, just copy
     , m_inputsNumber(other.m_inputsNumber) {
-    replaceUses(std::move(other));
+
+    addAsUserToInputs();
+    replaceUsesOf(std::move(other));
   }
 
   // Assignment is prohibited, since it will implicitly
@@ -86,7 +98,7 @@ public:
 
   virtual ~Operation() = default;
 
-  operator bool() {
+  operator bool() const {
     return (m_opcode != nullopcode);
   }
 
@@ -150,11 +162,32 @@ public:
     return m_inputs.at(index);
   }
 
+  void setInput(std::size_t index, const Input& input) {
+    m_inputs[index] = input;
+  }
+  void setInput(std::size_t index, Input&& input) {
+    m_inputs[index] = std::move(input);
+  }
+
+  void setInputAt(std::size_t index, const Input& input) {
+    m_inputs.at(index) = input;
+  }
+  void setInputAt(std::size_t index, Input&& input) {
+    m_inputs.at(index) = std::move(input);
+  }
+
   //--- Verification ---
 
   virtual bool verify() const {
-    // TODO
-    return true;
+
+    bool vres = true;
+    for (const auto& input : m_inputs) {
+      if (input.isEmpty()) {
+        std::cerr << "Empty input in the operation!" << std::endl;
+        vres = false;
+      }
+    }
+    return vres;
   }
 
   //--- Operation result's users ---
@@ -211,9 +244,13 @@ public:
     m_ID = id;
   }
 
-  void replaceUses(Operation&& other) noexcept;
+  void replaceUsesOf(Operation&& other) noexcept;
 
   void print(std::ostream& os) const;
+
+private:
+  // Add this operation as an user to every input
+  void addAsUserToInputs();
 
 protected:
   virtual void printID(std::ostream& os) const {

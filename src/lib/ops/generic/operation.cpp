@@ -1,10 +1,8 @@
-#include <ops/generic/input.hpp>
 #include <ops/generic/operation.hpp>
-#include <ops/generic/user.hpp>
 
 namespace iris {
 
-void Operation::replaceUses(Operation&& other) noexcept {
+void Operation::replaceUsesOf(Operation&& other) noexcept {
   // Replace 'other' operation with this operation in every user's input
   for (auto& user : other.m_users) {
     auto* userOp = user.getUserOp();
@@ -13,21 +11,18 @@ void Operation::replaceUses(Operation&& other) noexcept {
   }
 
   m_users = std::move(other.m_users);
-  m_inputs = other.m_inputs;
+}
 
-  // Replace 'other' with this operation in users list of every input
+void Operation::addAsUserToInputs() {
   for (std::size_t inputIdx = 0; inputIdx < m_inputsNumber; ++inputIdx) {
     auto& input = m_inputs.at(inputIdx);
-    auto* defOp = input.getDefiningOp();
 
-    auto& users = defOp->m_users;
-    for (auto userIt = users.begin(); userIt != users.end(); ++userIt) {
-      if (userIt->getUserOp() == &other &&
-          userIt->getInputIndex() == inputIdx) {
-        users.erase(userIt);
-        users.push_back(User{this, inputIdx});
-      }
+    if (input.isEmpty()) {
+      continue;
     }
+
+    auto* defOp = input.getDefiningOp();
+    defOp->addUser(User{this, inputIdx});
   }
 }
 
@@ -43,10 +38,16 @@ void Operation::print(std::ostream& os) const {
     for (std::size_t inputIndex = 0; inputIndex < m_inputsNumber;
          ++inputIndex) {
       const Input& input = getInputAt(inputIndex);
-      input.getDefiningOp()->printID(os);
+
+      if (input.isEmpty()) {
+        os << "none";
+      } else {
+        input.getDefiningOp()->printID(os);
+        os << " : " << input.getDataType();
+      }
 
       if (inputIndex != m_inputsNumber - 1) {
-        os << ",";
+        os << ", ";
       }
     }
     os << ") ";

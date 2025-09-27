@@ -16,24 +16,18 @@ int main() {
 
   iris::arith::AddOp addOp(&constOp, &paramOp);
   addOp.setID(2);
-  constOp.addUser(iris::User(&addOp, 0));
-  paramOp.addUser(iris::User(&addOp, 1));
 
   iris::arith::CastOp castOp(iris::DataType::SI32, &addOp);
   castOp.setID(3);
-  addOp.addUser(iris::User(&castOp, 0));
 
   iris::builtin::CopyOp copyOpOld(&castOp);
   copyOpOld.setID(4);
-  castOp.addUser(iris::User(&copyOpOld, 0));
 
   iris::builtin::CopyOp copyOpNew(std::move(copyOpOld));
   copyOpOld.setID(7);
 
   iris::ctrlflow::PhiOp phiOp(&castOp, &copyOpNew);
   phiOp.setID(5);
-  castOp.addUser(iris::User(&phiOp, 0));
-  copyOpNew.addUser(iris::User(&phiOp, 1));
 
   iris::ctrlflow::ReturnOp returnOp;
   returnOp.setID(6);

@@ -4,9 +4,10 @@
 #include <utility>
 
 #include <exception.hpp>
-#include <ops/generic/operation.hpp>
 
 namespace iris {
+
+class Operation;
 
 class User {
 private:
@@ -14,17 +15,7 @@ private:
   std::size_t m_inputIndex;
 
 public:
-  User(Operation* op, std::size_t inputIndex)
-    : m_op(op)
-    , m_inputIndex(inputIndex) {
-    if (m_op == nullptr) {
-      throw IrisException("Invalid pointer to using operation!");
-    }
-
-    if (inputIndex >= m_op->getInputsNum()) {
-      throw IrisException("Invalid operation's input index!");
-    }
-  }
+  User(Operation* op, std::size_t inputIndex);
 
   User(const User&) = default;
   User& operator=(const User&) = default;

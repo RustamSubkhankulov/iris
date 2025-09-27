@@ -3,6 +3,7 @@
 
 #include <utility>
 
+#include <data_types.hpp>
 #include <exception.hpp>
 
 namespace iris {
@@ -15,11 +16,7 @@ private:
 
 public:
   Input(Operation* op)
-    : m_op(op) {
-    if (m_op == nullptr) {
-      throw IrisException("Invalid pointer to defining operation!");
-    }
-  }
+    : m_op(op) {}
 
   Input(const Input&) = default;
   Input& operator=(const Input&) = default;
@@ -43,11 +40,18 @@ public:
   }
 
   void setDefiningOp(Operation* newOp) {
-    if (newOp == nullptr) {
-      throw IrisException("Invalid pointer to defining operation!");
-    }
     m_op = newOp;
   }
+
+  operator bool() const {
+    return (m_op != nullptr);
+  }
+
+  bool isEmpty() const {
+    return !(*this);
+  }
+
+  DataType getDataType() const;
 };
 
 } // namespace iris

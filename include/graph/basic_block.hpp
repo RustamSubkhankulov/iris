@@ -111,16 +111,16 @@ public:
     m_ID = id;
   }
 
-  void dump(std::ostream& os) {
-    os << "^bb" << m_ID << std::endl;
-    std::string_view ident = "   ";
+  void dump(std::ostream& os, const std::string& bbIdent) {
+    os << bbIdent << "^bb" << m_ID << ":" << std::endl;
+    std::string opIdent = bbIdent + "    ";
     for (auto phiOpIt = m_PhiOps.begin(); phiOpIt != m_PhiOps.end();
          ++phiOpIt) {
-      os << ident << static_cast<Operation&>(*phiOpIt) << std::endl;
+      os << opIdent << static_cast<Operation&>(*phiOpIt) << std::endl;
     }
     for (auto regOpIt = m_RegOps.begin(); regOpIt != m_RegOps.end();
          ++regOpIt) {
-      os << ident << static_cast<Operation&>(*regOpIt) << std::endl;
+      os << opIdent << static_cast<Operation&>(*regOpIt) << std::endl;
     }
   }
 };

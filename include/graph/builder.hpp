@@ -66,13 +66,13 @@ public:
     return (m_currBasicBlock != nullptr);
   }
 
-  bool startNewRegion() {
+  bool startNewRegion(std::string_view name) {
     if (m_currRegion != nullptr) {
       // Current region is still building
       return false;
     }
 
-    m_currRegion = new Region;
+    m_currRegion = new Region(name);
     return true;
   }
 

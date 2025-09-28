@@ -1,6 +1,9 @@
-#include "ops/dialects/opcodes.hpp"
+#include <set>
+
 #include <graph/basic_block.hpp>
 #include <graph/region.hpp>
+
+#include <ops/dialects/opcodes.hpp>
 
 namespace iris {
 
@@ -110,7 +113,17 @@ bool BasicBlock::verify(std::string& msg, bool isStart, bool isFinal) {
     return false;
   }
 
+  if (!verifyOps(msg, bbName)) {
+    return false;
+  }
+
+  return true;
+}
+
+bool BasicBlock::verifyOps(std::string& msg, const std::string& bbName) {
+  std::set<op_id_t> opIDs;
   auto opIt = m_RegOps.begin();
+
   for (std::size_t opIdx = 0; opIdx < m_RegOps.size() - 1; ++opIdx) {
     const Operation& op = static_cast<const Operation&>(*opIt);
     if (op.isTerminator()) {

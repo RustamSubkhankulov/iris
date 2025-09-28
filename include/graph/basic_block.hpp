@@ -109,6 +109,9 @@ public:
   void dump(std::ostream& os, const std::string& bbIdent);
 
   bool verify(std::string& msg, bool isStart = false, bool isFinal = false);
+
+private:
+  bool verifyOps(std::string& msg, const std::string& bbName);
 };
 
 } // namespace iris

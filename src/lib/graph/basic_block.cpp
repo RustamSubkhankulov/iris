@@ -1,4 +1,6 @@
+#include "ops/dialects/opcodes.hpp"
 #include <graph/basic_block.hpp>
+#include <graph/region.hpp>
 
 namespace iris {
 
@@ -35,6 +37,92 @@ void BasicBlock::dump(std::ostream& os, const std::string& bbIdent) {
 }
 
 bool BasicBlock::verify(std::string& msg, bool isStart, bool isFinal) {
+  std::string bbName = "BB" + std::to_string(m_ID);
+
+  if (m_ParentRegion == nullptr) {
+    msg = bbName + " has no parent region!";
+    return false;
+  }
+
+  if (isStart && m_preds.size() != 0) {
+    msg = bbName + " is starting bb, but has predecessor!";
+    return false;
+  }
+
+  if (isFinal && (m_succTrueID != -1 || m_succFalseID != -1)) {
+    msg = bbName + " is final bb, but has successors!";
+    return false;
+  }
+
+  // TODO move to region's verifier
+  for (bb_id_t predID : m_preds) {
+    if (!m_ParentRegion->isBasicBlockPresent(predID)) {
+      msg =
+        bbName + "'s pred " + std::to_string(predID) + " is not in the region!";
+      return false;
+    }
+  }
+
+  // TODO move to region's verifier
+  if (m_succTrueID != -1 &&
+      !m_ParentRegion->isBasicBlockPresent(m_succTrueID)) {
+    msg = bbName + "'s true successor is not in the region!";
+    return false;
+  }
+
+  // TODO move to region's verifier
+  if (m_succFalseID != -1 &&
+      !m_ParentRegion->isBasicBlockPresent(m_succFalseID)) {
+    msg = bbName + "'s false successor is not in the region!";
+    return false;
+  }
+
+  if (m_succFalseID != -1 && m_succTrueID == -1) {
+    msg =
+      bbName + " has false successor specified, but true successor is missing!";
+    return false;
+  }
+
+  if (!isFinal && m_succTrueID == -1) {
+    msg = bbName + " is not final, but has no successors!";
+    return false;
+  }
+
+  if (m_RegOps.size() == 0) {
+    msg = bbName + " is empty!";
+    return false;
+  }
+
+  const Operation& lastOp = static_cast<const Operation&>(m_RegOps.cback());
+
+  bool hasTwoSuccs = (m_succFalseID != -1);
+  bool lastOpIsCondJump = lastOp.isa(GlobalOpcodes::JUMPC);
+
+  if (hasTwoSuccs && !lastOpIsCondJump) {
+    msg = bbName +
+          " has two successors, but conditional jump at the end is missing!";
+    return false;
+  }
+
+  if (!hasTwoSuccs && lastOpIsCondJump) {
+    msg =
+      bbName + " has single successor, but has conditional jump at the end!";
+    return false;
+  }
+
+  auto opIt = m_RegOps.begin();
+  for (std::size_t opIdx = 0; opIdx < m_RegOps.size() - 1; ++opIdx) {
+    const Operation& op = static_cast<const Operation&>(*opIt);
+    if (op.isTerminator()) {
+      msg =
+        bbName + " - terminator operation is not the last one in the block!";
+      return false;
+    }
+    if (!op.verify(msg)) {
+      return false;
+    }
+  }
+
   return true;
 }
 

@@ -124,24 +124,14 @@ public:
       return false;
     }
 
-    m_currBasicBlock = new BasicBlock;
-    m_currBasicBlock->setID(id);
-    return true;
-  }
-
-  template <typename OpTy, typename... Args>
-  std::unique_ptr<Operation> createOp(Args... args) {
-    return std::make_unique<OpTy>(std::forward<Args>(args)...);
-  }
-
-  bool addOp(std::unique_ptr<Operation>&& op) {
-    if (m_currBasicBlock == nullptr) {
-      // No basic block in building process
+    if (m_currRegion->isBasicBlockPresent(id)) {
+      // Attempt to create a basic block with an ID
+      // that is already used in the region
       return false;
     }
 
-    op->setID(m_opIDProvider.obtainID());
-    m_currBasicBlock->addOp(std::move(op));
+    m_currBasicBlock = new BasicBlock;
+    m_currBasicBlock->setID(id);
     return true;
   }
 

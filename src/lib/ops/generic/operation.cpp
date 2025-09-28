@@ -1,3 +1,5 @@
+#include <sstream>
+
 #include <ops/generic/operation.hpp>
 
 namespace iris {
@@ -77,14 +79,17 @@ bool Operation::areUsersUnique(UserIt usersBegin, UserIt usersEnd) {
 
 bool Operation::verify(std::string& msg) const {
   // Verify that all of the inputs are non-empty.
-  bool vres = true;
-  for (const auto& input : m_inputs) {
+  for (std::size_t inputIdx = 0; inputIdx < m_inputsNumber; ++inputIdx) {
+    const auto& input = m_inputs[inputIdx];
     if (input.isEmpty()) {
-      msg = "Empty input in the operation!";
-      vres = false;
+      std::stringstream ss;
+      ss << getDialectName() << "." << getMnemonic() << "'s input #" << inputIdx
+         << " is empty!";
+      msg = ss.str();
+      return false;
     }
   }
-  return vres;
+  return true;
 }
 
 void Operation::print(std::ostream& os) const {

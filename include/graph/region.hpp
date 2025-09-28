@@ -27,6 +27,7 @@ public:
   }
 
   void addBasicBlock(std::unique_ptr<BasicBlock>&& basicBlock) {
+    basicBlock->setParentRegion(this);
     m_BasicBlocks.push_back(std::move(basicBlock));
     if (m_BasicBlocks.size() == 1) {
       m_startBB = m_BasicBlocks.front().get();
@@ -64,7 +65,9 @@ public:
     return nullptr;
   }
 
-  bool isBasicBlockPresent(bb_id_t id) const {}
+  bool isBasicBlockPresent(bb_id_t id) const {
+    return (getBasicBlockByID(id) != nullptr);
+  }
 
   void dump(std::ostream& os) {
     os << m_name << ":" << std::endl;
@@ -72,6 +75,22 @@ public:
     for (const auto& bbPtr : m_BasicBlocks) {
       bbPtr->dump(os, bbIdent);
     }
+  }
+
+  bool verify(std::string& msg) const {
+    auto bbsNum = m_BasicBlocks.size();
+    std::size_t idx = 0;
+
+    for (const auto& bb : m_BasicBlocks) {
+      bool isStart = (idx == 0);
+      bool isFinal = (idx == bbsNum - 1);
+
+      if (!bb->verify(msg, isStart, isFinal)) {
+        return false;
+      }
+      idx += 1;
+    }
+    return true;
   }
 };
 

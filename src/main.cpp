@@ -41,8 +41,8 @@ int main() {
   auto& bb3 = builder.getCurBasicBlock();
   bb2.setSucc(bb3, false);
 
-  auto* res = builder.createAndAddOp<arith::MulOp>(a0, v1);
-  builder.createAndAddOp<arith::AddOp>(res, v0);
+  auto* res = builder.createAndAddOp<arith::MulOp>(v0, v1);
+  builder.createAndAddOp<arith::AddOp>(res, v2);
   builder.createAndAddOp<ctrlflow::JumpOp>(bb2.getID());
   builder.finalizeBasicBlock();
 
@@ -59,6 +59,12 @@ int main() {
 
   auto regionPtr = builder.obtainRegion();
   regionPtr->dump(std::cout);
+
+  std::string msg;
+  if (!regionPtr->verify(msg)) {
+    std::cerr << "Verification failed:" << std::endl;
+    std::cerr << msg;
+  }
 
   return 0;
 }

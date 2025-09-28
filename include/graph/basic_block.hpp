@@ -65,13 +65,15 @@ public:
 
   //--- BB's successor ---
 
-  void setSucc(BasicBlock& succ, bool which = true) {
-    if (which == true) {
-      m_succTrueID = succ.m_ID;
-    } else {
-      m_succFalseID = succ.m_ID;
+  bool setSucc(BasicBlock& succ, bool which = true) {
+    auto& succID = (which == true) ? m_succTrueID : m_succFalseID;
+    if (succID != -1) {
+      // Successor is already set.
+      return false;
     }
+    succID = succ.m_ID;
     succ.m_preds.push_back(m_ID);
+    return true;
   }
 
   bool hasSucc(bool which = true) const {
@@ -81,14 +83,6 @@ public:
 
   bb_id_t getSuccID(bool which = true) const {
     return static_cast<bb_id_t>((which == true) ? m_succTrueID : m_succFalseID);
-  }
-
-  void clearSucc(bool which) {
-    if (which) {
-      m_succTrueID = -1;
-    } else {
-      m_succFalseID = -1;
-    }
   }
 
   //--- Operation ---
@@ -115,28 +109,6 @@ public:
   void dump(std::ostream& os, const std::string& bbIdent);
 
   bool verify(std::string& msg, bool isStart = false, bool isFinal = false);
-
-private:
-  void addPred(bb_id_t predID) {
-    m_preds.push_back(predID);
-  }
-
-  void addPred(const BasicBlock& pred) {
-    m_preds.push_back(pred.m_ID);
-  }
-
-  template <typename IterT>
-  void removePred(IterT iter) {
-    m_preds.erase(iter);
-  }
-
-  void removePred(std::size_t pos) {
-    m_preds.erase(std::next(m_preds.begin(), pos));
-  }
-
-  void removePred(bb_id_t predID) {
-    m_preds.remove(predID);
-  }
 };
 
 } // namespace iris

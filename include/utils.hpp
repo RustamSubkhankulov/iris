@@ -147,6 +147,30 @@ public:
   using iterator = IteratorImpl<ListNode>;
   using const_iterator = IteratorImpl<const ListNode>;
 
+  ListNode& front() {
+    return *m_head;
+  }
+
+  const ListNode& front() const {
+    return *m_head;
+  }
+
+  const ListNode& cfront() const {
+    return *m_head;
+  }
+
+  ListNode& back() {
+    return *m_tail;
+  }
+
+  const ListNode& back() const {
+    return *m_tail;
+  }
+
+  const ListNode& cback() const {
+    return *m_tail;
+  }
+
   iterator begin() {
     return iterator{m_head};
   }

@@ -165,17 +165,7 @@ public:
 
   //--- Verification ---
 
-  virtual bool verify() const {
-    // Verify that all of the inputs are non-empty.
-    bool vres = true;
-    for (const auto& input : m_inputs) {
-      if (input.isEmpty()) {
-        std::cerr << "Empty input in the operation!" << std::endl;
-        vres = false;
-      }
-    }
-    return vres;
-  }
+  virtual bool verify(std::string& msg) const;
 
   //--- Operation result's users ---
 
@@ -205,6 +195,10 @@ public:
 
   void setID(op_id_t id) {
     m_ID = id;
+  }
+
+  op_id_t getID() const {
+    return m_ID;
   }
 
   void print(std::ostream& os) const;

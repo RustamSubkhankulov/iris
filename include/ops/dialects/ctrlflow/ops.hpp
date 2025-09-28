@@ -1,6 +1,7 @@
 #ifndef INCLUDE_DIALECTS_CTRLFLOW_OPS_HPP
 #define INCLUDE_DIALECTS_CTRLFLOW_OPS_HPP
 
+#include <sstream>
 #include <string_view>
 #include <utility>
 #include <vector>
@@ -142,13 +143,13 @@ public:
     return false;
   }
 
-  bool verify() const override {
-    if (!CtrFlowOp::verify()) {
+  bool verify(std::string& msg) const override {
+    if (!CtrFlowOp::verify(msg)) {
       return false;
     }
 
     // Inputs have the same data types.
-    if (verifyInputsDTySame()) {
+    if (verifyInputsDTySame(msg)) {
       return false;
     }
 
@@ -164,12 +165,14 @@ public:
   }
 
 private:
-  bool verifyInputsDTySame() const {
+  bool verifyInputsDTySame(std::string& msg) const {
     auto inputXDTy = getInputX().getDefiningOp()->getDataType();
     auto inputYDTy = getInputY().getDefiningOp()->getDataType();
     if (inputXDTy != inputYDTy) {
-      std::cerr << "Operation " << getMnemonic() << ": ";
-      std::cerr << "inputs have different data types.\n";
+      std::stringstream ss;
+      ss << "Operation " << getMnemonic()
+         << ": inputs must have same data types.";
+      msg = ss.str();
       return false;
     }
     return true;

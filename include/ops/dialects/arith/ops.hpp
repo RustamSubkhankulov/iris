@@ -2,6 +2,7 @@
 #define INCLUDE_DIALECTS_ARITH_OPS_HPP
 
 #include <iostream>
+#include <sstream>
 
 #include <attributes.hpp>
 #include <ops/dialects/opcodes.hpp>
@@ -32,13 +33,13 @@ public:
   BinaryArithOp(opcode_t opcode, DataType dataType, Input inputX, Input inputY)
     : ArithOp(opcode, dataType, {inputX, inputY}) {}
 
-  bool verify() const override {
-    if (!ArithOp::verify()) {
+  bool verify(std::string& msg) const override {
+    if (!ArithOp::verify(msg)) {
       return false;
     }
 
     // Inputs have the same data types.
-    if (verifyInputsDTySame()) {
+    if (!verifyInputsDTySame(msg)) {
       return false;
     }
     return true;
@@ -52,12 +53,14 @@ public:
   }
 
 private:
-  bool verifyInputsDTySame() const {
+  bool verifyInputsDTySame(std::string& msg) const {
     auto inputXDTy = getInputX().getDefiningOp()->getDataType();
     auto inputYDTy = getInputY().getDefiningOp()->getDataType();
     if (inputXDTy != inputYDTy) {
-      std::cerr << "Operation " << getMnemonic() << ": ";
-      std::cerr << "inputs have different data types.\n";
+      std::stringstream ss;
+      ss << "Operation " << getMnemonic()
+         << ": inputs must have same data types.";
+      msg = ss.str();
       return false;
     }
     return true;

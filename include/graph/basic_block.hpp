@@ -1,6 +1,7 @@
 #ifndef INCLUDE_GRAPH_BASIC_BLOCK_HPP
 #define INCLUDE_GRAPH_BASIC_BLOCK_HPP
 
+#include <cstdint>
 #include <memory>
 #include <ostream>
 
@@ -14,9 +15,9 @@ class Region;
 
 class BasicBlock final {
 private:
-  std::list<BasicBlock*> m_preds;
-  BasicBlock* m_succTrue = nullptr;
-  BasicBlock* m_succFalse = nullptr;
+  std::list<bb_id_t> m_preds;
+  int64_t m_succTrue = -1;
+  int64_t m_succFalse = -1;
 
   List m_PhiOps;
   List m_RegOps;
@@ -49,14 +50,22 @@ public:
     return m_ParentRegion;
   }
 
+  void setParentRegion(Region* region) {
+    m_ParentRegion = region;
+  }
+
   //--- BB's predecessors ---
 
-  const std::list<BasicBlock*>& getPreds() const {
+  const std::list<bb_id_t>& getPreds() const {
     return m_preds;
   }
 
-  void addPred(BasicBlock* pred) {
-    m_preds.push_back(pred);
+  std::size_t getPredsNum() const {
+    return m_preds.size();
+  }
+
+  void addPred(bb_id_t predID) {
+    m_preds.push_back(predID);
   }
 
   template <typename IterT>
@@ -68,31 +77,35 @@ public:
     m_preds.erase(std::next(m_preds.begin(), pos));
   }
 
-  void removePred(BasicBlock* pred) {
-    m_preds.remove(pred);
+  void removePred(bb_id_t predID) {
+    m_preds.remove(predID);
   }
 
   //--- BB's successor ---
 
-  void setSucc(BasicBlock* succ, bool which = true) {
+  void setSucc(bb_id_t succID, bool which = true) {
     if (which == true) {
-      m_succTrue = succ;
+      m_succTrue = succID;
     } else {
-      m_succFalse = succ;
+      m_succFalse = succID;
+    }
+  }
+
+  void setSucc(const BasicBlock& succ, bool which = true) {
+    if (which == true) {
+      m_succTrue = succ.m_ID;
+    } else {
+      m_succFalse = succ.m_ID;
     }
   }
 
   bool hasSucc(bool which = true) const {
-    auto* succ = (which == true) ? m_succTrue : m_succFalse;
-    return (succ != nullptr);
+    auto succID = (which == true) ? m_succTrue : m_succFalse;
+    return (succID != -1);
   }
 
-  BasicBlock* getSucc(bool which = true) {
-    return (which == true) ? m_succTrue : m_succFalse;
-  }
-
-  const BasicBlock* getSucc(bool which = true) const {
-    return (which == true) ? m_succTrue : m_succFalse;
+  bb_id_t getSuccID(bool which = true) const {
+    return static_cast<bb_id_t>((which == true) ? m_succTrue : m_succFalse);
   }
 
   //--- Operation ---
@@ -111,18 +124,14 @@ public:
     m_ID = id;
   }
 
-  void dump(std::ostream& os, const std::string& bbIdent) {
-    os << bbIdent << "^bb" << m_ID << ":" << std::endl;
-    std::string opIdent = bbIdent + "    ";
-    for (auto phiOpIt = m_PhiOps.begin(); phiOpIt != m_PhiOps.end();
-         ++phiOpIt) {
-      os << opIdent << static_cast<Operation&>(*phiOpIt) << std::endl;
-    }
-    for (auto regOpIt = m_RegOps.begin(); regOpIt != m_RegOps.end();
-         ++regOpIt) {
-      os << opIdent << static_cast<Operation&>(*regOpIt) << std::endl;
-    }
+  bb_id_t getID() const {
+    return m_ID;
   }
+
+  // Text dump to the given ouput stream
+  void dump(std::ostream& os, const std::string& bbIdent);
+
+  bool verify(std::string& msg, bool isStart = false, bool isFinal = false);
 };
 
 } // namespace iris

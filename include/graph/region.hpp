@@ -1,10 +1,10 @@
 #ifndef INCLUDE_GRAPH_REGION_HPP
 #define INCLUDE_GRAPH_REGION_HPP
 
+#include <list>
 #include <memory>
 #include <ostream>
 #include <string_view>
-#include <vector>
 
 #include <exception.hpp>
 #include <graph/basic_block.hpp>
@@ -14,9 +14,9 @@ namespace iris {
 class Region final {
 private:
   std::string m_name;
-  std::vector<std::unique_ptr<BasicBlock>> m_BasicBlocks;
+  std::list<std::unique_ptr<BasicBlock>> m_BasicBlocks;
   BasicBlock* m_startBB = nullptr;
-  BasicBlock* m_endBB = nullptr;
+  BasicBlock* m_finalBB = nullptr;
 
 public:
   Region(std::string_view name)
@@ -34,7 +34,7 @@ public:
   }
 
   void finalize() {
-    m_endBB = m_BasicBlocks.back().get();
+    m_finalBB = m_BasicBlocks.back().get();
   }
 
   const BasicBlock& getStartBasicBlock() const {
@@ -44,12 +44,27 @@ public:
     return *m_startBB;
   }
 
-  const BasicBlock& getEndBasicBlock() const {
-    if (m_endBB != nullptr) {
+  const BasicBlock& getFinalBasicBlock() const {
+    if (m_finalBB != nullptr) {
       throw IrisException("No end basic block specified!");
     }
-    return *m_endBB;
+    return *m_finalBB;
   }
+
+  const std::list<std::unique_ptr<BasicBlock>>& getBasicBlocks() const {
+    return m_BasicBlocks;
+  }
+
+  const BasicBlock* getBasicBlockByID(bb_id_t id) const {
+    for (const auto& bb : m_BasicBlocks) {
+      if (bb->getID() == id) {
+        return bb.get();
+      }
+    }
+    return nullptr;
+  }
+
+  bool isBasicBlockPresent(bb_id_t id) const {}
 
   void dump(std::ostream& os) {
     os << m_name << ":" << std::endl;

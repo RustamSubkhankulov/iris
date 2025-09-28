@@ -75,6 +75,18 @@ bool Operation::areUsersUnique(UserIt usersBegin, UserIt usersEnd) {
   return true;
 }
 
+bool Operation::verify(std::string& msg) const {
+  // Verify that all of the inputs are non-empty.
+  bool vres = true;
+  for (const auto& input : m_inputs) {
+    if (input.isEmpty()) {
+      msg = "Empty input in the operation!";
+      vres = false;
+    }
+  }
+  return vres;
+}
+
 void Operation::print(std::ostream& os) const {
   printID(os);
   if (hasResult()) {

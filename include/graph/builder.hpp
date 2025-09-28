@@ -12,7 +12,7 @@ namespace iris {
 namespace detail {
 
 template <std::unsigned_integral IdType>
-class IDProvider {
+class IDProvider final {
 private:
   IdType m_curID = 0;
 
@@ -31,7 +31,7 @@ public:
 };
 } // namespace detail
 
-class IRBuilder final {
+class IRBuilder {
 private:
   Region* m_currRegion = nullptr;
   BasicBlock* m_currBasicBlock = nullptr;
@@ -42,7 +42,7 @@ private:
 public:
   IRBuilder() = default;
 
-  ~IRBuilder() {
+  virtual ~IRBuilder() {
     delete m_currRegion;
     delete m_currBasicBlock;
   }
@@ -74,6 +74,20 @@ public:
 
     m_currRegion = new Region(name);
     return true;
+  }
+
+  const Region& getCurRegion() const {
+    if (m_currRegion == nullptr) {
+      throw IrisException("No region is in process currently");
+    }
+    return *m_currRegion;
+  }
+
+  Region& getCurRegion() {
+    if (m_currRegion == nullptr) {
+      throw IrisException("No region is in process currently");
+    }
+    return *m_currRegion;
   }
 
   std::unique_ptr<Region> obtainRegion() {
@@ -152,6 +166,20 @@ public:
     }
 
     return static_cast<int64_t>(m_bbIDProvider.getLastID());
+  }
+
+  const BasicBlock& getCurBasicBlock() const {
+    if (m_currBasicBlock == nullptr) {
+      throw IrisException("No basic block in process currently");
+    }
+    return *m_currBasicBlock;
+  }
+
+  BasicBlock& getCurBasicBlock() {
+    if (m_currBasicBlock == nullptr) {
+      throw IrisException("No basic block in process currently");
+    }
+    return *m_currBasicBlock;
   }
 
   bool finalizeBasicBlock() {

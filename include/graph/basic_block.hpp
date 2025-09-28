@@ -5,7 +5,6 @@
 #include <memory>
 #include <ostream>
 
-#include <ops/dialects/ctrlflow/ops.hpp>
 #include <ops/dialects/opcodes.hpp>
 #include <ops/generic/operation.hpp>
 
@@ -16,8 +15,8 @@ class Region;
 class BasicBlock final {
 private:
   std::list<bb_id_t> m_preds;
-  int64_t m_succTrue = -1;
-  int64_t m_succFalse = -1;
+  int64_t m_succTrueID = -1;
+  int64_t m_succFalseID = -1;
 
   List m_PhiOps;
   List m_RegOps;
@@ -64,48 +63,32 @@ public:
     return m_preds.size();
   }
 
-  void addPred(bb_id_t predID) {
-    m_preds.push_back(predID);
-  }
-
-  template <typename IterT>
-  void removePred(IterT iter) {
-    m_preds.erase(iter);
-  }
-
-  void removePred(std::size_t pos) {
-    m_preds.erase(std::next(m_preds.begin(), pos));
-  }
-
-  void removePred(bb_id_t predID) {
-    m_preds.remove(predID);
-  }
-
   //--- BB's successor ---
 
-  void setSucc(bb_id_t succID, bool which = true) {
+  void setSucc(BasicBlock& succ, bool which = true) {
     if (which == true) {
-      m_succTrue = succID;
+      m_succTrueID = succ.m_ID;
     } else {
-      m_succFalse = succID;
+      m_succFalseID = succ.m_ID;
     }
-  }
-
-  void setSucc(const BasicBlock& succ, bool which = true) {
-    if (which == true) {
-      m_succTrue = succ.m_ID;
-    } else {
-      m_succFalse = succ.m_ID;
-    }
+    succ.m_preds.push_back(m_ID);
   }
 
   bool hasSucc(bool which = true) const {
-    auto succID = (which == true) ? m_succTrue : m_succFalse;
+    auto succID = (which == true) ? m_succTrueID : m_succFalseID;
     return (succID != -1);
   }
 
   bb_id_t getSuccID(bool which = true) const {
-    return static_cast<bb_id_t>((which == true) ? m_succTrue : m_succFalse);
+    return static_cast<bb_id_t>((which == true) ? m_succTrueID : m_succFalseID);
+  }
+
+  void clearSucc(bool which) {
+    if (which) {
+      m_succTrueID = -1;
+    } else {
+      m_succFalseID = -1;
+    }
   }
 
   //--- Operation ---
@@ -132,6 +115,28 @@ public:
   void dump(std::ostream& os, const std::string& bbIdent);
 
   bool verify(std::string& msg, bool isStart = false, bool isFinal = false);
+
+private:
+  void addPred(bb_id_t predID) {
+    m_preds.push_back(predID);
+  }
+
+  void addPred(const BasicBlock& pred) {
+    m_preds.push_back(pred.m_ID);
+  }
+
+  template <typename IterT>
+  void removePred(IterT iter) {
+    m_preds.erase(iter);
+  }
+
+  void removePred(std::size_t pos) {
+    m_preds.erase(std::next(m_preds.begin(), pos));
+  }
+
+  void removePred(bb_id_t predID) {
+    m_preds.remove(predID);
+  }
 };
 
 } // namespace iris

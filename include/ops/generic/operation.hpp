@@ -54,17 +54,7 @@ public:
   // Opcode 'nullopcode' is reserved to represent an empty op.
   Operation() = default;
 
-  template <typename... Args>
-  Operation(opcode_t opcode, DataType dataType, Args&&... args)
-    : m_opcode(opcode)
-    , m_dataType(dataType)
-    , m_inputs(std::forward<Args>(args)...)
-    , m_inputsNumber(m_inputs.size()) {
-
-    addAsUserToInputs();
-  }
-
-  Operation(opcode_t opcode, DataType dataType, InputList il)
+  Operation(opcode_t opcode, DataType dataType, InputList il = {})
     : m_opcode(opcode)
     , m_dataType(dataType)
     , m_inputs(il)

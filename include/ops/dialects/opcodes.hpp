@@ -17,6 +17,7 @@ enum GlobalOpcodes : opcode_t {
   COPY,
   CALL,
   JUMP,
+  JUMPC,
   RETURN,
   PHI,
 };

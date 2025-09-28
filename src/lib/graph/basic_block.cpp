@@ -15,12 +15,12 @@ void BasicBlock::dump(std::ostream& os, const std::string& bbIdent) {
     os << "> ";
   }
 
-  if (m_succTrue == -1 && m_succFalse == -1) {
+  if (m_succTrueID == -1 && m_succFalseID == -1) {
     os << "<final> ";
-  } else if (m_succTrue != -1 && m_succFalse != -1) {
-    os << "<to T:bb" << m_succTrue << " / F:bb" << m_succFalse << "> ";
+  } else if (m_succTrueID != -1 && m_succFalseID != -1) {
+    os << "<to T:bb" << m_succTrueID << " / F:bb" << m_succFalseID << "> ";
   } else {
-    os << "<to bb" << m_succTrue << "> ";
+    os << "<to bb" << m_succTrueID << "> ";
   }
 
   os << ": \n";

@@ -14,6 +14,8 @@
 #include <ops/generic/operation.hpp>
 #include <ops/generic/user.hpp>
 
+#include <graph/basic_block.hpp>
+
 namespace iris {
 namespace ctrlflow {
 
@@ -47,40 +49,16 @@ public:
 };
 
 class JumpOp : public CtrFlowOp {
-public:
-  enum class Pred : uint8_t {
-    NONE, // Unconditional
-    EQ,   // Equal
-    NEQ,  // Not equal
-    A,    // Above
-    B,    // Below
-    AE,   // Above or greater
-    BE,   // Below or greater
-  };
-
 private:
   bb_id_t m_targetBbID;
-  Pred m_pred;
 
 public:
-  JumpOp(bb_id_t targetBbID, Pred pred = Pred::NONE)
+  JumpOp(bb_id_t targetBbID)
     : CtrFlowOp(GlobalOpcodes::JUMP, DataType::NONE)
-    , m_targetBbID(targetBbID)
-    , m_pred(pred) {}
+    , m_targetBbID(targetBbID) {}
 
   std::string_view getMnemonic() const override {
-    // clang-format off
-    switch (m_pred) {
-      case Pred::NONE: return "jmp";     break;
-      case Pred::EQ:   return "jmp.eq";  break;
-      case Pred::NEQ:  return "jmp.neq"; break;
-      case Pred::A:    return "jmp.a";   break;
-      case Pred::B:    return "jmp.b";   break;
-      case Pred::AE:   return "jmp.ae";  break;
-      case Pred::BE:   return "jmp.be";  break;
-    }
-    std::unreachable();
-    // clang-format on
+    return "jmp";
   }
 
   bool isTerminator() const override {
@@ -93,6 +71,50 @@ public:
 
   void printSpecifics(std::ostream& os) const override {
     os << "^bb" << m_targetBbID << " ";
+  }
+};
+
+class JumpcOp : public CtrFlowOp {
+private:
+  bb_id_t m_targetBbID;
+
+public:
+  JumpcOp(bb_id_t targetBbID, Input input)
+    : CtrFlowOp(GlobalOpcodes::JUMPC, DataType::NONE, {input})
+    , m_targetBbID(targetBbID) {}
+
+  std::string_view getMnemonic() const override {
+    return "jmpc";
+  }
+
+  bool isTerminator() const override {
+    return true;
+  }
+
+  bb_id_t getTargetBbID() const {
+    return m_targetBbID;
+  }
+
+  void printSpecifics(std::ostream& os) const override {
+    os << "^bb" << m_targetBbID << " ";
+  }
+
+  bool verify(std::string& msg) const override {
+    if (!CtrFlowOp::verify(msg)) {
+      return false;
+    }
+
+    const Input& input = Operation::getInput(0);
+    if (input.getDataType() != DataType::BOOL) {
+      msg = "Input's data type must be bool";
+      return false;
+    }
+
+    return true;
+  }
+
+  const Input& getInput() const {
+    return Operation::getInput(1);
   }
 };
 

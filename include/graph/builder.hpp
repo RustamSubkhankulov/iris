@@ -165,7 +165,7 @@ public:
       return -1;
     }
 
-    return static_cast<int64_t>(m_bbIDProvider.getLastID());
+    return static_cast<int64_t>(m_currBasicBlock->getID());
   }
 
   const BasicBlock& getCurBasicBlock() const {
@@ -182,14 +182,15 @@ public:
     return *m_currBasicBlock;
   }
 
-  bool finalizeBasicBlock() {
+  BasicBlock& finalizeBasicBlock() {
     if (m_currBasicBlock == nullptr) {
-      return false;
+      throw IrisException("No basic block in process currently");
     }
 
-    m_currRegion->addBasicBlock(std::unique_ptr<BasicBlock>(m_currBasicBlock));
-    m_currBasicBlock = nullptr;
-    return true;
+    auto& bb = *m_currBasicBlock;
+    m_currRegion->addBasicBlock(
+      std::unique_ptr<BasicBlock>(std::exchange(m_currBasicBlock, nullptr)));
+    return bb;
   }
 };
 

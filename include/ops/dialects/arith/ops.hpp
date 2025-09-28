@@ -72,11 +72,39 @@ using HeterogenArithOp = BinaryArithOp;
 
 class CmpOp : public HeterogenArithOp {
 public:
-  CmpOp(Input inputX, Input inputY)
-    : BinaryArithOp(GlobalOpcodes::CMP, DataType::BOOL, inputX, inputY) {}
+  enum class Pred : uint8_t {
+    EQ,  // Equal
+    NEQ, // Not equal
+    A,   // Above
+    B,   // Below
+    AE,  // Above or greater
+    BE,  // Below or greater
+  };
+
+private:
+  Pred m_pred;
+
+public:
+  CmpOp(Input inputX, Input inputY, Pred pred)
+    : BinaryArithOp(GlobalOpcodes::CMP, DataType::BOOL, inputX, inputY)
+    , m_pred(pred) {}
 
   std::string_view getMnemonic() const override {
-    return "cmp";
+    // clang-format off
+    switch (m_pred) {
+      case Pred::EQ:   return "cmp.eq";  break;
+      case Pred::NEQ:  return "cmp.neq"; break;
+      case Pred::A:    return "cmp.a";   break;
+      case Pred::B:    return "cmp.b";   break;
+      case Pred::AE:   return "cmp.ae";  break;
+      case Pred::BE:   return "cmp.be";  break;
+    }
+    std::unreachable();
+    // clang-format on
+  }
+
+  Pred getPred() const {
+    return m_pred;
   }
 };
 

@@ -5,6 +5,8 @@
 #include <sstream>
 
 #include <attributes.hpp>
+#include <exception.hpp>
+
 #include <ops/dialects/opcodes.hpp>
 #include <ops/generic/input.hpp>
 #include <ops/generic/operation.hpp>
@@ -92,15 +94,14 @@ public:
   std::string_view getMnemonic() const override {
     // clang-format off
     switch (m_pred) {
-      case Pred::EQ:   return "cmp.eq";  break;
-      case Pred::NEQ:  return "cmp.neq"; break;
-      case Pred::A:    return "cmp.a";   break;
-      case Pred::B:    return "cmp.b";   break;
-      case Pred::AE:   return "cmp.ae";  break;
-      case Pred::BE:   return "cmp.be";  break;
-      default: std::unreachable();
+      case Pred::EQ:   return "cmp.eq";
+      case Pred::NEQ:  return "cmp.neq";
+      case Pred::A:    return "cmp.a"; 
+      case Pred::B:    return "cmp.b"; 
+      case Pred::AE:   return "cmp.ae"; 
+      case Pred::BE:   return "cmp.be";
+      default: throw IrisException("Unexpected predicate in CmpOp operation!");
     }
-    std::unreachable();
     // clang-format on
   }
 

@@ -56,8 +56,8 @@ public:
 
 private:
   bool verifyInputsDTySame(std::string& msg) const {
-    auto inputXDTy = getInputX().getDefiningOp()->getDataType();
-    auto inputYDTy = getInputY().getDefiningOp()->getDataType();
+    auto inputXDTy = getInputX().getDataType();
+    auto inputYDTy = getInputY().getDataType();
     if (inputXDTy != inputYDTy) {
       std::stringstream ss;
       ss << "Operation " << getMnemonic()
@@ -114,8 +114,7 @@ public:
 class HomogenBinaryArithOp : public BinaryArithOp {
 public:
   HomogenBinaryArithOp(opcode_t opcode, Input inputX, Input inputY)
-    : BinaryArithOp(opcode, inputX.getDefiningOp()->getDataType(), inputX,
-                    inputY) {}
+    : BinaryArithOp(opcode, inputX.getDataType(), inputX, inputY) {}
 };
 
 class AddOp final : public HomogenBinaryArithOp {

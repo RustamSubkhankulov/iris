@@ -4,7 +4,7 @@
 #include <iris.hpp>
 using namespace iris;
 
-TEST(ARITH, CMP_EXFAIL_NON_HOMOGEN_INPUTS) {
+TEST(ARITH, CMP_EXFAIL_NON_HOMOGEN_INPUTS1) {
   arith::ConstantOp cstI(makeConstAttribute(1));
   arith::ConstantOp cstF(makeConstAttribute(1.));
 
@@ -15,6 +15,28 @@ TEST(ARITH, CMP_EXFAIL_NON_HOMOGEN_INPUTS) {
 
   EXPECT_EQ(vres, false);
   EXPECT_TRUE(msg.contains("inputs must have same data types"));
+}
+
+TEST(ARITH, CMP_EXFAIL_EMPTY_INPUT_1) {
+  arith::ConstantOp cstI(makeConstAttribute(1));
+  arith::CmpOp cmp(&cstI, nullptr, arith::CmpOp::Pred::EQ);
+
+  std::string msg;
+  bool vres = cmp.verify(msg);
+
+  EXPECT_EQ(vres, false);
+  EXPECT_TRUE(msg.contains("input #1 is empty!"));
+}
+
+TEST(ARITH, CMP_EXFAIL_EMPTY_INPUT_2) {
+  arith::ConstantOp cstF(makeConstAttribute(1.));
+  arith::CmpOp cmp(nullptr, &cstF, arith::CmpOp::Pred::EQ);
+
+  std::string msg;
+  bool vres = cmp.verify(msg);
+
+  EXPECT_EQ(vres, false);
+  EXPECT_TRUE(msg.contains("input #0 is empty!"));
 }
 
 TEST(ARITH, ADD_EXFAIL_NON_HOMOGEN_INPUTS) {

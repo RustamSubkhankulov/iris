@@ -36,8 +36,7 @@ void Operation::addAsUserToInput(std::size_t inputIdx, Input& input) {
   auto res = defOp->addUser(User{this, inputIdx});
 
   if (!res) {
-    std::clog << "Warning: operation was not added to the users list "
-              << "since it is already present in it.\n";
+    throw IrisException("Operation is already in the users list!");
   }
 }
 

@@ -152,8 +152,7 @@ public:
 class PhiOp : public CtrFlowOp {
 public:
   PhiOp(Input inputX, Input inputY)
-    : CtrFlowOp(GlobalOpcodes::PHI, inputX.getDefiningOp()->getDataType(),
-                {inputX, inputY}) {}
+    : CtrFlowOp(GlobalOpcodes::PHI, inputX.getDataType(), {inputX, inputY}) {}
 
   std::string_view getMnemonic() const override {
     return "phi";
@@ -186,8 +185,8 @@ public:
 
 private:
   bool verifyInputsDTySame(std::string& msg) const {
-    auto inputXDTy = getInputX().getDefiningOp()->getDataType();
-    auto inputYDTy = getInputY().getDefiningOp()->getDataType();
+    auto inputXDTy = getInputX().getDataType();
+    auto inputYDTy = getInputY().getDataType();
     if (inputXDTy != inputYDTy) {
       std::stringstream ss;
       ss << "Operation " << getMnemonic()

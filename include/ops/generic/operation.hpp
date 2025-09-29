@@ -230,9 +230,6 @@ private:
     m_users.remove(user);
   }
 
-  // void preProcessNewInput(std::size_t inputIdx, const Input& newInput);
-  // void postProcessNewInput(std::size_t inputIdx, Input& newInput);
-
   void addAsUserToInputs();
   void addAsUserToInput(std::size_t inputIdx, Input& input);
 

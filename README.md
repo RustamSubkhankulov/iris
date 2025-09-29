@@ -91,3 +91,23 @@ List of available targets:
 - ``factorial`` - example of IR usage - building IR for a programm calculating factorial manually via ``iris::IRBuilder``
 
 Static library output files are located in ``build/lib/``, and executables - in ``build/bin``.
+
+#### Testing
+
+Project includes tests, impemented using **GTest**.
+
+To build and run tests, run following commands from project's root directory:
+```text
+cmake -B build
+cmake --build build --target iris_tests
+cd build
+ctest
+```
+
+Tests include:
+- Separate test suites for each dialect and its operations' verifiers and construction pre-conditions (``tests/dialects/``);
+- Basic block ``iris::BasicBlock`` verification tests;
+- Generic operation ``iris::Operation`` verification and API tests;
+- ``iris::Region``'s API tests;
+- ``iris::IRBuilder``'s API tests.
+

@@ -40,15 +40,14 @@ protected:
 class CopyOp : public BuiltinOp {
 public:
   CopyOp(Input input)
-    : BuiltinOp(GlobalOpcodes::COPY, input.getDefiningOp()->getDataType(),
-                {input}) {}
+    : BuiltinOp(GlobalOpcodes::COPY, input.getDataType(), {input}) {}
 
   std::string_view getMnemonic() const override {
     return "copy";
   }
 
   const Input& getInput() const {
-    return Operation::getInput(1);
+    return Operation::getInput(0);
   }
 };
 

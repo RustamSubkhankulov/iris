@@ -66,7 +66,7 @@ bool BasicBlock::verify(std::string& msg, bool isStart, bool isFinal) {
     return false;
   }
 
-  // TODO move to region's verifier
+  // TODO move to region's verifier maybe?
   for (bb_id_t predID : m_preds) {
     if (!m_ParentRegion->isBasicBlockPresent(predID)) {
       msg =
@@ -75,14 +75,14 @@ bool BasicBlock::verify(std::string& msg, bool isStart, bool isFinal) {
     }
   }
 
-  // TODO move to region's verifier
+  // TODO move to region's verifier maybe?
   if (m_succTrueID != -1 &&
       !m_ParentRegion->isBasicBlockPresent(m_succTrueID)) {
     msg = bbName + "'s true successor is not in the region!";
     return false;
   }
 
-  // TODO move to region's verifier
+  // TODO move to region's verifier maybe?
   if (m_succFalseID != -1 &&
       !m_ParentRegion->isBasicBlockPresent(m_succFalseID)) {
     msg = bbName + "'s false successor is not in the region!";

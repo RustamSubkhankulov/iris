@@ -3,7 +3,6 @@
 
 #include <sstream>
 #include <string_view>
-#include <utility>
 #include <vector>
 
 #include <exception.hpp>
@@ -170,7 +169,7 @@ public:
     }
 
     // Inputs have the same data types.
-    if (verifyInputsDTySame(msg)) {
+    if (!verifyInputsDTySame(msg)) {
       return false;
     }
 

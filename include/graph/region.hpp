@@ -71,6 +71,15 @@ public:
     return m_BasicBlocks;
   }
 
+  BasicBlock* getBasicBlockByID(bb_id_t id) {
+    for (const auto& bb : m_BasicBlocks) {
+      if (bb->getID() == id) {
+        return bb.get();
+      }
+    }
+    return nullptr;
+  }
+
   const BasicBlock* getBasicBlockByID(bb_id_t id) const {
     for (const auto& bb : m_BasicBlocks) {
       if (bb->getID() == id) {

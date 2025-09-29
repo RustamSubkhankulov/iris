@@ -92,8 +92,8 @@ public:
       throw IrisException("Current block is still building!");
     }
 
-    m_currBasicBlock = new BasicBlock;
-    m_currBasicBlock->setID(m_currRegion->obtainIDForBasicBlock());
+    auto id = m_currRegion->obtainIDForBasicBlock();
+    m_currBasicBlock = new BasicBlock(id);
   }
 
   void startNewBasicBlock(bb_id_t id) {
@@ -111,8 +111,7 @@ public:
       throw IrisException("ID is already used in the current region!");
     }
 
-    m_currBasicBlock = new BasicBlock;
-    m_currBasicBlock->setID(id);
+    m_currBasicBlock = new BasicBlock(id);
   }
 
   template <typename OpTy, typename... Args>

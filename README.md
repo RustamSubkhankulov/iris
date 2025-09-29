@@ -106,8 +106,9 @@ ctest
 
 Tests include:
 - Separate test suites for each dialect and its operations' verifiers and construction pre-conditions (``tests/dialects/``);
-- Basic block ``iris::BasicBlock`` verification tests;
-- Generic operation ``iris::Operation`` verification and API tests;
-- ``iris::Region``'s API tests;
-- ``iris::IRBuilder``'s API tests.
+- Tests of verifiers (ex-fails) and API tests for:
+    - Generic operation ``iris::Operation``;
+    - Basic block ``iris::BasicBlock`` (WIP);
+    - Region ``iris::Region`` (WIP);
+    - Builder ``iris::IRBuilder`` (WIP).
 

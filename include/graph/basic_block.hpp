@@ -21,13 +21,14 @@ private:
   detail::List m_PhiOps;
   detail::List m_RegOps;
 
-  Region* m_ParentRegion;
+  Region* m_ParentRegion = nullptr;
 
   // Identifier of the basic block
-  bb_id_t m_ID = 0U;
+  bb_id_t m_ID;
 
 public:
-  BasicBlock() = default;
+  explicit BasicBlock(bb_id_t id = 0U)
+    : m_ID(id) {}
 
   BasicBlock(const BasicBlock&) = delete;
   BasicBlock& operator=(const BasicBlock&) = delete;

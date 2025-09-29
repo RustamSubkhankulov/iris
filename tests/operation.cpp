@@ -88,7 +88,7 @@ TEST(GENERIC_OPERATION, DELETING_OPERATION) {
   EXPECT_TRUE(input.isEmpty());
 }
 
-TEST(GENERIC_OPERATION, EMPTY_INPUT) {
+TEST(GENERIC_OPERATION, EXFAIL_EMPTY_INPUT) {
   arith::ConstantOp cst(makeConstAttribute(1));
 
   arith::AddOp add1(nullptr, &cst);

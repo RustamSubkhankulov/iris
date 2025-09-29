@@ -6,21 +6,21 @@ Intermediate Representation Internal Structure - SSA-like IR developed as an edu
 IRIS is an example of IR that includes simple operations, separated into different _dialects_ - _arith_, _builtin_ and _ctrlflow_.
 
 Dialect _arith_:
-    - _ADD_, _SUB_, _MUL_, _DIV_ - basic arithmetical operations;
-    - _CONST_ - operation generating a constant SSA value;
-    - _CAST_ - operation, casting values between different data types;
-    - _CMP_ - comparison operation, which takes predicate (``EQ`` (equal), ``NEQ`` (not-equal), ``A`` (above), ``B`` (below), ``AE`` (above or equal), ``BE`` (below or equal)).
+- _ADD_, _SUB_, _MUL_, _DIV_ - basic arithmetical operations;
+- _CONST_ - operation generating a constant SSA value;
+- _CAST_ - operation, casting values between different data types;
+- _CMP_ - comparison operation, which takes predicate (``EQ`` (equal), ``NEQ`` (not-equal), ``A`` (above), ``B`` (below), ``AE`` (above or equal), ``BE`` (below or equal)).
 
 Dialect _builtin_:
-    - _PARAM_ - operation representing function's parameter;
-    - _COPY_ - operation that copies one SSA value into the new one.
+- _PARAM_ - operation representing function's parameter;
+- _COPY_ - operation that copies one SSA value into the new one.
     
 Dialect _ctrlflow_:
-    - _CALL_ - routine call operation;
-    - _JUMP_ - unconditional jump;
-    - _JUMPC_ - conditional jump;
-    - _RETURN_ - return from the routine operation;
-    - _PHI_ - phi-function.
+- _CALL_ - routine call operation;
+- _JUMP_ - unconditional jump;
+- _JUMPC_ - conditional jump;
+- _RETURN_ - return from the routine operation;
+- _PHI_ - phi-function.
 
 #### IRIS structure & examples
 
@@ -54,26 +54,26 @@ Operations that do not produce material result, for example, _ctrlflow::jump_, a
 Notice that different SSA values can have different literal preceeding its ID, but regardless of the literal **every value in the region must have unique ID**.
 
 Basic block properties:
-    - Basic block's ID is unique among the others in the same region;
-    - Each basic block has a list of **predecessors** (``<from bb3 bb1>``), or it is the starting basic block, in which case it is marked with ``<start>``;
-    - A basic block can have either zero (``<final>``), one (``<to bb2>``) or two **successors** (``<to T:bb2 / F:bb3>``);
-    - Basic block cannot have a **terminator** operation inside of it (it must be the last operation in the basic block);
-    - If operation have zero successors, its last operation must be _ctrlflow::return_ (TODO - add check);
-    - If operation have one successor, its last operation cannot be _ctrlflow::jumpc_;
-    - If operation have two successors, its last operation must be _ctrlflow::jumpc_.
+- Basic block's ID is unique among the others in the same region;
+- Each basic block has a list of **predecessors** (``<from bb3 bb1>``), or it is the starting basic block, in which case it is marked with ``<start>``;
+- A basic block can have either zero (``<final>``), one (``<to bb2>``) or two **successors** (``<to T:bb2 / F:bb3>``);
+- Basic block cannot have a **terminator** operation inside of it (it must be the last operation in the basic block);
+- If operation have zero successors, its last operation must be _ctrlflow::return_ (TODO - add check);
+- If operation have one successor, its last operation cannot be _ctrlflow::jumpc_;
+- If operation have two successors, its last operation must be _ctrlflow::jumpc_.
 
 Operations common properties:
-    - **Opcode** value, which is unique for every type of operation across all dialects;
-    - **SSA-value's ID**, which is unique across whole region;
-    - **Return data type**, which is ``DataType::NONE`` if operation does not produce any result;
-    - Optional list of **inputs**. Some operations can have variadic number of inputs (_ctrlflow::call_), other have fixed number of inputs (_arith::add_);
-    - List of **users**, who use this operation's result as their input/inputs;
+- **Opcode** value, which is unique for every type of operation across all dialects;
+- **SSA-value's ID**, which is unique across whole region;
+- **Return data type**, which is ``DataType::NONE`` if operation does not produce any result;
+- Optional list of **inputs**. Some operations can have variadic number of inputs (_ctrlflow::call_), other have fixed number of inputs (_arith::add_);
+- List of **users**, who use this operation's result as their input/inputs;
 
 #### Building examples
 
 Requirements:
-    - _CMake_ >= 3.21
-    - _C++_ compiler supporting **C++23** standard
+- _CMake_ >= 3.21
+- _C++_ compiler supporting **C++23** standard
 
 To build project, use following commads from the project's roor directory:
 ```text

@@ -221,7 +221,9 @@ private:
   }
 
   void removeUser(std::size_t pos) {
-    m_users.erase(std::next(m_users.begin(), pos));
+    using iterator_t = decltype(m_users)::iterator;
+    using diff_t = typename std::iterator_traits<iterator_t>::difference_type;
+    m_users.erase(std::next(m_users.begin(), static_cast<diff_t>(pos)));
   }
 
   void removeUser(const User& user) {

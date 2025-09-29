@@ -98,6 +98,7 @@ public:
       case Pred::B:    return "cmp.b";   break;
       case Pred::AE:   return "cmp.ae";  break;
       case Pred::BE:   return "cmp.be";  break;
+      default: std::unreachable();
     }
     std::unreachable();
     // clang-format on

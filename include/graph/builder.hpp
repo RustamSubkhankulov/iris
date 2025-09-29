@@ -1,43 +1,16 @@
 #ifndef INCLUDE_BUILDER
 #define INCLUDE_BUILDER
 
-#include "ops/types.hpp"
-#include <concepts>
 #include <memory>
 
 #include <graph/region.hpp>
 
 namespace iris {
 
-namespace detail {
-
-template <std::unsigned_integral IdType>
-class IDProvider final {
-private:
-  IdType m_curID = 0;
-
-public:
-  IdType obtainID() {
-    return m_curID++;
-  }
-
-  IdType getLastID() const {
-    return m_curID;
-  }
-
-  void reset() {
-    m_curID = 0;
-  }
-};
-} // namespace detail
-
 class IRBuilder {
 private:
   Region* m_currRegion = nullptr;
   BasicBlock* m_currBasicBlock = nullptr;
-
-  detail::IDProvider<bb_id_t> m_bbIDProvider;
-  detail::IDProvider<op_id_t> m_opIDProvider;
 
 public:
   IRBuilder() = default;
@@ -53,9 +26,6 @@ public:
 
     m_currRegion = nullptr;
     m_currBasicBlock = nullptr;
-
-    m_bbIDProvider.reset();
-    m_opIDProvider.reset();
   }
 
   bool isRegionBuilding() const {
@@ -66,14 +36,12 @@ public:
     return (m_currBasicBlock != nullptr);
   }
 
-  bool startNewRegion(std::string_view name) {
+  void startNewRegion(std::string_view name) {
     if (m_currRegion != nullptr) {
-      // Current region is still building
-      return false;
+      throw IrisException("Current region is still building!");
     }
 
     m_currRegion = new Region(name);
-    return true;
   }
 
   const Region& getCurRegion() const {
@@ -90,12 +58,11 @@ public:
     return *m_currRegion;
   }
 
-  bool dropRegion() {
+  void dropRegion() {
     if (m_currRegion == nullptr) {
-      return false;
+      throw IrisException("No region is building!");
     }
     delete m_currRegion;
-    return true;
   }
 
   std::unique_ptr<Region> obtainRegion() {
@@ -110,42 +77,47 @@ public:
   }
 
   bb_id_t obtainIdForBasicBlock() {
-    return m_bbIDProvider.obtainID();
+    if (m_currRegion == nullptr) {
+      throw IrisException("No region is building!");
+    }
+    return m_currRegion->obtainIDForBasicBlock();
   }
 
-  bool startNewBasicBlock() {
-    if (m_currBasicBlock != nullptr || m_currRegion == nullptr) {
-      // Current basic block is still building,
-      // or no region is building
-      return false;
+  void startNewBasicBlock() {
+    if (m_currRegion == nullptr) {
+      throw IrisException("No region is building!");
+    }
+
+    if (m_currBasicBlock != nullptr) {
+      throw IrisException("Current block is still building!");
     }
 
     m_currBasicBlock = new BasicBlock;
-    m_currBasicBlock->setID(m_bbIDProvider.obtainID());
-    return true;
+    m_currBasicBlock->setID(m_currRegion->obtainIDForBasicBlock());
   }
 
-  bool startNewBasicBlock(bb_id_t id) {
-    if (m_currBasicBlock != nullptr || m_currRegion == nullptr) {
-      // Current basic block is still building,
-      // or no region is building
-      return false;
+  void startNewBasicBlock(bb_id_t id) {
+    if (m_currRegion == nullptr) {
+      throw IrisException("No region is building!");
+    }
+
+    if (m_currBasicBlock != nullptr) {
+      throw IrisException("Current block is still building!");
     }
 
     if (m_currRegion->isBasicBlockPresent(id)) {
       // Attempt to create a basic block with an ID
       // that is already used in the region
-      return false;
+      throw IrisException("ID is already used in the current region!");
     }
 
     m_currBasicBlock = new BasicBlock;
     m_currBasicBlock->setID(id);
-    return true;
   }
 
   template <typename OpTy, typename... Args>
   Operation* createAndAddOp(Args... args) {
-    if (m_currBasicBlock == nullptr) {
+    if (m_currRegion == nullptr || m_currBasicBlock == nullptr) {
       // No basic block in building process
       return nullptr;
     }
@@ -153,7 +125,7 @@ public:
     auto op = std::make_unique<OpTy>(std::forward<Args>(args)...);
     auto* opPtr = op.get();
 
-    op->setID(m_opIDProvider.obtainID());
+    op->setID(m_currRegion->obtainIDForOperation());
     m_currBasicBlock->addOp(std::move(op));
     return opPtr;
   }
@@ -168,29 +140,28 @@ public:
 
   const BasicBlock& getCurBasicBlock() const {
     if (m_currBasicBlock == nullptr) {
-      throw IrisException("No basic block in process currently");
+      throw IrisException("No basic block in building!");
     }
     return *m_currBasicBlock;
   }
 
   BasicBlock& getCurBasicBlock() {
     if (m_currBasicBlock == nullptr) {
-      throw IrisException("No basic block in process currently");
+      throw IrisException("No basic block in building!");
     }
     return *m_currBasicBlock;
   }
 
-  bool dropBasicBlock() {
+  void dropBasicBlock() {
     if (m_currBasicBlock == nullptr) {
-      return false;
+      throw IrisException("No basic block is building!");
     }
     delete m_currBasicBlock;
-    return true;
   }
 
   BasicBlock& finalizeBasicBlock() {
     if (m_currBasicBlock == nullptr) {
-      throw IrisException("No basic block in process currently");
+      throw IrisException("No basic block in building!");
     }
 
     auto& bb = *m_currBasicBlock;

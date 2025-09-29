@@ -7,6 +7,15 @@
 
 namespace iris {
 
+void BasicBlock::addOp(std::unique_ptr<Operation>&& op) {
+  op->setParentBasicBlock(this);
+  if (op->isa(GlobalOpcodes::PHI)) {
+    m_PhiOps.append_back(op.release());
+  } else {
+    m_RegOps.append_back(op.release());
+  }
+}
+
 void BasicBlock::dump(std::ostream& os, const std::string& bbIdent) {
   os << bbIdent << "^bb" << m_ID << " ";
 

@@ -18,6 +18,9 @@ private:
   BasicBlock* m_startBB = nullptr;
   BasicBlock* m_finalBB = nullptr;
 
+  detail::IDProvider<bb_id_t> m_bbIDProvider;
+  detail::IDProvider<op_id_t> m_opIDProvider;
+
 public:
   Region(std::string_view name)
     : m_name(name) {
@@ -28,6 +31,14 @@ public:
 
   std::string_view getName() const {
     return m_name;
+  }
+
+  bb_id_t obtainIDForBasicBlock() {
+    return m_bbIDProvider.obtainID();
+  }
+
+  op_id_t obtainIDForOperation() {
+    return m_opIDProvider.obtainID();
   }
 
   void addBasicBlock(std::unique_ptr<BasicBlock>&& basicBlock) {

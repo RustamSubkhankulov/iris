@@ -51,7 +51,7 @@ Other SSA values are marked with literal ``v`` (``v3``, ``v4`` etc.).
 
 Operations that do not produce material result, for example, _ctrlflow::jump_, are marked with literal ``n`` for 'none', as its return value type is ``DataType::NONE``.
 
-Notice that different SSA values can have different literal preceeding its ID, but regardless of the literal **every value in the region must have unique ID**.
+Notice that different SSA values can have different literal preceeding its ID, but regardless of the literal **every value in the region has unique ID**.
 
 Basic block properties:
 - Basic block's ID is unique among the others in the same region;

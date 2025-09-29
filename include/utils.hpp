@@ -2,6 +2,7 @@
 #define INCLUDE_UTILS_HPP
 
 #include <cassert>
+#include <concepts>
 #include <utility>
 
 namespace iris {
@@ -250,6 +251,25 @@ public:
   static Derived& get() {
     static Derived m_instance;
     return m_instance;
+  }
+};
+
+template <std::unsigned_integral IdType>
+class IDProvider final {
+private:
+  IdType m_curID = 0;
+
+public:
+  IdType obtainID() {
+    return m_curID++;
+  }
+
+  IdType getLastID() const {
+    return m_curID;
+  }
+
+  void reset() {
+    m_curID = 0;
   }
 };
 

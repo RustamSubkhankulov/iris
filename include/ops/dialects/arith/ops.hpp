@@ -159,12 +159,12 @@ public:
 
 class ConstantOp final : public ArithOp {
 private:
-  ConstAttribute m_attr;
+  std::unique_ptr<ConstAttribute> m_attr;
 
 public:
-  ConstantOp(ConstAttribute attr)
-    : ArithOp(GlobalOpcodes::CONST, attr.getDataType())
-    , m_attr(attr) {}
+  ConstantOp(std::unique_ptr<ConstAttribute>&& attr)
+    : ArithOp(GlobalOpcodes::CONST, attr->getDataType())
+    , m_attr(std::move(attr)) {}
 
   std::string_view getMnemonic() const override {
     return "const";
@@ -173,6 +173,12 @@ public:
 protected:
   void printID(std::ostream& os) const override {
     os << "c" << m_ID;
+  }
+
+  void printSpecifics(std::ostream& os) const override {
+    os << "(";
+    m_attr->print(os);
+    os << ") ";
   }
 };
 

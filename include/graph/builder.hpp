@@ -90,8 +90,16 @@ public:
     return *m_currRegion;
   }
 
-  std::unique_ptr<Region> obtainRegion() {
+  bool dropRegion() {
     if (m_currRegion == nullptr) {
+      return false;
+    }
+    delete m_currRegion;
+    return true;
+  }
+
+  std::unique_ptr<Region> obtainRegion() {
+    if (m_currRegion == nullptr && m_currBasicBlock != nullptr) {
       return nullptr;
     }
 
@@ -170,6 +178,14 @@ public:
       throw IrisException("No basic block in process currently");
     }
     return *m_currBasicBlock;
+  }
+
+  bool dropBasicBlock() {
+    if (m_currBasicBlock == nullptr) {
+      return false;
+    }
+    delete m_currBasicBlock;
+    return true;
   }
 
   BasicBlock& finalizeBasicBlock() {

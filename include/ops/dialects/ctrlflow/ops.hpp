@@ -124,9 +124,8 @@ private:
   std::string m_funcName;
 
 public:
-  template <typename... Args>
-  CallOp(std::string_view funcName, DataType dataType, Args&&... args)
-    : CtrFlowOp(GlobalOpcodes::CALL, dataType, args...)
+  CallOp(std::string_view funcName, DataType dataType, InputList il = {})
+    : CtrFlowOp(GlobalOpcodes::CALL, dataType, il)
     , m_funcName(funcName) {
 
     if (m_funcName.empty()) {

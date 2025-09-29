@@ -3,6 +3,7 @@
 
 #include <concepts>
 #include <cstdint>
+#include <ostream>
 
 #include <data_types.hpp>
 
@@ -21,6 +22,8 @@ public:
   constexpr DataType getDataType() const {
     return m_dataType;
   }
+
+  virtual void print(std::ostream& os) const = 0;
 };
 
 namespace detail {
@@ -39,6 +42,10 @@ public:
   constexpr F getData() const {
     return m_data;
   }
+
+  void print(std::ostream& os) const override {
+    os << m_data;
+  }
 };
 
 template <std::signed_integral S, DataType DTy>
@@ -55,6 +62,10 @@ public:
   constexpr S getData() const {
     return m_data;
   }
+
+  void print(std::ostream& os) const override {
+    os << m_data;
+  }
 };
 
 template <std::unsigned_integral U, DataType DTy>
@@ -70,6 +81,10 @@ public:
 
   constexpr U getData() const {
     return m_data;
+  }
+
+  void print(std::ostream& os) const override {
+    os << m_data;
   }
 };
 
@@ -109,50 +124,56 @@ public:
   constexpr bool getData() const {
     return m_data;
   }
+
+  void print(std::ostream& os) const override {
+    auto flags = os.flags();
+    os << std::boolalpha << m_data;
+    os.flags(flags);
+  }
 };
 
-constexpr Float32ConstAttribute makeConstAttribute(float value) {
-  return Float32ConstAttribute{value};
+inline std::unique_ptr<ConstAttribute> makeConstAttribute(float value) {
+  return std::make_unique<Float32ConstAttribute>(value);
 }
 
-constexpr Float64ConstAttribute makeConstAttribute(double value) {
-  return Float64ConstAttribute{value};
+inline std::unique_ptr<ConstAttribute> makeConstAttribute(double value) {
+  return std::make_unique<Float64ConstAttribute>(value);
 }
 
-constexpr SInteger8ConstAttribute makeConstAttribute(int8_t value) {
-  return SInteger8ConstAttribute{value};
+inline std::unique_ptr<ConstAttribute> makeConstAttribute(int8_t value) {
+  return std::make_unique<SInteger8ConstAttribute>(value);
 }
 
-constexpr SInteger16ConstAttribute makeConstAttribute(int16_t value) {
-  return SInteger16ConstAttribute{value};
+inline std::unique_ptr<ConstAttribute> makeConstAttribute(int16_t value) {
+  return std::make_unique<SInteger16ConstAttribute>(value);
 }
 
-constexpr SInteger32ConstAttribute makeConstAttribute(int32_t value) {
-  return SInteger32ConstAttribute{value};
+inline std::unique_ptr<ConstAttribute> makeConstAttribute(int32_t value) {
+  return std::make_unique<SInteger32ConstAttribute>(value);
 }
 
-constexpr SInteger64ConstAttribute makeConstAttribute(int64_t value) {
-  return SInteger64ConstAttribute{value};
+inline std::unique_ptr<ConstAttribute> makeConstAttribute(int64_t value) {
+  return std::make_unique<SInteger64ConstAttribute>(value);
 }
 
-constexpr UInteger8ConstAttribute makeConstAttribute(uint8_t value) {
-  return UInteger8ConstAttribute{value};
+inline std::unique_ptr<ConstAttribute> makeConstAttribute(uint8_t value) {
+  return std::make_unique<UInteger8ConstAttribute>(value);
 }
 
-constexpr UInteger16ConstAttribute makeConstAttribute(uint16_t value) {
-  return UInteger16ConstAttribute{value};
+inline std::unique_ptr<ConstAttribute> makeConstAttribute(uint16_t value) {
+  return std::make_unique<UInteger16ConstAttribute>(value);
 }
 
-constexpr UInteger32ConstAttribute makeConstAttribute(uint32_t value) {
-  return UInteger32ConstAttribute{value};
+inline std::unique_ptr<ConstAttribute> makeConstAttribute(uint32_t value) {
+  return std::make_unique<UInteger32ConstAttribute>(value);
 }
 
-constexpr UInteger64ConstAttribute makeConstAttribute(uint64_t value) {
-  return UInteger64ConstAttribute{value};
+inline std::unique_ptr<ConstAttribute> makeConstAttribute(uint64_t value) {
+  return std::make_unique<UInteger64ConstAttribute>(value);
 }
 
-constexpr BoolConstAttribute makeConstAttribute(bool value) {
-  return BoolConstAttribute{value};
+inline std::unique_ptr<ConstAttribute> makeConstAttribute(bool value) {
+  return std::make_unique<BoolConstAttribute>(value);
 }
 
 } // namespace iris

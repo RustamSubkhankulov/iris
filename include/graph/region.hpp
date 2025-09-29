@@ -26,6 +26,10 @@ public:
     }
   }
 
+  std::string_view getName() const {
+    return m_name;
+  }
+
   void addBasicBlock(std::unique_ptr<BasicBlock>&& basicBlock) {
     basicBlock->setParentRegion(this);
     m_BasicBlocks.push_back(std::move(basicBlock));

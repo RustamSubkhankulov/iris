@@ -1,3 +1,6 @@
+#include "attributes.hpp"
+#include "ops/dialects/arith/ops.hpp"
+#include "ops/dialects/ctrlflow/ops.hpp"
 #include <gtest/gtest.h>
 
 #include <iris.hpp>
@@ -171,4 +174,135 @@ TEST(BASIC_BLOCK, EXFAIL_EMPTY_BB) {
 
   EXPECT_FALSE(vres);
   EXPECT_TRUE(msg.contains("is empty"));
+}
+
+TEST(BASIC_BLOCK, EXFAIL_TWO_SUCC_IDENTIVAL) {
+  Region region("foo");
+
+  region.addBasicBlock(std::make_unique<BasicBlock>(1));
+  auto* bb1 = region.getBasicBlockByID(1);
+  region.addBasicBlock(std::make_unique<BasicBlock>(2));
+  auto* bb2 = region.getBasicBlockByID(2);
+
+  bb1->setSucc(*bb2, true);
+  bb1->setSucc(*bb2, false);
+  bb1->addOp(std::make_unique<ctrlflow::JumpOp>(2));
+
+  std::string msg;
+  bool vres = bb1->verify(msg, true);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("has two identical successors"));
+}
+
+TEST(BASIC_BLOCK, EXFAIL_TWO_SUCC_NO_JUMPC) {
+  Region region("foo");
+
+  region.addBasicBlock(std::make_unique<BasicBlock>(1));
+  auto* bb1 = region.getBasicBlockByID(1);
+  region.addBasicBlock(std::make_unique<BasicBlock>(2));
+  auto* bb2 = region.getBasicBlockByID(2);
+  region.addBasicBlock(std::make_unique<BasicBlock>(3));
+  auto* bb3 = region.getBasicBlockByID(3);
+
+  bb1->setSucc(*bb2, true);
+  bb1->setSucc(*bb3, false);
+  bb1->addOp(std::make_unique<ctrlflow::JumpOp>(2));
+
+  std::string msg;
+  bool vres = bb1->verify(msg, true);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains(
+    "has two successors, but conditional jump at the end is missing"));
+}
+
+TEST(BASIC_BLOCK, EXFAIL_ONE_SUCC_WITH_JUMPC) {
+  Region region("foo");
+
+  region.addBasicBlock(std::make_unique<BasicBlock>(1));
+  auto* bb1 = region.getBasicBlockByID(1);
+  region.addBasicBlock(std::make_unique<BasicBlock>(2));
+  auto* bb2 = region.getBasicBlockByID(2);
+
+  bb1->setSucc(*bb2);
+
+  auto val = std::make_unique<arith::ConstantOp>(makeConstAttribute(true));
+  auto jmp = std::make_unique<ctrlflow::JumpcOp>(2, val.get());
+
+  bb1->addOp(std::move(val));
+  bb1->addOp(std::move(jmp));
+
+  std::string msg;
+  bool vres = bb1->verify(msg, true);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(
+    msg.contains("has single successor, but has conditional jump at the end"));
+}
+
+TEST(BASIC_BLOCK, EXFAIL_JUMP_INVALID_TARGET) {
+  Region region("foo");
+
+  region.addBasicBlock(std::make_unique<BasicBlock>(1));
+  auto* bb1 = region.getBasicBlockByID(1);
+  region.addBasicBlock(std::make_unique<BasicBlock>(2));
+  auto* bb2 = region.getBasicBlockByID(2);
+
+  bb1->setSucc(*bb2);
+  bb1->addOp(std::make_unique<ctrlflow::JumpOp>(3));
+
+  std::string msg;
+  bool vres = bb1->verify(msg, true);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("targets basic block which is not in the region"));
+}
+
+TEST(BASIC_BLOCK, EXFAIL_JUMPC_INVALID_TARGET) {
+  Region region("foo");
+
+  region.addBasicBlock(std::make_unique<BasicBlock>(1));
+  auto* bb1 = region.getBasicBlockByID(1);
+  region.addBasicBlock(std::make_unique<BasicBlock>(2));
+  auto* bb2 = region.getBasicBlockByID(2);
+  region.addBasicBlock(std::make_unique<BasicBlock>(3));
+  auto* bb3 = region.getBasicBlockByID(3);
+
+  bb1->setSucc(*bb2, true);
+  bb1->setSucc(*bb3, false);
+
+  auto val = std::make_unique<arith::ConstantOp>(makeConstAttribute(true));
+  auto jmp = std::make_unique<ctrlflow::JumpcOp>(4, val.get());
+
+  bb1->addOp(std::move(val));
+  bb1->addOp(std::move(jmp));
+
+  std::string msg;
+  bool vres = bb1->verify(msg, true);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("targets basic block which is not in the region"));
+}
+
+TEST(BASIC_BLOCK, EXFAIL_TERMINATOR_INSIDE) {
+  Region region("foo");
+
+  region.addBasicBlock(std::make_unique<BasicBlock>(1));
+  auto* bb1 = region.getBasicBlockByID(1);
+
+  auto vl1 = std::make_unique<arith::ConstantOp>(makeConstAttribute(true));
+  auto jmp = std::make_unique<ctrlflow::JumpcOp>(2, vl1.get());
+  auto vl2 = std::make_unique<arith::ConstantOp>(makeConstAttribute(true));
+
+  bb1->addOp(std::move(vl1));
+  bb1->addOp(std::move(jmp));
+  bb1->addOp(std::move(vl2));
+
+  std::string msg;
+  bool vres = bb1->verify(msg, true, true);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(
+    msg.contains("terminator operation is not the last one in the block"));
 }

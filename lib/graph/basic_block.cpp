@@ -3,6 +3,7 @@
 #include <graph/basic_block.hpp>
 #include <graph/region.hpp>
 
+#include <ops/dialects/ctrlflow/ops.hpp>
 #include <ops/dialects/opcodes.hpp>
 
 namespace iris {
@@ -110,6 +111,11 @@ bool BasicBlock::verify(std::string& msg, bool isStart, bool isFinal) {
   bool hasTwoSuccs = (m_succFalseID != -1);
   bool lastOpIsCondJump = lastOp.isa(GlobalOpcodes::JUMPC);
 
+  if (hasTwoSuccs && m_succTrueID == m_succFalseID) {
+    msg = bbName + " has two identical successors!";
+    return false;
+  }
+
   if (hasTwoSuccs && !lastOpIsCondJump) {
     msg = bbName +
           " has two successors, but conditional jump at the end is missing!";
@@ -122,6 +128,25 @@ bool BasicBlock::verify(std::string& msg, bool isStart, bool isFinal) {
     return false;
   }
 
+  // TODO: move to op verifier maybe?
+  if (lastOp.isa(GlobalOpcodes::JUMP)) {
+    const ctrlflow::JumpOp& jumpOp =
+      static_cast<const ctrlflow::JumpOp&>(lastOp);
+    if (!m_ParentRegion->isBasicBlockPresent(jumpOp.getTargetBbID())) {
+      msg = bbName + " - ctrlflow.jump operation targets basic block which is "
+                     "not in the region!";
+      return false;
+    }
+  } else if (lastOp.isa(GlobalOpcodes::JUMPC)) {
+    const ctrlflow::JumpcOp& jumpcOp =
+      static_cast<const ctrlflow::JumpcOp&>(lastOp);
+    if (!m_ParentRegion->isBasicBlockPresent(jumpcOp.getTargetBbID())) {
+      msg = bbName + " - ctrlflow.jumpc operation targets basic block which is "
+                     "not in the region!";
+      return false;
+    }
+  }
+
   if (!verifyOps(msg, bbName)) {
     return false;
   }
@@ -130,9 +155,7 @@ bool BasicBlock::verify(std::string& msg, bool isStart, bool isFinal) {
 }
 
 bool BasicBlock::verifyOps(std::string& msg, const std::string& bbName) {
-  std::set<op_id_t> opIDs;
   auto opIt = m_RegOps.begin();
-
   for (std::size_t opIdx = 0; opIdx < m_RegOps.size() - 1; ++opIdx) {
     const Operation& op = static_cast<const Operation&>(*opIt);
     if (op.isTerminator()) {
@@ -140,9 +163,11 @@ bool BasicBlock::verifyOps(std::string& msg, const std::string& bbName) {
         bbName + " - terminator operation is not the last one in the block!";
       return false;
     }
+
     if (!op.verify(msg)) {
       return false;
     }
+    ++opIt;
   }
 
   return true;

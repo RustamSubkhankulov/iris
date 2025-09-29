@@ -18,8 +18,8 @@ private:
   int64_t m_succTrueID = -1;
   int64_t m_succFalseID = -1;
 
-  List m_PhiOps;
-  List m_RegOps;
+  detail::List m_PhiOps;
+  detail::List m_RegOps;
 
   Region* m_ParentRegion;
 

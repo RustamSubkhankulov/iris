@@ -21,7 +21,7 @@ class User;
 class BasicBlock;
 
 // Operation base class
-class Operation : private ListNode {
+class Operation : private detail::ListNode {
 private:
   // Operation code - unique for each operation
   // (type of operation, not an instance)

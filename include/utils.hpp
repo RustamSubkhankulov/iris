@@ -5,6 +5,7 @@
 #include <utility>
 
 namespace iris {
+namespace detail {
 
 class ListNode {
 private:
@@ -252,6 +253,7 @@ public:
   }
 };
 
+} // namespace detail
 } // namespace iris
 
 #endif // INCLUDE_UTILS_HPP

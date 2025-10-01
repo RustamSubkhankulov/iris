@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 
 project(
         iris
-        DESCRIPTION "Intermediate Representation Internal Structure "
+        DESCRIPTION "Intermediate Representation Internal Structure"
         LANGUAGES CXX
         )
 

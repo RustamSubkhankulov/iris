@@ -22,9 +22,9 @@ public:
   }
 };
 
-class ParamOp : public BuiltinOp {
+class ParamOp final : public BuiltinOp {
 public:
-  ParamOp(DataType dataType)
+  explicit ParamOp(DataType dataType)
     : BuiltinOp(GlobalOpcodes::PARAM, dataType) {}
 
   std::string_view getMnemonic() const override {
@@ -37,9 +37,9 @@ protected:
   }
 };
 
-class CopyOp : public BuiltinOp {
+class CopyOp final : public BuiltinOp {
 public:
-  CopyOp(Input input)
+  explicit CopyOp(Input input)
     : BuiltinOp(GlobalOpcodes::COPY, input.getDataType(), {input}) {}
 
   std::string_view getMnemonic() const override {

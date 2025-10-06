@@ -29,9 +29,12 @@ public:
   using Operation::verify;
 };
 
-class ReturnOp : public CtrFlowOp {
+class ReturnOp final : public CtrFlowOp {
 public:
-  ReturnOp(Input input)
+  ReturnOp()
+    : CtrFlowOp(GlobalOpcodes::RETURN, DataType::NONE) {}
+
+  explicit ReturnOp(Input input)
     : CtrFlowOp(GlobalOpcodes::RETURN, DataType::NONE, {input}) {}
 
   std::string_view getMnemonic() const override {
@@ -47,9 +50,9 @@ public:
   }
 };
 
-class JumpOp : public CtrFlowOp {
+class JumpOp final : public CtrFlowOp {
 public:
-  JumpOp(bb_id_t targetBbID)
+  explicit JumpOp(bb_id_t targetBbID)
     : CtrFlowOp(GlobalOpcodes::JUMP, DataType::NONE)
     , m_targetBbID(targetBbID) {}
 
@@ -73,7 +76,7 @@ private:
   bb_id_t m_targetBbID;
 };
 
-class JumpcOp : public CtrFlowOp {
+class JumpcOp final : public CtrFlowOp {
 public:
   JumpcOp(bb_id_t targetBbID, Input input)
     : CtrFlowOp(GlobalOpcodes::JUMPC, DataType::NONE, {input})
@@ -117,7 +120,7 @@ private:
   bb_id_t m_targetBbID;
 };
 
-class CallOp : public CtrFlowOp {
+class CallOp final : public CtrFlowOp {
 public:
   CallOp(std::string_view funcName, DataType dataType, InputList il = {})
     : CtrFlowOp(GlobalOpcodes::CALL, dataType, il)
@@ -149,7 +152,7 @@ private:
   std::string m_funcName;
 };
 
-class PhiOp : public CtrFlowOp {
+class PhiOp final : public CtrFlowOp {
 public:
   PhiOp(Input inputX, Input inputY)
     : CtrFlowOp(GlobalOpcodes::PHI, inputX.getDataType(), {inputX, inputY}) {}

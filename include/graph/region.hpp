@@ -13,7 +13,7 @@ namespace iris {
 
 class Region final {
 public:
-  Region(std::string_view name)
+  explicit Region(std::string_view name)
     : m_name(name) {
     if (m_name.empty()) {
       throw IrisException("Region is assigned with an empty name!");

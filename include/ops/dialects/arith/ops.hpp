@@ -72,7 +72,7 @@ private:
 // Inputs does not have to be the same data type as operation's data type
 using HeterogenArithOp = BinaryArithOp;
 
-class CmpOp : public HeterogenArithOp {
+class CmpOp final : public HeterogenArithOp {
 public:
   enum class Pred : uint8_t {
     EQ,  // Equal
@@ -158,7 +158,7 @@ public:
 
 class ConstantOp final : public ArithOp {
 public:
-  ConstantOp(std::unique_ptr<ConstAttribute>&& attr)
+  explicit ConstantOp(std::unique_ptr<ConstAttribute>&& attr)
     : ArithOp(GlobalOpcodes::CONST, attr->getDataType())
     , m_attr(std::move(attr)) {}
 
@@ -181,7 +181,7 @@ private:
   std::unique_ptr<ConstAttribute> m_attr;
 };
 
-class CastOp : public ArithOp {
+class CastOp final : public ArithOp {
 public:
   CastOp(DataType dataType, Input input)
     : ArithOp(GlobalOpcodes::CAST, dataType, {input}) {}

@@ -19,7 +19,7 @@ int main() {
   builder.startNewBasicBlock();
   auto v3 = builder.createAndAddOp<arith::CmpOp>(a0, c2, arith::CmpOp::Pred::B);
   auto done = builder.obtainIdForBasicBlock();
-  /* n4 */ builder.createAndAddOp<ctrlflow::JumpcOp>(done, v3);
+  /* n4 */ builder.createAndAddOp<ctrlflow::JumpcOp>(v3);
   auto& bb1 = builder.finalizeBasicBlock();
   bb0.linkSucc(bb1);
 

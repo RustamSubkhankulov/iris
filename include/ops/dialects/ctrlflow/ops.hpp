@@ -44,17 +44,12 @@ public:
   bool isTerminator() const override {
     return true;
   }
-
-  const Input& getInput() const {
-    return Operation::getInput(0);
-  }
 };
 
 class JumpOp final : public CtrFlowOp {
 public:
-  explicit JumpOp(bb_id_t targetBbID)
-    : CtrFlowOp(GlobalOpcodes::JUMP, DataType::NONE)
-    , m_targetBbID(targetBbID) {}
+  JumpOp()
+    : CtrFlowOp(GlobalOpcodes::JUMP, DataType::NONE) {}
 
   std::string_view getMnemonic() const override {
     return "jmp";
@@ -63,24 +58,12 @@ public:
   bool isTerminator() const override {
     return true;
   }
-
-  bb_id_t getTargetBbID() const {
-    return m_targetBbID;
-  }
-
-  void printSpecifics(std::ostream& os) const override {
-    os << "^bb" << m_targetBbID << " ";
-  }
-
-private:
-  bb_id_t m_targetBbID;
 };
 
 class JumpcOp final : public CtrFlowOp {
 public:
-  JumpcOp(bb_id_t targetBbID, Input input)
-    : CtrFlowOp(GlobalOpcodes::JUMPC, DataType::NONE, {input})
-    , m_targetBbID(targetBbID) {}
+  explicit JumpcOp(Input input)
+    : CtrFlowOp(GlobalOpcodes::JUMPC, DataType::NONE, {input}) {}
 
   std::string_view getMnemonic() const override {
     return "jmpc";
@@ -88,14 +71,6 @@ public:
 
   bool isTerminator() const override {
     return true;
-  }
-
-  bb_id_t getTargetBbID() const {
-    return m_targetBbID;
-  }
-
-  void printSpecifics(std::ostream& os) const override {
-    os << "^bb" << m_targetBbID << " ";
   }
 
   bool verify(std::string& msg) const override {
@@ -113,11 +88,8 @@ public:
   }
 
   const Input& getInput() const {
-    return Operation::getInput(1);
+    return Operation::getInput(0);
   }
-
-private:
-  bb_id_t m_targetBbID;
 };
 
 class CallOp final : public CtrFlowOp {
@@ -188,24 +160,20 @@ public:
     return true;
   }
 
-  const Input& getInputX() const {
-    return getInput(0);
-  }
-
-  const Input& getInputY() const {
-    return getInput(1);
-  }
-
 private:
   bool verifyInputsDTySame(std::string& msg) const {
-    auto inputXDTy = getInputX().getDataType();
-    auto inputYDTy = getInputY().getDataType();
-    if (inputXDTy != inputYDTy) {
-      std::stringstream ss;
-      ss << "Operation " << getMnemonic()
-         << ": inputs must have same data types.";
-      msg = ss.str();
-      return false;
+    auto dataTy = getInput(0).getDataType();
+    auto inputsNum = getInputsNum();
+
+    for (std::size_t inIdx = 0U; inIdx < inputsNum; ++inIdx) {
+      auto otherDataTy = getInput(inIdx).getDataType();
+      if (dataTy != otherDataTy) {
+        std::stringstream ss;
+        ss << "Operation " << getMnemonic()
+           << ": inputs must have same data types.";
+        msg = ss.str();
+        return false;
+      }
     }
     return true;
   }

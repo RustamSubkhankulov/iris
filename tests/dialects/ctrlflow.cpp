@@ -4,10 +4,9 @@
 using namespace iris;
 
 TEST(CTRLFLOW, JUMPC_EXFAIL_NON_BOOLEAN_INPUT) {
-  bb_id_t targetID = 0;
   arith::ConstantOp cstF(makeConstAttribute(1.));
 
-  ctrlflow::JumpcOp jumpc(targetID, &cstF);
+  ctrlflow::JumpcOp jumpc(&cstF);
 
   std::string msg;
   bool vres = jumpc.verify(msg);

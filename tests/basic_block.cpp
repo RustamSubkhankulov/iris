@@ -186,7 +186,7 @@ TEST(BASIC_BLOCK, EXFAIL_TWO_SUCC_IDENTIVAL) {
 
   bb1->linkSucc(*bb2, true);
   bb1->linkSucc(*bb2, false);
-  bb1->addOp(std::make_unique<ctrlflow::JumpOp>(2));
+  bb1->addOp(std::make_unique<ctrlflow::JumpOp>());
 
   std::string msg;
   bool vres = bb1->verify(msg, true);
@@ -207,7 +207,7 @@ TEST(BASIC_BLOCK, EXFAIL_TWO_SUCC_NO_JUMPC) {
 
   bb1->linkSucc(*bb2, true);
   bb1->linkSucc(*bb3, false);
-  bb1->addOp(std::make_unique<ctrlflow::JumpOp>(2));
+  bb1->addOp(std::make_unique<ctrlflow::JumpOp>());
 
   std::string msg;
   bool vres = bb1->verify(msg, true);
@@ -228,7 +228,7 @@ TEST(BASIC_BLOCK, EXFAIL_ONE_SUCC_WITH_JUMPC) {
   bb1->linkSucc(*bb2);
 
   auto val = std::make_unique<arith::ConstantOp>(makeConstAttribute(true));
-  auto jmp = std::make_unique<ctrlflow::JumpcOp>(2, val.get());
+  auto jmp = std::make_unique<ctrlflow::JumpcOp>(val.get());
 
   bb1->addOp(std::move(val));
   bb1->addOp(std::move(jmp));
@@ -241,50 +241,6 @@ TEST(BASIC_BLOCK, EXFAIL_ONE_SUCC_WITH_JUMPC) {
     msg.contains("has single successor, but has conditional jump at the end"));
 }
 
-TEST(BASIC_BLOCK, EXFAIL_JUMP_INVALID_TARGET) {
-  Region region("foo");
-
-  region.addBasicBlock(std::make_unique<BasicBlock>(1));
-  auto* bb1 = region.getBasicBlockByID(1);
-  region.addBasicBlock(std::make_unique<BasicBlock>(2));
-  auto* bb2 = region.getBasicBlockByID(2);
-
-  bb1->linkSucc(*bb2);
-  bb1->addOp(std::make_unique<ctrlflow::JumpOp>(3));
-
-  std::string msg;
-  bool vres = bb1->verify(msg, true);
-
-  EXPECT_FALSE(vres);
-  EXPECT_TRUE(msg.contains("targets basic block which is not in the region"));
-}
-
-TEST(BASIC_BLOCK, EXFAIL_JUMPC_INVALID_TARGET) {
-  Region region("foo");
-
-  region.addBasicBlock(std::make_unique<BasicBlock>(1));
-  auto* bb1 = region.getBasicBlockByID(1);
-  region.addBasicBlock(std::make_unique<BasicBlock>(2));
-  auto* bb2 = region.getBasicBlockByID(2);
-  region.addBasicBlock(std::make_unique<BasicBlock>(3));
-  auto* bb3 = region.getBasicBlockByID(3);
-
-  bb1->linkSucc(*bb2, true);
-  bb1->linkSucc(*bb3, false);
-
-  auto val = std::make_unique<arith::ConstantOp>(makeConstAttribute(true));
-  auto jmp = std::make_unique<ctrlflow::JumpcOp>(4, val.get());
-
-  bb1->addOp(std::move(val));
-  bb1->addOp(std::move(jmp));
-
-  std::string msg;
-  bool vres = bb1->verify(msg, true);
-
-  EXPECT_FALSE(vres);
-  EXPECT_TRUE(msg.contains("targets basic block which is not in the region"));
-}
-
 TEST(BASIC_BLOCK, EXFAIL_TERMINATOR_INSIDE) {
   Region region("foo");
 
@@ -292,7 +248,7 @@ TEST(BASIC_BLOCK, EXFAIL_TERMINATOR_INSIDE) {
   auto* bb1 = region.getBasicBlockByID(1);
 
   auto vl1 = std::make_unique<arith::ConstantOp>(makeConstAttribute(true));
-  auto jmp = std::make_unique<ctrlflow::JumpcOp>(2, vl1.get());
+  auto jmp = std::make_unique<ctrlflow::JumpcOp>(vl1.get());
   auto vl2 = std::make_unique<arith::ConstantOp>(makeConstAttribute(true));
 
   bb1->addOp(std::move(vl1));

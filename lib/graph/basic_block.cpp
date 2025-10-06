@@ -128,25 +128,6 @@ bool BasicBlock::verify(std::string& msg, bool isStart, bool isFinal) {
     return false;
   }
 
-  // TODO: move to op verifier maybe?
-  if (lastOp.isa(GlobalOpcodes::JUMP)) {
-    const ctrlflow::JumpOp& jumpOp =
-      static_cast<const ctrlflow::JumpOp&>(lastOp);
-    if (!m_ParentRegion->isBasicBlockPresent(jumpOp.getTargetBbID())) {
-      msg = bbName + " - ctrlflow.jump operation targets basic block which is "
-                     "not in the region!";
-      return false;
-    }
-  } else if (lastOp.isa(GlobalOpcodes::JUMPC)) {
-    const ctrlflow::JumpcOp& jumpcOp =
-      static_cast<const ctrlflow::JumpcOp&>(lastOp);
-    if (!m_ParentRegion->isBasicBlockPresent(jumpcOp.getTargetBbID())) {
-      msg = bbName + " - ctrlflow.jumpc operation targets basic block which is "
-                     "not in the region!";
-      return false;
-    }
-  }
-
   if (!verifyOps(msg, bbName)) {
     return false;
   }

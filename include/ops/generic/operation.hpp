@@ -180,7 +180,11 @@ private:
 protected:
   // Resulting data type of the operation
   // DataType::NONE if operation has no result
-  const DataType m_dataType = DataType::NONE;
+  DataType m_dataType = DataType::NONE;
+
+  void setDataType(DataType dataType) {
+    m_dataType = dataType;
+  }
 
 private:
   // Vector of operation's inputs

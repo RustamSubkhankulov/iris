@@ -27,6 +27,17 @@ TEST(CTRLFLOW, CALL_EXPECTED_EXCEPTION_INVALID_FUNC_NAME) {
   FAIL();
 }
 
+TEST(CTRLFLOW, PHI_EXPECTED_EXCEPTION_EMPTY_INPUTS) {
+  try {
+    ctrlflow::PhiOp phi(InputList{});
+  } catch (const IrisException& exc) {
+    std::string msg = exc.what();
+    EXPECT_TRUE(!msg.compare("Operation must have at least one input!"));
+    return;
+  }
+  FAIL();
+}
+
 TEST(CTRLFLOW, PHI_EXFAIL_NON_HOMOGEN_INPUTS) {
   arith::ConstantOp cstI(makeConstAttribute(1));
   arith::ConstantOp cstF(makeConstAttribute(1.));

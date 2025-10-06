@@ -157,6 +157,16 @@ public:
   PhiOp(Input inputX, Input inputY)
     : CtrFlowOp(GlobalOpcodes::PHI, inputX.getDataType(), {inputX, inputY}) {}
 
+  explicit PhiOp(InputList il)
+    : CtrFlowOp(GlobalOpcodes::PHI, DataType::NONE, il) {
+
+    if (getInputsNum() == 0U) {
+      throw IrisException("Operation must have at least one input!");
+    }
+
+    setDataType(getInput(0U).getDataType());
+  }
+
   std::string_view getMnemonic() const override {
     return "phi";
   }

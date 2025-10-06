@@ -12,15 +12,6 @@
 namespace iris {
 
 class Region final {
-private:
-  std::string m_name;
-  std::list<std::unique_ptr<BasicBlock>> m_BasicBlocks;
-  BasicBlock* m_startBB = nullptr;
-  BasicBlock* m_finalBB = nullptr;
-
-  detail::IDProvider<bb_id_t> m_bbIDProvider;
-  detail::IDProvider<op_id_t> m_opIDProvider;
-
 public:
   Region(std::string_view name)
     : m_name(name) {
@@ -116,6 +107,15 @@ public:
     }
     return true;
   }
+
+private:
+  std::string m_name;
+  std::list<std::unique_ptr<BasicBlock>> m_BasicBlocks;
+  BasicBlock* m_startBB = nullptr;
+  BasicBlock* m_finalBB = nullptr;
+
+  detail::IDProvider<bb_id_t> m_bbIDProvider;
+  detail::IDProvider<op_id_t> m_opIDProvider;
 };
 
 } // namespace iris

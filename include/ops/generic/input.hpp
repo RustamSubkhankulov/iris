@@ -12,9 +12,6 @@ namespace iris {
 class Operation;
 
 class Input {
-private:
-  Operation* m_op;
-
 public:
   Input(Operation* op = nullptr)
     : m_op(op) {}
@@ -53,6 +50,9 @@ public:
   }
 
   DataType getDataType() const;
+
+private:
+  Operation* m_op;
 };
 
 using InputList = std::initializer_list<Input>;

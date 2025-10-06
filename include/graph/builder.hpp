@@ -8,10 +8,6 @@
 namespace iris {
 
 class IRBuilder {
-private:
-  Region* m_currRegion = nullptr;
-  BasicBlock* m_currBasicBlock = nullptr;
-
 public:
   IRBuilder() = default;
 
@@ -168,6 +164,10 @@ public:
       std::unique_ptr<BasicBlock>(std::exchange(m_currBasicBlock, nullptr)));
     return bb;
   }
+
+private:
+  Region* m_currRegion = nullptr;
+  BasicBlock* m_currBasicBlock = nullptr;
 };
 
 } // namespace iris

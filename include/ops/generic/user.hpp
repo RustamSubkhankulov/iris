@@ -10,10 +10,6 @@ namespace iris {
 class Operation;
 
 class User {
-private:
-  Operation* m_op;
-  std::size_t m_inputIndex;
-
 public:
   User(Operation* op, std::size_t inputIndex);
 
@@ -51,6 +47,10 @@ public:
   friend bool operator==(const User& lhs, const User& rhs) {
     return lhs.compare(rhs);
   }
+
+private:
+  Operation* m_op;
+  std::size_t m_inputIndex;
 };
 
 } // namespace iris

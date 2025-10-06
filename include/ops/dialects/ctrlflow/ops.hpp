@@ -48,9 +48,6 @@ public:
 };
 
 class JumpOp : public CtrFlowOp {
-private:
-  bb_id_t m_targetBbID;
-
 public:
   JumpOp(bb_id_t targetBbID)
     : CtrFlowOp(GlobalOpcodes::JUMP, DataType::NONE)
@@ -71,12 +68,12 @@ public:
   void printSpecifics(std::ostream& os) const override {
     os << "^bb" << m_targetBbID << " ";
   }
+
+private:
+  bb_id_t m_targetBbID;
 };
 
 class JumpcOp : public CtrFlowOp {
-private:
-  bb_id_t m_targetBbID;
-
 public:
   JumpcOp(bb_id_t targetBbID, Input input)
     : CtrFlowOp(GlobalOpcodes::JUMPC, DataType::NONE, {input})
@@ -115,13 +112,12 @@ public:
   const Input& getInput() const {
     return Operation::getInput(1);
   }
+
+private:
+  bb_id_t m_targetBbID;
 };
 
 class CallOp : public CtrFlowOp {
-private:
-  std::vector<Input> m_inputs;
-  std::string m_funcName;
-
 public:
   CallOp(std::string_view funcName, DataType dataType, InputList il = {})
     : CtrFlowOp(GlobalOpcodes::CALL, dataType, il)
@@ -147,6 +143,10 @@ public:
   void printSpecifics(std::ostream& os) const override {
     os << "@" << m_funcName << " ";
   }
+
+private:
+  std::vector<Input> m_inputs;
+  std::string m_funcName;
 };
 
 class PhiOp : public CtrFlowOp {

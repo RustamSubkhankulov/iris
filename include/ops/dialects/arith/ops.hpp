@@ -83,10 +83,6 @@ public:
     BE,  // Below or greater
   };
 
-private:
-  Pred m_pred;
-
-public:
   CmpOp(Input inputX, Input inputY, Pred pred)
     : BinaryArithOp(GlobalOpcodes::CMP, DataType::BOOL, inputX, inputY)
     , m_pred(pred) {}
@@ -108,6 +104,9 @@ public:
   Pred getPred() const {
     return m_pred;
   }
+
+private:
+  Pred m_pred;
 };
 
 // Operation's result datat type is the same as data type of the inputs
@@ -158,9 +157,6 @@ public:
 };
 
 class ConstantOp final : public ArithOp {
-private:
-  std::unique_ptr<ConstAttribute> m_attr;
-
 public:
   ConstantOp(std::unique_ptr<ConstAttribute>&& attr)
     : ArithOp(GlobalOpcodes::CONST, attr->getDataType())
@@ -180,6 +176,9 @@ protected:
     m_attr->print(os);
     os << ") ";
   }
+
+private:
+  std::unique_ptr<ConstAttribute> m_attr;
 };
 
 class CastOp : public ArithOp {

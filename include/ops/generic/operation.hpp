@@ -22,33 +22,6 @@ class BasicBlock;
 
 // Operation base class
 class Operation : private detail::ListNode {
-private:
-  // Operation code - unique for each operation
-  // (type of operation, not an instance)
-  const opcode_t m_opcode = nullopcode;
-
-  // List of operation's users
-  std::list<User> m_users;
-
-  BasicBlock* m_ParentBlock = nullptr;
-  friend class BasicBlock;
-
-protected:
-  // Resulting data type of the operation
-  // DataType::NONE if operation has no result
-  const DataType m_dataType = DataType::NONE;
-
-private:
-  // Vector of operation's inputs
-  std::vector<Input> m_inputs;
-
-  // Number of inputs of the operation
-  const std::size_t m_inputsNumber = 0LLU;
-
-protected:
-  // Idenditier of the operation
-  op_id_t m_ID = 0U;
-
 public:
   // Default constructor - constructs an empty op.
   // Opcode 'nullopcode' is reserved to represent an empty op.
@@ -192,6 +165,33 @@ public:
   }
 
   void print(std::ostream& os) const;
+
+private:
+  // Operation code - unique for each operation
+  // (type of operation, not an instance)
+  const opcode_t m_opcode = nullopcode;
+
+  // List of operation's users
+  std::list<User> m_users;
+
+  BasicBlock* m_ParentBlock = nullptr;
+  friend class BasicBlock;
+
+protected:
+  // Resulting data type of the operation
+  // DataType::NONE if operation has no result
+  const DataType m_dataType = DataType::NONE;
+
+private:
+  // Vector of operation's inputs
+  std::vector<Input> m_inputs;
+
+  // Number of inputs of the operation
+  const std::size_t m_inputsNumber = 0LLU;
+
+protected:
+  // Idenditier of the operation
+  op_id_t m_ID = 0U;
 
 private:
   void replaceAllUsesOf(Operation&& other) noexcept;

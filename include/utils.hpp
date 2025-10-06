@@ -9,12 +9,6 @@ namespace iris {
 namespace detail {
 
 class ListNode {
-private:
-  ListNode* m_next = nullptr;
-  ListNode* m_prev = nullptr;
-
-  friend class List;
-
 public:
   ListNode() = default;
 
@@ -68,14 +62,15 @@ public:
       prev->m_next = node;
     }
   }
+
+private:
+  ListNode* m_next = nullptr;
+  ListNode* m_prev = nullptr;
+
+  friend class List;
 };
 
 class List final {
-private:
-  ListNode* m_head = nullptr;
-  ListNode* m_tail = nullptr;
-  std::size_t m_size = 0LLU;
-
 public:
   List() = default;
 
@@ -102,9 +97,6 @@ public:
 private:
   template <typename ListNodeT>
   class IteratorImpl final {
-  private:
-    ListNodeT* m_ptr;
-
   public:
     IteratorImpl(ListNodeT* ptr)
       : m_ptr(ptr) {}
@@ -143,6 +135,9 @@ private:
     bool operator==(const IteratorImpl& other) const {
       return m_ptr == other.m_ptr;
     }
+
+  private:
+    ListNodeT* m_ptr;
   };
 
 public:
@@ -225,6 +220,10 @@ public:
   }
 
 private:
+  ListNode* m_head = nullptr;
+  ListNode* m_tail = nullptr;
+  std::size_t m_size = 0LLU;
+
   void freeNodes() {
     if (m_size == 0) {
       return;
@@ -256,9 +255,6 @@ public:
 
 template <std::unsigned_integral IdType>
 class IDProvider final {
-private:
-  IdType m_curID = 0;
-
 public:
   IdType obtainID() {
     return m_curID++;
@@ -271,6 +267,9 @@ public:
   void reset() {
     m_curID = 0;
   }
+
+private:
+  IdType m_curID = 0;
 };
 
 } // namespace detail

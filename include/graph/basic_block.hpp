@@ -13,19 +13,6 @@ namespace iris {
 class Region;
 
 class BasicBlock final {
-private:
-  std::list<bb_id_t> m_preds;
-  int64_t m_succTrueID = -1;
-  int64_t m_succFalseID = -1;
-
-  detail::List m_PhiOps;
-  detail::List m_RegOps;
-
-  Region* m_ParentRegion = nullptr;
-
-  // Identifier of the basic block
-  bb_id_t m_ID;
-
 public:
   explicit BasicBlock(bb_id_t id = 0U)
     : m_ID(id) {}
@@ -105,6 +92,18 @@ public:
   bool verify(std::string& msg, bool isStart = false, bool isFinal = false);
 
 private:
+  std::list<bb_id_t> m_preds;
+  int64_t m_succTrueID = -1;
+  int64_t m_succFalseID = -1;
+
+  detail::List m_PhiOps;
+  detail::List m_RegOps;
+
+  Region* m_ParentRegion = nullptr;
+
+  // Identifier of the basic block
+  bb_id_t m_ID;
+
   bool verifyOps(std::string& msg, const std::string& bbName);
 };
 

@@ -31,9 +31,6 @@ namespace detail {
 template <std::floating_point F, DataType DTy>
   requires(isFloatingPoint(DTy) == true)
 class FloatConstAttribute : public ConstAttribute {
-private:
-  F m_data;
-
 public:
   constexpr FloatConstAttribute(F data)
     : ConstAttribute(DTy)
@@ -46,14 +43,14 @@ public:
   void print(std::ostream& os) const override {
     os << m_data;
   }
+
+private:
+  F m_data;
 };
 
 template <std::signed_integral S, DataType DTy>
   requires(isSignedInteger(DTy) == true)
 class SIntegerConstAttribute : public ConstAttribute {
-private:
-  S m_data;
-
 public:
   constexpr SIntegerConstAttribute(S data)
     : ConstAttribute(DTy)
@@ -66,14 +63,14 @@ public:
   void print(std::ostream& os) const override {
     os << m_data;
   }
+
+private:
+  S m_data;
 };
 
 template <std::unsigned_integral U, DataType DTy>
   requires(isUnsignedInteger(DTy) == true)
 class UIntegerConstAttribute : public ConstAttribute {
-private:
-  U m_data;
-
 public:
   constexpr UIntegerConstAttribute(U data)
     : ConstAttribute(DTy)
@@ -86,6 +83,9 @@ public:
   void print(std::ostream& os) const override {
     os << m_data;
   }
+
+private:
+  U m_data;
 };
 
 } // namespace detail
@@ -113,9 +113,6 @@ using SInteger64ConstAttribute =
   detail::SIntegerConstAttribute<int64_t, DataType::SI64>;
 
 class BoolConstAttribute : public ConstAttribute {
-private:
-  bool m_data;
-
 public:
   constexpr BoolConstAttribute(bool data)
     : ConstAttribute(DataType::BOOL)
@@ -130,6 +127,9 @@ public:
     os << std::boolalpha << m_data;
     os.flags(flags);
   }
+
+private:
+  bool m_data;
 };
 
 inline std::unique_ptr<ConstAttribute> makeConstAttribute(float value) {

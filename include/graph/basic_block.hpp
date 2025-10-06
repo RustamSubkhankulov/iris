@@ -53,7 +53,7 @@ public:
 
   //--- BB's successor ---
 
-  bool setSucc(BasicBlock& succ, bool which = true) {
+  bool linkSucc(BasicBlock& succ, bool which = true) {
     auto& succID = (which == true) ? m_succTrueID : m_succFalseID;
     if (succID != -1) {
       // Successor is already set.

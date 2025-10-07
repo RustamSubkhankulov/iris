@@ -1,6 +1,8 @@
 # iris
 Intermediate Representation Internal Structure - SSA-like IR developed as an educational project
 
+<img src="images/logo.png" alt="logo" width="250">
+
 #### Overview
 
 IRIS is an example of IR that includes simple operations, separated into different _dialects_ - _arith_, _builtin_ and _ctrlflow_.

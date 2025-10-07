@@ -32,7 +32,7 @@ public:
     return m_opIDProvider.obtainID();
   }
 
-  void addBasicBlock(std::unique_ptr<BasicBlock>&& basicBlock) {
+  void addBasicBlock(std::unique_ptr<BasicBlock> basicBlock) {
     basicBlock->setParentRegion(this);
     m_BasicBlocks.push_back(std::move(basicBlock));
     if (m_BasicBlocks.size() == 1) {

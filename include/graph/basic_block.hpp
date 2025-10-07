@@ -75,7 +75,7 @@ public:
 
   //--- Operation ---
 
-  void addOp(std::unique_ptr<Operation>&& op);
+  void addOp(std::unique_ptr<Operation> op);
 
   //--- Misc ---
   void setID(bb_id_t id) {

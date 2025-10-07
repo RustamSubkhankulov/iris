@@ -8,7 +8,7 @@
 
 namespace iris {
 
-void BasicBlock::addOp(std::unique_ptr<Operation>&& op) {
+void BasicBlock::addOp(std::unique_ptr<Operation> op) {
   op->setParentBasicBlock(this);
   if (op->isa(GlobalOpcodes::PHI)) {
     m_PhiOps.append_back(op.release());

@@ -176,6 +176,21 @@ TEST(BASIC_BLOCK, EXFAIL_EMPTY_BB) {
   EXPECT_TRUE(msg.contains("is empty"));
 }
 
+TEST(BASIC_BLOCK, EXFAIL_FINAL_HAS_NO_RETURN) {
+  Region region("foo");
+
+  region.addBasicBlock(std::make_unique<BasicBlock>(1));
+  auto* bb1 = region.getBasicBlockByID(1);
+
+  bb1->addOp(std::make_unique<ctrlflow::JumpOp>());
+
+  std::string msg;
+  bool vres = bb1->verify(msg, true, true);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("last operation is not an \'ctrlflow.return\'"));
+}
+
 TEST(BASIC_BLOCK, EXFAIL_TWO_SUCC_IDENTIVAL) {
   Region region("foo");
 
@@ -249,11 +264,11 @@ TEST(BASIC_BLOCK, EXFAIL_TERMINATOR_INSIDE) {
 
   auto vl1 = std::make_unique<arith::ConstantOp>(makeConstAttribute(true));
   auto jmp = std::make_unique<ctrlflow::JumpcOp>(vl1.get());
-  auto vl2 = std::make_unique<arith::ConstantOp>(makeConstAttribute(true));
+  auto ret = std::make_unique<ctrlflow::ReturnOp>();
 
   bb1->addOp(std::move(vl1));
   bb1->addOp(std::move(jmp));
-  bb1->addOp(std::move(vl2));
+  bb1->addOp(std::move(ret));
 
   std::string msg;
   bool vres = bb1->verify(msg, true, true);

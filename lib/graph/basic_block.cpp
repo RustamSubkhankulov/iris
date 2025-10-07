@@ -108,6 +108,12 @@ bool BasicBlock::verify(std::string& msg, bool isStart, bool isFinal) {
 
   const Operation& lastOp = static_cast<const Operation&>(m_RegOps.cback());
 
+  if (isFinal && !lastOp.isa(GlobalOpcodes::RETURN)) {
+    msg = bbName +
+          " is final, but its last operation is not an \'ctrlflow.return\'";
+    return false;
+  }
+
   bool hasTwoSuccs = (m_succFalseID != -1);
   bool lastOpIsCondJump = lastOp.isa(GlobalOpcodes::JUMPC);
 

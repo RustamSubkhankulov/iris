@@ -21,7 +21,7 @@ int main() {
   auto done = builder.obtainIdForBasicBlock();
   /* n4 */ builder.createAndAddOp<ctrlflow::JumpcOp>(v3);
   auto& bb1 = builder.finalizeBasicBlock();
-  bb0.linkSucc(bb1);
+  bb0.linkSucc(&bb1);
 
   // bb3:
   builder.startNewBasicBlock();
@@ -30,15 +30,15 @@ int main() {
     builder.getCurRegion().getName(), DataType::UI32, InputList{v5});
   auto v7 = builder.createAndAddOp<arith::MulOp>(a0, v6);
   auto& bb3 = builder.finalizeBasicBlock();
-  bb1.linkSucc(bb3, false);
+  bb1.linkSucc(&bb3, false);
 
   // bb2:
   builder.startNewBasicBlock(done);
   auto v8 = builder.createAndAddOp<ctrlflow::PhiOp>(c1, v7);
   /* n9 */ builder.createAndAddOp<ctrlflow::ReturnOp>(v8);
   auto& bb2 = builder.finalizeBasicBlock();
-  bb3.linkSucc(bb2);
-  bb1.linkSucc(bb2, true);
+  bb3.linkSucc(&bb2);
+  bb1.linkSucc(&bb2, true);
 
   auto regionPtr = builder.obtainRegion();
   regionPtr->dump(std::cout);

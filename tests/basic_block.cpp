@@ -20,10 +20,10 @@ TEST(BASIC_BLOCK, CONNECTION_P2P) {
   BasicBlock bb1(1);
   BasicBlock bb2(2);
 
-  bb1.linkSucc(bb2);
+  bb1.linkSucc(&bb2);
 
   EXPECT_EQ(bb2.getPredsNum(), 1);
-  EXPECT_EQ(bb2.getPreds().front(), 1);
+  EXPECT_EQ(bb2.getPreds().front(), &bb1);
 
   EXPECT_TRUE(bb1.hasSucc(true));
   EXPECT_FALSE(bb1.hasSucc(false));
@@ -32,19 +32,47 @@ TEST(BASIC_BLOCK, CONNECTION_P2P) {
   EXPECT_EQ(bb1.getSuccID(false), -1);
 }
 
+TEST(BASIC_BLOCK, DELETION) {
+  auto bb0 = new BasicBlock(0);
+
+  BasicBlock bbP1(1);
+  BasicBlock bbP2(2);
+
+  BasicBlock scT(3);
+  BasicBlock scF(4);
+
+  bbP1.linkSucc(bb0);
+  bbP2.linkSucc(bb0);
+
+  bb0->linkSucc(&scT, true);
+  bb0->linkSucc(&scF, false);
+
+  EXPECT_EQ(scT.getPredsNum(), 1);
+  EXPECT_EQ(scF.getPredsNum(), 1);
+  EXPECT_TRUE(bbP1.hasSucc());
+  EXPECT_TRUE(bbP2.hasSucc());
+
+  delete bb0;
+
+  EXPECT_EQ(scT.getPredsNum(), 0);
+  EXPECT_EQ(scF.getPredsNum(), 0);
+  EXPECT_FALSE(bbP1.hasSucc());
+  EXPECT_FALSE(bbP2.hasSucc());
+}
+
 TEST(BASIC_BLOCK, CONNECTION_TRUE_AND_FALSE) {
   BasicBlock bb1(1);
   BasicBlock bbT(2);
   BasicBlock bbF(3);
 
-  bb1.linkSucc(bbT, true);
-  bb1.linkSucc(bbF, false);
+  bb1.linkSucc(&bbT, true);
+  bb1.linkSucc(&bbF, false);
 
   EXPECT_EQ(bbT.getPredsNum(), 1);
-  EXPECT_EQ(bbT.getPreds().front(), 1);
+  EXPECT_EQ(bbT.getPreds().front(), &bb1);
 
   EXPECT_EQ(bbF.getPredsNum(), 1);
-  EXPECT_EQ(bbF.getPreds().front(), 1);
+  EXPECT_EQ(bbF.getPreds().front(), &bb1);
 
   EXPECT_TRUE(bb1.hasSucc(true));
   EXPECT_TRUE(bb1.hasSucc(false));
@@ -70,7 +98,7 @@ TEST(BASIC_BLOCK, EXFAIL_START_WITH_PREDECESSORS) {
   region.addBasicBlock(std::make_unique<BasicBlock>(2));
   auto* bb2 = region.getBasicBlockByID(2);
 
-  bb1->linkSucc(*bb2);
+  bb1->linkSucc(bb2);
 
   std::string msg;
   bool vres = bb2->verify(msg, true);
@@ -87,7 +115,7 @@ TEST(BASIC_BLOCK, EXFAIL_FINAL_WITH_SUCCESSORS) {
   region.addBasicBlock(std::make_unique<BasicBlock>(2));
   auto* bb2 = region.getBasicBlockByID(2);
 
-  bb1->linkSucc(*bb2);
+  bb1->linkSucc(bb2);
 
   std::string msg;
   bool vres = bb1->verify(msg, false, true);
@@ -103,7 +131,7 @@ TEST(BASIC_BLOCK, EXFAIL_TRUE_SUCCESSOR_NOT_IN_REGION) {
   auto* bb1 = region.getBasicBlockByID(1);
 
   BasicBlock bb2(2);
-  bb1->linkSucc(bb2);
+  bb1->linkSucc(&bb2);
 
   std::string msg;
   bool vres = bb1->verify(msg, true);
@@ -119,7 +147,7 @@ TEST(BASIC_BLOCK, EXFAIL_FALSE_SUCCESSOR_NOT_IN_REGION) {
   auto* bb1 = region.getBasicBlockByID(1);
 
   BasicBlock bb2(2);
-  bb1->linkSucc(bb2, false);
+  bb1->linkSucc(&bb2, false);
 
   std::string msg;
   bool vres = bb1->verify(msg, true);
@@ -136,7 +164,7 @@ TEST(BASIC_BLOCK, EXFAIL_FALSE_BUT_NO_TRUE_SUCCESSORS) {
   region.addBasicBlock(std::make_unique<BasicBlock>(2));
   auto* bb2 = region.getBasicBlockByID(2);
 
-  bb1->linkSucc(*bb2, false);
+  bb1->linkSucc(bb2, false);
 
   std::string msg;
   bool vres = bb1->verify(msg, true);
@@ -167,7 +195,7 @@ TEST(BASIC_BLOCK, EXFAIL_EMPTY_BB) {
   region.addBasicBlock(std::make_unique<BasicBlock>(2));
   auto* bb2 = region.getBasicBlockByID(2);
 
-  bb1->linkSucc(*bb2);
+  bb1->linkSucc(bb2);
 
   std::string msg;
   bool vres = bb1->verify(msg, true);
@@ -199,8 +227,8 @@ TEST(BASIC_BLOCK, EXFAIL_TWO_SUCC_IDENTIVAL) {
   region.addBasicBlock(std::make_unique<BasicBlock>(2));
   auto* bb2 = region.getBasicBlockByID(2);
 
-  bb1->linkSucc(*bb2, true);
-  bb1->linkSucc(*bb2, false);
+  bb1->linkSucc(bb2, true);
+  bb1->linkSucc(bb2, false);
   bb1->addOp(std::make_unique<ctrlflow::JumpOp>());
 
   std::string msg;
@@ -220,8 +248,8 @@ TEST(BASIC_BLOCK, EXFAIL_TWO_SUCC_NO_JUMPC) {
   region.addBasicBlock(std::make_unique<BasicBlock>(3));
   auto* bb3 = region.getBasicBlockByID(3);
 
-  bb1->linkSucc(*bb2, true);
-  bb1->linkSucc(*bb3, false);
+  bb1->linkSucc(bb2, true);
+  bb1->linkSucc(bb3, false);
   bb1->addOp(std::make_unique<ctrlflow::JumpOp>());
 
   std::string msg;
@@ -240,7 +268,7 @@ TEST(BASIC_BLOCK, EXFAIL_ONE_SUCC_WITH_JUMPC) {
   region.addBasicBlock(std::make_unique<BasicBlock>(2));
   auto* bb2 = region.getBasicBlockByID(2);
 
-  bb1->linkSucc(*bb2);
+  bb1->linkSucc(bb2);
 
   auto val = std::make_unique<arith::ConstantOp>(makeConstAttribute(true));
   auto jmp = std::make_unique<ctrlflow::JumpcOp>(val.get());

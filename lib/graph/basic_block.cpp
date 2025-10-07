@@ -24,18 +24,19 @@ void BasicBlock::dump(std::ostream& os, const std::string& bbIdent) {
     os << "<start> ";
   } else {
     os << "<from";
-    for (bb_id_t predID : m_preds) {
-      os << " " << "bb" << predID;
+    for (auto pred : m_preds) {
+      os << " " << "bb" << pred->m_ID;
     }
     os << "> ";
   }
 
-  if (m_succTrueID == -1 && m_succFalseID == -1) {
+  if (m_succTrue == nullptr) {
     os << "<final> ";
-  } else if (m_succTrueID != -1 && m_succFalseID != -1) {
-    os << "<to T:bb" << m_succTrueID << " / F:bb" << m_succFalseID << "> ";
+  } else if (m_succFalse != nullptr) {
+    os << "<to T:bb" << m_succTrue->m_ID << " / F:bb" << m_succFalse->m_ID
+       << "> ";
   } else {
-    os << "<to bb" << m_succTrueID << "> ";
+    os << "<to bb" << m_succTrue->m_ID << "> ";
   }
 
   os << ": \n";
@@ -62,41 +63,41 @@ bool BasicBlock::verify(std::string& msg, bool isStart, bool isFinal) {
     return false;
   }
 
-  if (isFinal && (m_succTrueID != -1 || m_succFalseID != -1)) {
+  if (isFinal && (m_succTrue != nullptr || m_succFalse != nullptr)) {
     msg = bbName + " is final bb, but has successors!";
     return false;
   }
 
   // TODO move to region's verifier maybe?
-  for (bb_id_t predID : m_preds) {
-    if (!m_ParentRegion->isBasicBlockPresent(predID)) {
-      msg =
-        bbName + "'s pred " + std::to_string(predID) + " is not in the region!";
+  for (auto pred : m_preds) {
+    if (!m_ParentRegion->isBasicBlockPresent(pred->m_ID)) {
+      msg = bbName + "'s pred " + std::to_string(pred->m_ID) +
+            " is not in the region!";
       return false;
     }
   }
 
   // TODO move to region's verifier maybe?
-  if (m_succTrueID != -1 &&
-      !m_ParentRegion->isBasicBlockPresent(m_succTrueID)) {
+  if (m_succTrue != nullptr &&
+      !m_ParentRegion->isBasicBlockPresent(m_succTrue->m_ID)) {
     msg = bbName + "'s true successor is not in the region!";
     return false;
   }
 
   // TODO move to region's verifier maybe?
-  if (m_succFalseID != -1 &&
-      !m_ParentRegion->isBasicBlockPresent(m_succFalseID)) {
+  if (m_succFalse != nullptr &&
+      !m_ParentRegion->isBasicBlockPresent(m_succFalse->m_ID)) {
     msg = bbName + "'s false successor is not in the region!";
     return false;
   }
 
-  if (m_succFalseID != -1 && m_succTrueID == -1) {
+  if (m_succFalse != nullptr && m_succTrue == nullptr) {
     msg =
       bbName + " has false successor specified, but true successor is missing!";
     return false;
   }
 
-  if (!isFinal && m_succTrueID == -1) {
+  if (!isFinal && m_succTrue == nullptr) {
     msg = bbName + " is not final, but has no successors!";
     return false;
   }
@@ -114,10 +115,10 @@ bool BasicBlock::verify(std::string& msg, bool isStart, bool isFinal) {
     return false;
   }
 
-  bool hasTwoSuccs = (m_succFalseID != -1);
+  bool hasTwoSuccs = (m_succFalse != nullptr);
   bool lastOpIsCondJump = lastOp.isa(GlobalOpcodes::JUMPC);
 
-  if (hasTwoSuccs && m_succTrueID == m_succFalseID) {
+  if (hasTwoSuccs && m_succTrue == m_succFalse) {
     msg = bbName + " has two identical successors!";
     return false;
   }
@@ -158,6 +159,19 @@ bool BasicBlock::verifyOps(std::string& msg, const std::string& bbName) {
   }
 
   return true;
+}
+
+void BasicBlock::removeFromPredsAsSucc() {
+  for (auto bb : m_preds) {
+
+    if (bb->m_succTrue == this) {
+      bb->m_succTrue = nullptr;
+    }
+
+    if (bb->m_succFalse == this) {
+      bb->m_succFalse = nullptr;
+    }
+  }
 }
 
 } // namespace iris

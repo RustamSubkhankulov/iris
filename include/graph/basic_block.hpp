@@ -23,6 +23,12 @@ public:
   BasicBlock(BasicBlock&&) = delete;
   BasicBlock& operator=(BasicBlock&&) = delete;
 
+  ~BasicBlock() {
+    clearSucc(true);
+    clearSucc(false);
+    removeFromPredsAsSucc();
+  }
+
   //--- BB's parent region ---
 
   bool hasParentRegion() const {
@@ -43,7 +49,7 @@ public:
 
   //--- BB's predecessors ---
 
-  const std::list<bb_id_t>& getPreds() const {
+  const std::list<BasicBlock*>& getPreds() const {
     return m_preds;
   }
 
@@ -53,24 +59,37 @@ public:
 
   //--- BB's successor ---
 
-  bool linkSucc(BasicBlock& succ, bool which = true) {
-    auto& succID = (which == true) ? m_succTrueID : m_succFalseID;
-    if (succID != -1) {
-      // Successor is already set.
+  bool linkSucc(BasicBlock* bb, bool which = true) {
+    auto& succ = (which == true) ? m_succTrue : m_succFalse;
+    if (succ != nullptr || bb == nullptr) {
+      // Successor is already set, or given bb pointer is invalid
       return false;
     }
-    succID = succ.m_ID;
-    succ.m_preds.push_back(m_ID);
+    succ = bb;
+    succ->m_preds.push_back(this);
     return true;
   }
 
-  bool hasSucc(bool which = true) const {
-    auto succID = (which == true) ? m_succTrueID : m_succFalseID;
-    return (succID != -1);
+  void clearSucc(bool which = true) {
+    auto& succ = (which == true) ? m_succTrue : m_succFalse;
+    if (succ != nullptr) {
+      succ->m_preds.remove(this);
+    }
+    succ = nullptr;
   }
 
-  bb_id_t getSuccID(bool which = true) const {
-    return static_cast<bb_id_t>((which == true) ? m_succTrueID : m_succFalseID);
+  bool hasSucc(bool which = true) const {
+    auto succ = (which == true) ? m_succTrue : m_succFalse;
+    return (succ != nullptr);
+  }
+
+  const BasicBlock* getSucc(bool which = true) const {
+    return (which == true) ? m_succTrue : m_succFalse;
+  }
+
+  int64_t getSuccID(bool which = true) const {
+    auto succ = (which == true) ? m_succTrue : m_succFalse;
+    return (succ != nullptr) ? static_cast<int64_t>(succ->m_ID) : -1;
   }
 
   //--- Operation ---
@@ -92,9 +111,9 @@ public:
   bool verify(std::string& msg, bool isStart = false, bool isFinal = false);
 
 private:
-  std::list<bb_id_t> m_preds;
-  int64_t m_succTrueID = -1;
-  int64_t m_succFalseID = -1;
+  std::list<BasicBlock*> m_preds;
+  BasicBlock* m_succTrue = nullptr;
+  BasicBlock* m_succFalse = nullptr;
 
   detail::List m_PhiOps;
   detail::List m_RegOps;
@@ -105,6 +124,8 @@ private:
   bb_id_t m_ID;
 
   bool verifyOps(std::string& msg, const std::string& bbName);
+
+  void removeFromPredsAsSucc();
 };
 
 } // namespace iris

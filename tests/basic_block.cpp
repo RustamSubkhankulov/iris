@@ -52,6 +52,7 @@ TEST(BASIC_BLOCK, DELETION) {
   EXPECT_TRUE(bbP1.hasSucc());
   EXPECT_TRUE(bbP2.hasSucc());
 
+  bb0->unlink();
   delete bb0;
 
   EXPECT_EQ(scT.getPredsNum(), 0);

@@ -23,11 +23,7 @@ public:
   BasicBlock(BasicBlock&&) = delete;
   BasicBlock& operator=(BasicBlock&&) = delete;
 
-  ~BasicBlock() {
-    clearSucc(true);
-    clearSucc(false);
-    removeFromPredsAsSucc();
-  }
+  ~BasicBlock() = default;
 
   //--- BB's parent region ---
 
@@ -58,6 +54,12 @@ public:
   }
 
   //--- BB's successor ---
+
+  void unlink() {
+    clearSucc(true);
+    clearSucc(false);
+    removeFromPredsAsSucc();
+  }
 
   bool linkSucc(BasicBlock* bb, bool which = true) {
     auto& succ = (which == true) ? m_succTrue : m_succFalse;

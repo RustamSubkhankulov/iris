@@ -1,10 +1,10 @@
 #ifndef INCLUDE_OPS_GENERIC_OPERATION_HPP
 #define INCLUDE_OPS_GENERIC_OPERATION_HPP
 
+#include <concepts>
 #include <initializer_list>
 #include <iostream>
 #include <list>
-#include <utility>
 #include <vector>
 
 #include <data_types.hpp>
@@ -239,11 +239,11 @@ private:
 
   void clearInputs() noexcept;
 
-  template <typename UserIt>
+  template <std::input_iterator UserIt>
   bool isUserUniqueWith(const User& user, UserIt usersBegin,
                         UserIt usersEnd) noexcept;
 
-  template <typename UserIt>
+  template <std::input_iterator UserIt>
   bool areUsersUnique(UserIt usersBegin, UserIt usersEnd) noexcept;
 
 protected:

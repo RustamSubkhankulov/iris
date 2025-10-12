@@ -74,7 +74,7 @@ void Operation::clearInputs() noexcept {
   }
 }
 
-template <typename UserIt>
+template <std::input_iterator UserIt>
 bool Operation::isUserUniqueWith(const User& user, UserIt usersBegin,
                                  UserIt usersEnd) noexcept {
   for (auto userIt = usersBegin; userIt != usersEnd; ++userIt) {
@@ -85,7 +85,7 @@ bool Operation::isUserUniqueWith(const User& user, UserIt usersBegin,
   return true;
 }
 
-template <typename UserIt>
+template <std::input_iterator UserIt>
 bool Operation::areUsersUnique(UserIt usersBegin, UserIt usersEnd) noexcept {
   for (auto firstIt = usersBegin; firstIt != usersEnd; ++firstIt) {
     if (!isUserUniqueWith(*firstIt, std::next(firstIt), usersEnd)) {

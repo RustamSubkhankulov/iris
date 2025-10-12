@@ -57,7 +57,7 @@ TEST(GENERIC_OPERATION, MOVING_OPERATION) {
   EXPECT_EQ(cst_2.getUsersNum(), 2);
 }
 
-TEST(GENERIC_OPERATION, CLEAR_OPERATIONS_USES) {
+TEST(GENERIC_OPERATION, CLEARING_OPERATIONS_USES) {
   arith::ConstantOp cst_1(makeConstAttribute(1));
   arith::ConstantOp cst_2(makeConstAttribute(1));
 

@@ -3,7 +3,13 @@
 
 #include <cassert>
 #include <concepts>
+#include <iterator>
+#include <limits>
+#include <memory>
+#include <stdexcept>
 #include <utility>
+
+#include <exception.hpp>
 
 namespace iris {
 namespace detail {
@@ -15,23 +21,13 @@ public:
   ListNode(const ListNode&) = delete;
   ListNode& operator=(const ListNode&) = delete;
 
-  ListNode(ListNode&& other)
+  ListNode(ListNode&& other) noexcept
     : m_next(std::exchange(other.m_next, nullptr))
     , m_prev(std::exchange(other.m_prev, nullptr)) {}
 
-  ListNode& operator=(ListNode&& other) {
-    m_next = other.m_next;
-    m_prev = other.m_prev;
-
-    other.m_next = nullptr;
-    other.m_prev = nullptr;
-
-    return *this;
-  }
-
   virtual ~ListNode() = default;
 
-  ListNode(ListNode* next, ListNode* prev)
+  ListNode(ListNode* next, ListNode* prev) noexcept
     : m_next(next)
     , m_prev(prev) {}
 
@@ -82,7 +78,7 @@ public:
     , m_tail(std::exchange(other.m_tail, nullptr))
     , m_size(std::exchange(other.m_size, 0LLU)) {}
 
-  List& operator=(List&& other) {
+  List& operator=(List&& other) noexcept {
     freeNodes();
     m_head = std::exchange(other.m_head, nullptr);
     m_tail = std::exchange(other.m_tail, nullptr);
@@ -90,7 +86,13 @@ public:
     return *this;
   }
 
-  ~List() {
+  void swap(List&& other) noexcept {
+    std::swap(m_head, other.m_head);
+    std::swap(m_tail, other.m_tail);
+    std::swap(m_size, other.m_size);
+  }
+
+  ~List() noexcept {
     freeNodes();
   }
 
@@ -98,7 +100,14 @@ private:
   template <typename ListNodeT>
   class IteratorImpl final {
   public:
-    IteratorImpl(ListNodeT* ptr)
+    using iterator_category = std::bidirectional_iterator_tag;
+    using value_type = ListNodeT;
+    using difference_type = std::ptrdiff_t;
+
+    using pointer = ListNodeT*;
+    using reference = ListNodeT&;
+
+    IteratorImpl(pointer ptr) noexcept
       : m_ptr(ptr) {}
 
     IteratorImpl(const IteratorImpl&) = default;
@@ -106,14 +115,15 @@ private:
 
     ~IteratorImpl() = default;
 
-    ListNodeT& operator*() const {
+    reference operator*() const {
       return *m_ptr;
     }
-    ListNodeT* operator->() const {
+
+    pointer operator->() const {
       return m_ptr;
     }
 
-    ListNodeT* get() const {
+    pointer get() const {
       return m_ptr;
     }
 
@@ -124,16 +134,35 @@ private:
       return *this;
     }
 
+    IteratorImpl& operator--() {
+      if (m_ptr != nullptr) {
+        m_ptr = m_ptr->m_prev;
+      }
+      return *this;
+    }
+
     IteratorImpl& operator++(int) {
-      auto& tmp = *this;
+      auto tmp = *this;
       if (m_ptr != nullptr) {
         m_ptr = m_ptr->m_next;
       }
       return tmp;
     }
 
+    IteratorImpl& operator--(int) {
+      auto tmp = *this;
+      if (m_ptr != nullptr) {
+        m_ptr = m_ptr->m_prev;
+      }
+      return tmp;
+    }
+
     bool operator==(const IteratorImpl& other) const {
       return m_ptr == other.m_ptr;
+    }
+
+    bool operator!=(const IteratorImpl& other) const {
+      return m_ptr != other.m_ptr;
     }
 
   private:
@@ -144,76 +173,146 @@ public:
   using iterator = IteratorImpl<ListNode>;
   using const_iterator = IteratorImpl<const ListNode>;
 
-  ListNode& front() {
+  using reverse_iterator = std::reverse_iterator<IteratorImpl<ListNode>>;
+  using const_reverse_iterator =
+    std::reverse_iterator<IteratorImpl<const ListNode>>;
+
+  ListNode& front() noexcept {
     return *m_head;
   }
 
-  const ListNode& front() const {
+  ListNode& try_front() {
+    if (m_head == nullptr) {
+      throw IrisException("List is empty!");
+    }
     return *m_head;
   }
 
-  const ListNode& cfront() const {
+  const ListNode& front() const noexcept {
     return *m_head;
   }
 
-  ListNode& back() {
+  const ListNode& try_front() const {
+    if (m_head == nullptr) {
+      throw IrisException("List is empty!");
+    }
+    return *m_head;
+  }
+
+  const ListNode& cfront() const noexcept {
+    return *m_head;
+  }
+
+  const ListNode& try_cfront() const {
+    if (m_head == nullptr) {
+      throw IrisException("List is empty!");
+    }
+    return *m_head;
+  }
+
+  ListNode& back() noexcept {
     return *m_tail;
   }
 
-  const ListNode& back() const {
+  ListNode& try_back() {
+    if (m_tail == nullptr) {
+      throw IrisException("List is empty!");
+    }
     return *m_tail;
   }
 
-  const ListNode& cback() const {
+  const ListNode& back() const noexcept {
     return *m_tail;
   }
 
-  iterator begin() {
+  const ListNode& try_back() const {
+    if (m_tail == nullptr) {
+      throw IrisException("List is empty!");
+    }
+    return *m_tail;
+  }
+
+  const ListNode& cback() const noexcept {
+    return *m_tail;
+  }
+
+  const ListNode& try_cback() const {
+    if (m_tail == nullptr) {
+      throw IrisException("List is empty!");
+    }
+    return *m_tail;
+  }
+
+  iterator begin() noexcept {
     return iterator{m_head};
   }
-  iterator end() {
+  iterator end() noexcept {
     return iterator{nullptr};
   }
 
-  const_iterator begin() const {
+  const_iterator begin() const noexcept {
     return const_iterator{m_head};
   }
-  const_iterator end() const {
+  const_iterator end() const noexcept {
     return const_iterator{nullptr};
   }
 
-  const_iterator cbegin() const {
+  const_iterator cbegin() const noexcept {
     return const_iterator{m_head};
   }
-  const_iterator cend() const {
+  const_iterator cend() const noexcept {
     return const_iterator{nullptr};
+  }
+
+  reverse_iterator rbegin() noexcept {
+    return std::reverse_iterator(end());
+  }
+  const_reverse_iterator rbegin() const noexcept {
+    return std::reverse_iterator(end());
+  }
+  const_reverse_iterator crbegin() const noexcept {
+    return std::reverse_iterator(cend());
+  }
+
+  reverse_iterator rend() noexcept {
+    return std::reverse_iterator(begin());
+  }
+  const_reverse_iterator rend() const noexcept {
+    return std::reverse_iterator(begin());
+  }
+  const_reverse_iterator crend() const noexcept {
+    return std::reverse_iterator(cbegin());
   }
 
   std::size_t size() const {
     return m_size;
   }
 
-  void append_front(ListNode* node) {
+  void append_front(std::unique_ptr<ListNode> node) {
+    auto nodePtr = node.release();
+
     if (m_size == 0LLU) {
-      m_head = m_tail = node;
+      m_head = m_tail = nodePtr;
     } else {
-      m_head->insert_before(node);
-      m_head = node;
+      m_head->insert_before(nodePtr);
+      m_head = nodePtr;
     }
     m_size += 1;
   }
 
-  void append_back(ListNode* node) {
+  void append_back(std::unique_ptr<ListNode> node) {
+    auto nodePtr = node.release();
+
     if (m_size == 0LLU) {
-      m_head = m_tail = node;
+      m_head = m_tail = nodePtr;
     } else {
-      m_tail->insert_after(node);
-      m_tail = node;
+      m_tail->insert_after(nodePtr);
+      m_tail = nodePtr;
     }
     m_size += 1;
   }
 
-  void clear() {
+  void clear() noexcept {
     freeNodes();
     m_head = m_tail = nullptr;
     m_size = 0LLU;
@@ -224,7 +323,7 @@ private:
   ListNode* m_tail = nullptr;
   std::size_t m_size = 0LLU;
 
-  void freeNodes() {
+  void freeNodes() noexcept {
     if (m_size == 0) {
       return;
     }
@@ -237,34 +336,21 @@ private:
   }
 };
 
-template <typename Derived>
-class Singleton {
-protected:
-  Singleton() = default;
-  ~Singleton() = default;
-
-public:
-  Singleton(const Singleton&) = delete;
-  Singleton& operator=(const Singleton&) = delete;
-
-  static Derived& get() {
-    static Derived m_instance;
-    return m_instance;
-  }
-};
-
 template <std::unsigned_integral IdType>
 class IDProvider final {
 public:
   IdType obtainID() {
+    if (m_curID == std::numeric_limits<IdType>::max()) {
+      throw std::overflow_error("ID Provider has overflown!");
+    }
     return m_curID++;
   }
 
-  IdType getLastID() const {
+  IdType getLastID() const noexcept {
     return m_curID;
   }
 
-  void reset() {
+  void reset() noexcept {
     m_curID = 0;
   }
 

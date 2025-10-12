@@ -31,6 +31,10 @@ void Operation::replaceAllUsesOf(Operation& other) noexcept {
   }
 }
 
+void Operation::replaceAllUsesWith(Operation& that) noexcept {
+  that.replaceAllUsesOf(*this);
+}
+
 void Operation::addAsUserToInputs() {
   for (std::size_t inputIdx = 0; inputIdx < m_inputsNumber; ++inputIdx) {
     auto& input = m_inputs[inputIdx];
@@ -49,13 +53,13 @@ void Operation::addAsUserToInput(std::size_t inputIdx, Input& input) {
   }
 }
 
-void Operation::removeAsUserFromInputs() {
+void Operation::removeAsUserFromInputs() noexcept {
   for (std::size_t inputIdx = 0; inputIdx < m_inputsNumber; ++inputIdx) {
     removeAsUserFromInput(inputIdx);
   }
 }
 
-void Operation::removeAsUserFromInput(std::size_t inputIdx) {
+void Operation::removeAsUserFromInput(std::size_t inputIdx) noexcept {
   auto& input = m_inputs.at(inputIdx);
 
   if (!input.isEmpty()) {
@@ -64,9 +68,15 @@ void Operation::removeAsUserFromInput(std::size_t inputIdx) {
   }
 }
 
+void Operation::clearInputs() noexcept {
+  for (auto& input : m_inputs) {
+    input.clear();
+  }
+}
+
 template <typename UserIt>
 bool Operation::isUserUniqueWith(const User& user, UserIt usersBegin,
-                                 UserIt usersEnd) {
+                                 UserIt usersEnd) noexcept {
   for (auto userIt = usersBegin; userIt != usersEnd; ++userIt) {
     if (*userIt == user) {
       return false;
@@ -76,7 +86,7 @@ bool Operation::isUserUniqueWith(const User& user, UserIt usersBegin,
 }
 
 template <typename UserIt>
-bool Operation::areUsersUnique(UserIt usersBegin, UserIt usersEnd) {
+bool Operation::areUsersUnique(UserIt usersBegin, UserIt usersEnd) noexcept {
   for (auto firstIt = usersBegin; firstIt != usersEnd; ++firstIt) {
     if (!isUserUniqueWith(*firstIt, std::next(firstIt), usersEnd)) {
       return false;
@@ -85,7 +95,7 @@ bool Operation::areUsersUnique(UserIt usersBegin, UserIt usersEnd) {
   return true;
 }
 
-bool Operation::verify(std::string& msg) const {
+bool Operation::verify(std::string& msg) const noexcept {
   // Verify that all of the inputs are non-empty.
   for (std::size_t inputIdx = 0; inputIdx < m_inputsNumber; ++inputIdx) {
     const auto& input = m_inputs[inputIdx];
@@ -100,7 +110,7 @@ bool Operation::verify(std::string& msg) const {
   return true;
 }
 
-void Operation::print(std::ostream& os) const {
+void Operation::print(std::ostream& os) const noexcept {
   printID(os);
   if (hasResult()) {
     os << "." << m_dataType;

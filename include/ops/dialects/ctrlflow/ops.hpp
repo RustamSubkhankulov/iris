@@ -39,7 +39,7 @@ public:
     return "return";
   }
 
-  bool isTerminator() const override {
+  bool isTerminator() const noexcept override {
     return true;
   }
 };
@@ -53,7 +53,7 @@ public:
     return "jmp";
   }
 
-  bool isTerminator() const override {
+  bool isTerminator() const noexcept override {
     return true;
   }
 };
@@ -67,11 +67,11 @@ public:
     return "jmpc";
   }
 
-  bool isTerminator() const override {
+  bool isTerminator() const noexcept override {
     return true;
   }
 
-  bool verify(std::string& msg) const override {
+  bool verify(std::string& msg) const noexcept override {
     if (!CtrFlowOp::verify(msg)) {
       return false;
     }
@@ -105,7 +105,7 @@ public:
     return "call";
   }
 
-  bool isTerminator() const override {
+  bool isTerminator() const noexcept override {
     return false;
   }
 
@@ -141,11 +141,11 @@ public:
     return "phi";
   }
 
-  bool isTerminator() const override {
+  bool isTerminator() const noexcept override {
     return false;
   }
 
-  bool verify(std::string& msg) const override {
+  bool verify(std::string& msg) const noexcept override {
     if (!CtrFlowOp::verify(msg)) {
       return false;
     }

@@ -13,7 +13,7 @@ class BuiltinOp : public Operation {
 public:
   using Operation::Operation;
 
-  bool isTerminator() const override {
+  bool isTerminator() const noexcept override {
     return false;
   }
 

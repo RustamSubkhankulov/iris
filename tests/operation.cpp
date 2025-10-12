@@ -117,22 +117,37 @@ TEST(GENERIC_OPERATION, REPLACING_OPERATIONS_USES_2) {
   EXPECT_EQ(copyOp2.getInputAt(0).getDefiningOp(), &newAddOp);
 }
 
+TEST(GENERIC_OPERATION, DISCONNECTING_OPERATION) {
+  arith::ConstantOp cst_1(makeConstAttribute(1));
+  arith::ConstantOp cst_2(makeConstAttribute(2));
+
+  arith::AddOp addOp(&cst_1, &cst_2);
+  builtin::CopyOp copyOp(&addOp);
+
+  EXPECT_EQ(addOp.getUsersNum(), 1);
+  EXPECT_EQ(cst_1.getUsersNum(), 1);
+  EXPECT_EQ(cst_2.getUsersNum(), 1);
+  EXPECT_FALSE(addOp.getInputAt(0).isEmpty());
+  EXPECT_FALSE(addOp.getInputAt(1).isEmpty());
+  EXPECT_FALSE(copyOp.getInputAt(0).isEmpty());
+
+  addOp.disconnect();
+
+  EXPECT_EQ(addOp.getUsersNum(), 0);
+  EXPECT_EQ(cst_1.getUsersNum(), 0);
+  EXPECT_EQ(cst_2.getUsersNum(), 0);
+  EXPECT_TRUE(addOp.getInputAt(0).isEmpty());
+  EXPECT_TRUE(addOp.getInputAt(1).isEmpty());
+  EXPECT_TRUE(copyOp.getInputAt(0).isEmpty());
+}
+
 TEST(GENERIC_OPERATION, DELETING_OPERATION) {
   arith::ConstantOp cst_1(makeConstAttribute(1));
   arith::ConstantOp cst_2(makeConstAttribute(1));
 
-  std::cout << "cst_1: " << &cst_1 << std::endl;
-  std::cout << "cst_1: " << &cst_2 << std::endl;
-
   auto addOp = new arith::AddOp(&cst_1, &cst_2);
 
   builtin::CopyOp copyOp(addOp);
-  std::cout << "copyOp: " << &copyOp << std::endl;
-
-  for (const auto& user : addOp->getUsers()) {
-    std::cout << "User: " << user.getUserOp() << " at " << user.getInputIndex()
-              << std::endl;
-  }
 
   EXPECT_EQ(addOp->getUsersNum(), 1);
   EXPECT_EQ(cst_1.getUsersNum(), 1);

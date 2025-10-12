@@ -19,7 +19,7 @@ class ArithOp : public Operation {
 public:
   using Operation::Operation;
 
-  bool isTerminator() const override {
+  bool isTerminator() const noexcept override {
     return false;
   }
 
@@ -35,7 +35,7 @@ public:
   BinaryArithOp(opcode_t opcode, DataType dataType, Input inputX, Input inputY)
     : ArithOp(opcode, dataType, {inputX, inputY}) {}
 
-  bool verify(std::string& msg) const override {
+  bool verify(std::string& msg) const noexcept override {
     if (!ArithOp::verify(msg)) {
       return false;
     }

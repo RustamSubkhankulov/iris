@@ -60,22 +60,23 @@ public:
   Operation& operator=(const Operation&) = delete;
   Operation& operator=(Operation&& other) = delete;
 
-  virtual ~Operation() {
-    clearAllUses();
-    removeAsUserFromInputs();
+  virtual ~Operation() noexcept {
+    disconnect();
   }
 
   operator bool() const {
     return (m_opcode != nullopcode);
   }
 
-  void clearAllUses() noexcept;
-
-  void replaceAllUsesOf(Operation& other) noexcept;
-
-  void replaceAllUsesWith(Operation& that) noexcept {
-    that.replaceAllUsesOf(*this);
+  void disconnect() noexcept {
+    clearAllUses();
+    removeAsUserFromInputs();
+    clearInputs();
   }
+
+  void clearAllUses() noexcept;
+  void replaceAllUsesOf(Operation& other) noexcept;
+  void replaceAllUsesWith(Operation& that) noexcept;
 
   //--- Mnemonics of the operation ---
 
@@ -87,47 +88,47 @@ public:
 
   //--- Operation's parent basic block
 
-  bool hasParentBasicBlock() const {
+  bool hasParentBasicBlock() const noexcept {
     return (m_ParentBlock != nullptr);
   }
 
-  BasicBlock* getParentBasicBlock() {
+  BasicBlock* getParentBasicBlock() noexcept {
     return m_ParentBlock;
   }
 
-  const BasicBlock* getParentBasicBlock() const {
+  const BasicBlock* getParentBasicBlock() const noexcept {
     return m_ParentBlock;
   }
 
-  void setParentBasicBlock(BasicBlock* basicBlock) {
+  void setParentBasicBlock(BasicBlock* basicBlock) noexcept {
     m_ParentBlock = basicBlock;
   }
 
   //--- General properties of the operation ---
 
-  virtual bool isTerminator() const = 0;
+  virtual bool isTerminator() const noexcept = 0;
 
-  DataType getDataType() const {
+  DataType getDataType() const noexcept {
     return m_dataType;
   }
-  bool hasResult() const {
+  bool hasResult() const noexcept {
     return (getDataType() != DataType::NONE);
   }
 
   //--- Operation's inputs ---
 
-  std::size_t getInputsNum() const {
+  std::size_t getInputsNum() const noexcept {
     return m_inputsNumber;
   }
-  bool hasInputs() const {
+  bool hasInputs() const noexcept {
     return (getInputsNum() != 0);
   }
 
-  const std::vector<Input>& getInputs() const {
+  const std::vector<Input>& getInputs() const noexcept {
     return m_inputs;
   }
 
-  const Input& getInput(std::size_t index) const {
+  const Input& getInput(std::size_t index) const noexcept {
     return m_inputs[index];
   }
 
@@ -147,43 +148,43 @@ public:
 
   //--- Verification ---
 
-  virtual bool verify(std::string& msg) const;
+  virtual bool verify(std::string& msg) const noexcept;
 
   //--- Operation result's users ---
 
-  const std::list<User>& getUsers() const {
+  const std::list<User>& getUsers() const noexcept {
     return m_users;
   }
 
-  std::size_t getUsersNum() const {
+  std::size_t getUsersNum() const noexcept {
     return m_users.size();
   }
 
-  bool hasUsers() const {
+  bool hasUsers() const noexcept {
     return (getUsersNum() != 0);
   }
 
   //--- Operation type identification ---
 
-  bool isa(opcode_t opcode) const {
+  bool isa(opcode_t opcode) const noexcept {
     return m_opcode == opcode;
   }
 
-  bool isa(const Operation& other) const {
+  bool isa(const Operation& other) const noexcept {
     return isa(other.m_opcode);
   }
 
   //--- Misc ---
 
-  void setID(op_id_t id) {
+  void setID(op_id_t id) noexcept {
     m_ID = id;
   }
 
-  op_id_t getID() const {
+  op_id_t getID() const noexcept {
     return m_ID;
   }
 
-  void print(std::ostream& os) const;
+  void print(std::ostream& os) const noexcept;
 
 private:
   // Operation code - unique for each operation
@@ -201,7 +202,7 @@ protected:
   // DataType::NONE if operation has no result
   DataType m_dataType = DataType::NONE;
 
-  void setDataType(DataType dataType) {
+  void setDataType(DataType dataType) noexcept {
     m_dataType = dataType;
   }
 
@@ -233,14 +234,17 @@ private:
   void addAsUserToInputs();
   void addAsUserToInput(std::size_t inputIdx, Input& input);
 
-  void removeAsUserFromInputs();
-  void removeAsUserFromInput(std::size_t inputIdx);
+  void removeAsUserFromInputs() noexcept;
+  void removeAsUserFromInput(std::size_t inputIdx) noexcept;
+
+  void clearInputs() noexcept;
 
   template <typename UserIt>
-  bool isUserUniqueWith(const User& user, UserIt usersBegin, UserIt usersEnd);
+  bool isUserUniqueWith(const User& user, UserIt usersBegin,
+                        UserIt usersEnd) noexcept;
 
   template <typename UserIt>
-  bool areUsersUnique(UserIt usersBegin, UserIt usersEnd);
+  bool areUsersUnique(UserIt usersBegin, UserIt usersEnd) noexcept;
 
 protected:
   virtual void printID(std::ostream& os) const {

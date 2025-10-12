@@ -36,6 +36,8 @@ public:
 
   void unlink() noexcept;
 
+  void replaceWith(ListNode& that) noexcept;
+
 private:
   ListNode* m_next = nullptr;
   ListNode* m_prev = nullptr;

@@ -42,6 +42,18 @@ void ListNode::unlink() noexcept {
   }
 }
 
+void ListNode::replaceWith(ListNode& that) noexcept {
+  that.unlink();
+  if (m_prev != nullptr) {
+    m_prev->m_next = &that;
+    m_prev = nullptr;
+  }
+  if (m_next != nullptr) {
+    m_next->m_prev = &that;
+    m_next = nullptr;
+  }
+}
+
 void List::insertFront(std::unique_ptr<ListNode> node) noexcept {
   auto nodePtr = node.release();
 

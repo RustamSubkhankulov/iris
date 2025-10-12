@@ -4,22 +4,29 @@
 
 namespace iris {
 
-void Operation::replaceAllUsesOf(Operation&& other) noexcept {
-  // Replace 'other' operation with this operation in every user's input
-  m_users = std::move(other.m_users);
-  for (auto& user : m_users) {
-    auto* userOp = user.getUserOp();
-    userOp->m_inputs.at(user.getInputIndex()) = Input{this};
-  }
-}
-
-void Operation::removeAllUses() noexcept {
+void Operation::clearAllUses() noexcept {
   // Nulify all inputs for every user of this operation
   for (auto& user : m_users) {
     auto* userOp = user.getUserOp();
     userOp->m_inputs.at(user.getInputIndex()) = Input{};
   }
   m_users.clear();
+}
+
+void Operation::replaceAllUsesOf(Operation& other) noexcept {
+  if (this == &other) {
+    return;
+  }
+
+  // Clear current uses
+  clearAllUses();
+
+  // Replace 'other' operation with this operation in every user's input
+  m_users = std::move(other.m_users);
+  for (auto& user : m_users) {
+    auto* userOp = user.getUserOp();
+    userOp->m_inputs.at(user.getInputIndex()) = Input{this};
+  }
 }
 
 void Operation::addAsUserToInputs() {

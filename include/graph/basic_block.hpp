@@ -96,23 +96,32 @@ public:
     return (succ != nullptr) ? static_cast<int64_t>(succ->m_ID) : -1;
   }
 
-  //--- Operation ---
+  //--- Operations ---
 
   using OpList = detail::List;
   using op_iterator = OpList::iterator;
   using const_op_iterator = OpList::const_iterator;
 
+  //--- Phi ops ---
+
   const OpList& getPhiOps() const& {
     return m_PhiOps;
   }
 
+  void insertPhiOpBack(std::unique_ptr<ctrlflow::PhiOp> op);
+
+  void erasePhiOp(op_iterator pos);
+  void erasePhiOp(const_op_iterator pos);
+
+  void replacePhiOpWith(op_iterator pos, std::unique_ptr<ctrlflow::PhiOp> op);
+  void replacePhiOpWith(const_op_iterator pos,
+                        std::unique_ptr<ctrlflow::PhiOp> op);
+
+  //--- Regular ops ---
+
   const OpList& getOps() const& {
     return m_RegOps;
   }
-
-  void insertPhiOpBack(std::unique_ptr<ctrlflow::PhiOp> op);
-  void erasePhiOp(op_iterator pos);
-  void erasePhiOp(const_op_iterator pos);
 
   void insertOpFront(std::unique_ptr<Operation> op);
   void insertOpBack(std::unique_ptr<Operation> op);
@@ -125,6 +134,9 @@ public:
 
   void eraseOp(op_iterator pos);
   void eraseOp(const_op_iterator pos);
+
+  void replaceOpWith(op_iterator pos, std::unique_ptr<Operation> op);
+  void replaceOpWith(const_op_iterator pos, std::unique_ptr<Operation> op);
 
   //--- Misc ---
 
@@ -158,6 +170,8 @@ private:
   bool verifyOps(std::string& msg, const std::string& bbName);
 
   void removeFromPredsAsSucc();
+
+  void doReplaceOpWith(Operation* opPtr, detail::ListNode* nodePtr);
 };
 
 } // namespace iris

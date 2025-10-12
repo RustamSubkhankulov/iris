@@ -19,6 +19,29 @@ void BasicBlock::erasePhiOp(const_op_iterator pos) {
   m_PhiOps.erase(pos);
 }
 
+void BasicBlock::doReplaceOpWith(Operation* opPtr, detail::ListNode* nodePtr) {
+  // Replace all uses of the previous operation with new one
+  opPtr->replaceAllUsesOf(*static_cast<Operation*>(nodePtr));
+  // Replace list node
+  nodePtr->replaceWith(*static_cast<detail::ListNode*>(opPtr));
+}
+
+void BasicBlock::replacePhiOpWith(op_iterator pos,
+                                  std::unique_ptr<ctrlflow::PhiOp> op) {
+  auto opPtr = op.release();
+  auto nodePtr = pos.get();
+  doReplaceOpWith(opPtr, nodePtr);
+  m_PhiOps.erase(pos);
+}
+
+void BasicBlock::replacePhiOpWith(const_op_iterator pos,
+                                  std::unique_ptr<ctrlflow::PhiOp> op) {
+  auto opPtr = op.release();
+  auto nodePtr = const_cast<detail::ListNode*>(pos.get());
+  doReplaceOpWith(opPtr, nodePtr);
+  m_PhiOps.erase(pos);
+}
+
 void BasicBlock::insertOpFront(std::unique_ptr<Operation> op) {
   auto opPtr = op.release();
   opPtr->setParentBasicBlock(this);
@@ -63,6 +86,20 @@ void BasicBlock::eraseOp(op_iterator pos) {
 }
 
 void BasicBlock::eraseOp(const_op_iterator pos) {
+  m_RegOps.erase(pos);
+}
+
+void BasicBlock::replaceOpWith(op_iterator pos, std::unique_ptr<Operation> op) {
+  auto opPtr = op.release();
+  auto nodePtr = pos.get();
+  doReplaceOpWith(opPtr, nodePtr);
+  m_RegOps.erase(pos);
+}
+void BasicBlock::replaceOpWith(const_op_iterator pos,
+                               std::unique_ptr<Operation> op) {
+  auto opPtr = op.release();
+  auto nodePtr = const_cast<detail::ListNode*>(pos.get());
+  doReplaceOpWith(opPtr, nodePtr);
   m_RegOps.erase(pos);
 }
 

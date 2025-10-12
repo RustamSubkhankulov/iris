@@ -48,9 +48,10 @@ public:
     , m_inputs(other.m_inputs) // Do not move, just copy
     , m_inputsNumber(other.m_inputsNumber) {
 
-    // TODO: what to do with ID at this point?
+    // ID is ignored at this point. It is assigned
+    // by the IR builder to each operation at creation.
     addAsUserToInputs();
-    replaceAllUsesOf(std::move(other));
+    replaceAllUsesOf(other);
   }
 
   // Assignment is prohibited, since it will implicitly
@@ -60,12 +61,20 @@ public:
   Operation& operator=(Operation&& other) = delete;
 
   virtual ~Operation() {
-    removeAllUses();
+    clearAllUses();
     removeAsUserFromInputs();
   }
 
   operator bool() const {
     return (m_opcode != nullopcode);
+  }
+
+  void clearAllUses() noexcept;
+
+  void replaceAllUsesOf(Operation& other) noexcept;
+
+  void replaceAllUsesWith(Operation& that) noexcept {
+    that.replaceAllUsesOf(*this);
   }
 
   //--- Mnemonics of the operation ---
@@ -198,9 +207,6 @@ protected:
   op_id_t m_ID = 0U;
 
 private:
-  void replaceAllUsesOf(Operation&& other) noexcept;
-  void removeAllUses() noexcept;
-
   bool addUser(const User& user) {
     if (!isUserUniqueWith(user, m_users.begin(), m_users.end())) {
       // Provided user is already in the users list

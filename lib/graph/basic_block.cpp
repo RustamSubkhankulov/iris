@@ -144,19 +144,27 @@ bool BasicBlock::verify(std::string& msg, bool isStart, bool isFinal) {
 }
 
 bool BasicBlock::verifyOps(std::string& msg, const std::string& bbName) {
-  auto opIt = m_RegOps.begin();
-  for (std::size_t opIdx = 0; opIdx < m_RegOps.size() - 1; ++opIdx) {
-    const Operation& op = static_cast<const Operation&>(*opIt);
-    if (op.isTerminator()) {
+  // Phi operations
+  for (auto phiOpIt = m_PhiOps.begin(); phiOpIt != m_PhiOps.end(); ++phiOpIt) {
+    const Operation& op = static_cast<const Operation&>(*phiOpIt);
+    if (!op.verify(msg)) {
+      return false;
+    }
+  }
+
+  // Regular operations
+  auto regOpIt = m_RegOps.begin();
+  for (std::size_t opIdx = 0U; opIdx < m_RegOps.size(); ++opIdx) {
+    const Operation& op = static_cast<const Operation&>(*regOpIt);
+    if (opIdx + 1U != m_RegOps.size() && op.isTerminator()) {
       msg =
         bbName + " - terminator operation is not the last one in the block!";
       return false;
     }
-
     if (!op.verify(msg)) {
       return false;
     }
-    ++opIt;
+    ++regOpIt;
   }
 
   return true;

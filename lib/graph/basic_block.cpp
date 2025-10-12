@@ -12,9 +12,9 @@ void BasicBlock::addOp(std::unique_ptr<Operation> op) {
   auto listNodePtr = std::unique_ptr<detail::ListNode>(opPtr);
 
   if (opPtr->isa(GlobalOpcodes::PHI)) {
-    m_PhiOps.append_back(std::move(listNodePtr));
+    m_PhiOps.insertBack(std::move(listNodePtr));
   } else {
-    m_RegOps.append_back(std::move(listNodePtr));
+    m_RegOps.insertBack(std::move(listNodePtr));
   }
 }
 

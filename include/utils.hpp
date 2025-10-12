@@ -31,33 +31,10 @@ public:
     : m_next(next)
     , m_prev(prev) {}
 
-  void insert_after(ListNode* node) {
-    assert(node != nullptr);
+  void insertAfter(ListNode* node) noexcept;
+  void insertBefore(ListNode* node) noexcept;
 
-    auto next = m_next;
-    m_next = node;
-
-    node->m_prev = this;
-    node->m_next = next;
-
-    if (next != nullptr) {
-      next->m_prev = node;
-    }
-  }
-
-  void insert_before(ListNode* node) {
-    assert(node != nullptr);
-
-    auto prev = m_prev;
-    m_prev = node;
-
-    node->m_next = this;
-    node->m_prev = prev;
-
-    if (prev != nullptr) {
-      prev->m_next = node;
-    }
-  }
+  void unlink() noexcept;
 
 private:
   ListNode* m_next = nullptr;
@@ -284,56 +261,34 @@ public:
     return std::reverse_iterator(cbegin());
   }
 
-  std::size_t size() const {
+  std::size_t size() const noexcept {
     return m_size;
   }
 
-  void append_front(std::unique_ptr<ListNode> node) {
-    auto nodePtr = node.release();
+  void insertFront(std::unique_ptr<ListNode> node) noexcept;
+  void insertBack(std::unique_ptr<ListNode> node) noexcept;
 
-    if (m_size == 0LLU) {
-      m_head = m_tail = nodePtr;
-    } else {
-      m_head->insert_before(nodePtr);
-      m_head = nodePtr;
-    }
-    m_size += 1;
-  }
+  void insertBefore(iterator pos, std::unique_ptr<ListNode> node);
+  void insertBefore(const_iterator pos, std::unique_ptr<ListNode> node);
 
-  void append_back(std::unique_ptr<ListNode> node) {
-    auto nodePtr = node.release();
+  void insertAfter(iterator pos, std::unique_ptr<ListNode> node);
+  void insertAfter(const_iterator pos, std::unique_ptr<ListNode> node);
 
-    if (m_size == 0LLU) {
-      m_head = m_tail = nodePtr;
-    } else {
-      m_tail->insert_after(nodePtr);
-      m_tail = nodePtr;
-    }
-    m_size += 1;
-  }
+  void erase(iterator pos);
+  void erase(const_iterator pos);
 
-  void clear() noexcept {
-    freeNodes();
-    m_head = m_tail = nullptr;
-    m_size = 0LLU;
-  }
+  void clear() noexcept;
 
 private:
   ListNode* m_head = nullptr;
   ListNode* m_tail = nullptr;
   std::size_t m_size = 0LLU;
 
-  void freeNodes() noexcept {
-    if (m_size == 0) {
-      return;
-    }
-    ListNode* node = m_head;
-    while (node != nullptr) {
-      ListNode* next = node->m_next;
-      delete node;
-      node = next;
-    }
-  }
+  void freeNodes() noexcept;
+
+  void doInsertBefore(ListNode* posNodePtr, ListNode* nodePtr);
+  void doInsertAfter(ListNode* posNodePtr, ListNode* nodePtr);
+  void doErase(ListNode* nodePtr);
 };
 
 template <std::unsigned_integral IdType>

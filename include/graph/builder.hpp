@@ -56,8 +56,12 @@ public:
   }
 
   std::unique_ptr<Region> obtainRegion() {
-    if (!isRegionBuilding() && isBasicBlockBuilding()) {
-      return nullptr;
+    if (!isRegionBuilding()) {
+      throw IrisException("No region is building!");
+    }
+
+    if (isBasicBlockBuilding()) {
+      throw IrisException("Current region is still building!");
     }
 
     return std::exchange(m_currRegion, std::unique_ptr<Region>());

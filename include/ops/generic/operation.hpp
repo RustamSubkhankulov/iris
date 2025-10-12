@@ -216,26 +216,6 @@ private:
     return true;
   }
 
-  bool addUser(User&& user) {
-    if (!isUserUniqueWith(user, m_users.begin(), m_users.end())) {
-      // Provided user is already in the users list
-      return false;
-    }
-    m_users.push_back(std::move(user));
-    return true;
-  }
-
-  template <typename IterType>
-  void removeUser(IterType iter) {
-    m_users.erase(iter);
-  }
-
-  void removeUser(std::size_t pos) {
-    using iterator_t = decltype(m_users)::iterator;
-    using diff_t = typename std::iterator_traits<iterator_t>::difference_type;
-    m_users.erase(std::next(m_users.begin(), static_cast<diff_t>(pos)));
-  }
-
   void removeUser(const User& user) {
     m_users.remove(user);
   }

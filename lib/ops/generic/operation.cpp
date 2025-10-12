@@ -8,7 +8,8 @@ void Operation::clearAllUses() noexcept {
   // Nulify all inputs for every user of this operation
   for (auto& user : m_users) {
     auto* userOp = user.getUserOp();
-    userOp->m_inputs.at(user.getInputIndex()) = Input{};
+    auto& input = userOp->m_inputs.at(user.getInputIndex());
+    input.clear();
   }
   m_users.clear();
 }
@@ -25,7 +26,8 @@ void Operation::replaceAllUsesOf(Operation& other) noexcept {
   m_users = std::move(other.m_users);
   for (auto& user : m_users) {
     auto* userOp = user.getUserOp();
-    userOp->m_inputs.at(user.getInputIndex()) = Input{this};
+    auto& input = userOp->m_inputs.at(user.getInputIndex());
+    input.setDefiningOp(this);
   }
 }
 

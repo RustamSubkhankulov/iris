@@ -41,7 +41,7 @@ public:
     m_op = newOp;
   }
 
-  operator bool() const {
+  explicit operator bool() const {
     return (m_op != nullptr);
   }
 
@@ -50,6 +50,10 @@ public:
   }
 
   DataType getDataType() const;
+
+  void clear() {
+    m_op = nullptr;
+  }
 
 private:
   Operation* m_op;

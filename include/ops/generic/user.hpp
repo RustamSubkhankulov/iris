@@ -16,16 +16,6 @@ public:
   User(const User&) = default;
   User& operator=(const User&) = default;
 
-  User(User&& other)
-    : m_op(std::exchange(other.m_op, nullptr))
-    , m_inputIndex(std::exchange(other.m_inputIndex, -1)) {}
-
-  User& operator=(User&& other) {
-    m_op = std::exchange(other.m_op, nullptr);
-    m_inputIndex = std::exchange(other.m_inputIndex, -1);
-    return *this;
-  }
-
   virtual ~User() = default;
 
   const Operation* getUserOp() const {

@@ -46,7 +46,7 @@ public:
   }
 
   bool isEmpty() const {
-    return !(*this);
+    return (m_op == nullptr);
   }
 
   DataType getDataType() const;

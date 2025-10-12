@@ -135,6 +135,16 @@ public:
     return m_inputs.at(index);
   }
 
+  void setInput(std::size_t index, Input newInput) {
+    auto& input = m_inputs.at(index);
+    if (!input.isEmpty()) {
+      removeAsUserFromInput(index);
+    }
+
+    input = newInput;
+    addAsUserToInput(index, input);
+  }
+
   //--- Verification ---
 
   virtual bool verify(std::string& msg) const;

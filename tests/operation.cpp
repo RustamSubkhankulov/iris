@@ -164,3 +164,34 @@ TEST(GENERIC_OPERATION, EXFAIL_EMPTY_INPUT) {
   EXPECT_EQ(vres2, false);
   EXPECT_TRUE(msg.contains("input #1 is empty!"));
 }
+
+TEST(GENERIC_OPERATION, MANUAL_INPUT_SETTING) {
+  arith::AddOp addOp(nullptr, nullptr);
+
+  arith::ConstantOp cst_1(makeConstAttribute(1));
+  arith::ConstantOp cst_2(makeConstAttribute(2));
+
+  EXPECT_TRUE(addOp.getInputAt(0).isEmpty());
+  EXPECT_TRUE(addOp.getInputAt(1).isEmpty());
+  EXPECT_EQ(cst_1.getUsersNum(), 0);
+  EXPECT_EQ(cst_2.getUsersNum(), 0);
+
+  addOp.setInput(0, &cst_1);
+  addOp.setInput(1, &cst_2);
+
+  EXPECT_FALSE(addOp.getInputAt(0).isEmpty());
+  EXPECT_FALSE(addOp.getInputAt(1).isEmpty());
+  EXPECT_EQ(cst_1.getUsersNum(), 1);
+  EXPECT_EQ(cst_2.getUsersNum(), 1);
+
+  arith::ConstantOp newCst(makeConstAttribute(3));
+
+  addOp.setInput(0, &newCst);
+  addOp.setInput(1, &newCst);
+
+  EXPECT_FALSE(addOp.getInputAt(0).isEmpty());
+  EXPECT_FALSE(addOp.getInputAt(1).isEmpty());
+  EXPECT_EQ(cst_1.getUsersNum(), 0);
+  EXPECT_EQ(cst_2.getUsersNum(), 0);
+  EXPECT_EQ(newCst.getUsersNum(), 2);
+}

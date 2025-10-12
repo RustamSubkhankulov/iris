@@ -87,6 +87,10 @@ public:
     return (succ != nullptr);
   }
 
+  BasicBlock* getSucc(bool which = true) {
+    return (which == true) ? m_succTrue : m_succFalse;
+  }
+
   const BasicBlock* getSucc(bool which = true) const {
     return (which == true) ? m_succTrue : m_succFalse;
   }

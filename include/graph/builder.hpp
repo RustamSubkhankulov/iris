@@ -60,7 +60,6 @@ public:
       return nullptr;
     }
 
-    m_currRegion->finalize();
     return std::exchange(m_currRegion, std::unique_ptr<Region>());
   }
 

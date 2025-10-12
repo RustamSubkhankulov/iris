@@ -73,7 +73,7 @@ TEST(GENERIC_OPERATION, CLEARING_OPERATIONS_USES) {
   EXPECT_TRUE(copyOp2.getInputAt(0).isEmpty());
 }
 
-TEST(GENERIC_OPERATION, REPLACING_OPERATIONS_USES_1) {
+TEST(GENERIC_OPERATION, REPLACING_OPERATIONS_USES_WITH) {
   arith::ConstantOp cst_1(makeConstAttribute(1));
   arith::ConstantOp cst_2(makeConstAttribute(1));
 
@@ -95,7 +95,7 @@ TEST(GENERIC_OPERATION, REPLACING_OPERATIONS_USES_1) {
   EXPECT_EQ(copyOp2.getInputAt(0).getDefiningOp(), &newAddOp);
 }
 
-TEST(GENERIC_OPERATION, REPLACING_OPERATIONS_USES_2) {
+TEST(GENERIC_OPERATION, REPLACING_OPERATIONS_USES_OF) {
   arith::ConstantOp cst_1(makeConstAttribute(1));
   arith::ConstantOp cst_2(makeConstAttribute(1));
 

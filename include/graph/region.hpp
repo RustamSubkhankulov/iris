@@ -35,78 +35,44 @@ public:
   void addBasicBlock(std::unique_ptr<BasicBlock> basicBlock) {
     basicBlock->setParentRegion(this);
     m_BasicBlocks.push_back(std::move(basicBlock));
-    if (m_BasicBlocks.size() == 1) {
-      m_startBB = m_BasicBlocks.front().get();
-    }
   }
 
-  void finalize() {
-    m_finalBB = m_BasicBlocks.back().get();
-  }
+  void addStartBasicBlock(std::unique_ptr<BasicBlock> basicBlock);
+  void addFinalBasicBlock(std::unique_ptr<BasicBlock> basicBlock);
 
-  const BasicBlock& getStartBasicBlock() const {
-    if (m_startBB != nullptr) {
-      throw IrisException("No start basic block specified!");
-    }
-    return *m_startBB;
-  }
+  bool setStartBasicBlock(bb_id_t id);
+  bool setStartBasicBlock(BasicBlock* basicBlock);
 
-  const BasicBlock& getFinalBasicBlock() const {
-    if (m_finalBB != nullptr) {
-      throw IrisException("No end basic block specified!");
-    }
-    return *m_finalBB;
-  }
+  bool setFinalBasicBlock(bb_id_t id);
+  bool setFinalBasicBlock(BasicBlock* basicBlock);
+
+  const BasicBlock& getStartBasicBlock() const;
+
+  const BasicBlock& getFinalBasicBlock() const;
 
   const std::list<std::unique_ptr<BasicBlock>>& getBasicBlocks() const {
     return m_BasicBlocks;
   }
 
-  BasicBlock* getBasicBlockByID(bb_id_t id) {
-    for (const auto& bb : m_BasicBlocks) {
-      if (bb->getID() == id) {
-        return bb.get();
-      }
-    }
-    return nullptr;
-  }
-
-  const BasicBlock* getBasicBlockByID(bb_id_t id) const {
-    for (const auto& bb : m_BasicBlocks) {
-      if (bb->getID() == id) {
-        return bb.get();
-      }
-    }
-    return nullptr;
-  }
+  BasicBlock* getBasicBlockByID(bb_id_t id);
+  const BasicBlock* getBasicBlockByID(bb_id_t id) const;
 
   bool isBasicBlockPresent(bb_id_t id) const {
     return (getBasicBlockByID(id) != nullptr);
   }
 
-  void dump(std::ostream& os) {
-    os << m_name << ":" << std::endl;
-    std::string bbIdent = "  ";
-    for (const auto& bbPtr : m_BasicBlocks) {
-      bbPtr->dump(os, bbIdent);
-    }
-  }
+  bool isBasicBlockPresent(const BasicBlock* basicBlock) const;
 
-  bool verify(std::string& msg) const {
-    auto bbsNum = m_BasicBlocks.size();
-    std::size_t idx = 0;
+  bool removeBasicBlock(BasicBlock* basicBlock);
+  bool removeBasicBlock(bb_id_t id);
 
-    for (const auto& bb : m_BasicBlocks) {
-      bool isStart = (idx == 0);
-      bool isFinal = (idx == bbsNum - 1);
+  bool replaceBasicBlockWith(bb_id_t id,
+                             std::unique_ptr<BasicBlock> newBasicBlock);
+  bool replaceBasicBlockWith(BasicBlock* oldBasicBlock,
+                             std::unique_ptr<BasicBlock> newBasicBlock);
 
-      if (!bb->verify(msg, isStart, isFinal)) {
-        return false;
-      }
-      idx += 1;
-    }
-    return true;
-  }
+  void dump(std::ostream& os);
+  bool verify(std::string& msg) const;
 
 private:
   std::string m_name;

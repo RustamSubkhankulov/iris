@@ -5,8 +5,10 @@
 #include <memory>
 #include <ostream>
 
-#include <ops/dialects/opcodes.hpp>
 #include <ops/generic/operation.hpp>
+
+#include <ops/dialects/ctrlflow/ops.hpp>
+#include <ops/dialects/opcodes.hpp>
 
 namespace iris {
 
@@ -96,9 +98,36 @@ public:
 
   //--- Operation ---
 
-  void addOp(std::unique_ptr<Operation> op);
+  using OpList = detail::List;
+  using op_iterator = OpList::iterator;
+  using const_op_iterator = OpList::const_iterator;
+
+  const OpList& getPhiOps() const& {
+    return m_PhiOps;
+  }
+
+  const OpList& getOps() const& {
+    return m_RegOps;
+  }
+
+  void insertPhiOpBack(std::unique_ptr<ctrlflow::PhiOp> op);
+  void erasePhiOp(op_iterator pos);
+  void erasePhiOp(const_op_iterator pos);
+
+  void insertOpFront(std::unique_ptr<Operation> op);
+  void insertOpBack(std::unique_ptr<Operation> op);
+
+  void insertOpAfter(op_iterator pos, std::unique_ptr<Operation> op);
+  void insertOpAfter(const_op_iterator pos, std::unique_ptr<Operation> op);
+
+  void insertOpBefore(op_iterator pos, std::unique_ptr<Operation> op);
+  void insertOpBefore(const_op_iterator pos, std::unique_ptr<Operation> op);
+
+  void eraseOp(op_iterator pos);
+  void eraseOp(const_op_iterator pos);
 
   //--- Misc ---
+
   void setID(bb_id_t id) {
     m_ID = id;
   }
@@ -117,14 +146,15 @@ private:
   BasicBlock* m_succTrue = nullptr;
   BasicBlock* m_succFalse = nullptr;
 
-  detail::List m_PhiOps;
-  detail::List m_RegOps;
+  OpList m_PhiOps;
+  OpList m_RegOps;
 
   Region* m_ParentRegion = nullptr;
 
   // Identifier of the basic block
   bb_id_t m_ID;
 
+  // Verify operations, which bb contains
   bool verifyOps(std::string& msg, const std::string& bbName);
 
   void removeFromPredsAsSucc();

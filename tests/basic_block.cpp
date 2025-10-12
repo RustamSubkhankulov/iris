@@ -211,7 +211,7 @@ TEST(BASIC_BLOCK, EXFAIL_FINAL_HAS_NO_RETURN) {
   region.addBasicBlock(std::make_unique<BasicBlock>(1));
   auto* bb1 = region.getBasicBlockByID(1);
 
-  bb1->addOp(std::make_unique<ctrlflow::JumpOp>());
+  bb1->insertOpBack(std::make_unique<ctrlflow::JumpOp>());
 
   std::string msg;
   bool vres = bb1->verify(msg, true, true);
@@ -230,7 +230,7 @@ TEST(BASIC_BLOCK, EXFAIL_TWO_SUCC_IDENTIVAL) {
 
   bb1->linkSucc(bb2, true);
   bb1->linkSucc(bb2, false);
-  bb1->addOp(std::make_unique<ctrlflow::JumpOp>());
+  bb1->insertOpBack(std::make_unique<ctrlflow::JumpOp>());
 
   std::string msg;
   bool vres = bb1->verify(msg, true);
@@ -251,7 +251,7 @@ TEST(BASIC_BLOCK, EXFAIL_TWO_SUCC_NO_JUMPC) {
 
   bb1->linkSucc(bb2, true);
   bb1->linkSucc(bb3, false);
-  bb1->addOp(std::make_unique<ctrlflow::JumpOp>());
+  bb1->insertOpBack(std::make_unique<ctrlflow::JumpOp>());
 
   std::string msg;
   bool vres = bb1->verify(msg, true);
@@ -274,8 +274,8 @@ TEST(BASIC_BLOCK, EXFAIL_ONE_SUCC_WITH_JUMPC) {
   auto val = std::make_unique<arith::ConstantOp>(makeConstAttribute(true));
   auto jmp = std::make_unique<ctrlflow::JumpcOp>(val.get());
 
-  bb1->addOp(std::move(val));
-  bb1->addOp(std::move(jmp));
+  bb1->insertOpBack(std::move(val));
+  bb1->insertOpBack(std::move(jmp));
 
   std::string msg;
   bool vres = bb1->verify(msg, true);
@@ -295,9 +295,9 @@ TEST(BASIC_BLOCK, EXFAIL_TERMINATOR_INSIDE) {
   auto jmp = std::make_unique<ctrlflow::JumpcOp>(vl1.get());
   auto ret = std::make_unique<ctrlflow::ReturnOp>();
 
-  bb1->addOp(std::move(vl1));
-  bb1->addOp(std::move(jmp));
-  bb1->addOp(std::move(ret));
+  bb1->insertOpBack(std::move(vl1));
+  bb1->insertOpBack(std::move(jmp));
+  bb1->insertOpBack(std::move(ret));
 
   std::string msg;
   bool vres = bb1->verify(msg, true, true);

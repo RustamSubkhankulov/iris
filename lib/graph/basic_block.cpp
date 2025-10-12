@@ -1,21 +1,69 @@
 #include <graph/basic_block.hpp>
 #include <graph/region.hpp>
 
-#include <ops/dialects/ctrlflow/ops.hpp>
 #include <ops/dialects/opcodes.hpp>
 
 namespace iris {
 
-void BasicBlock::addOp(std::unique_ptr<Operation> op) {
+void BasicBlock::insertPhiOpBack(std::unique_ptr<ctrlflow::PhiOp> op) {
   auto opPtr = op.release();
   opPtr->setParentBasicBlock(this);
-  auto listNodePtr = std::unique_ptr<detail::ListNode>(opPtr);
+  m_PhiOps.insertBack(std::unique_ptr<detail::ListNode>(opPtr));
+}
 
-  if (opPtr->isa(GlobalOpcodes::PHI)) {
-    m_PhiOps.insertBack(std::move(listNodePtr));
-  } else {
-    m_RegOps.insertBack(std::move(listNodePtr));
-  }
+void BasicBlock::erasePhiOp(op_iterator pos) {
+  m_PhiOps.erase(pos);
+}
+
+void BasicBlock::erasePhiOp(const_op_iterator pos) {
+  m_PhiOps.erase(pos);
+}
+
+void BasicBlock::insertOpFront(std::unique_ptr<Operation> op) {
+  auto opPtr = op.release();
+  opPtr->setParentBasicBlock(this);
+  m_RegOps.insertFront(std::unique_ptr<detail::ListNode>(opPtr));
+}
+
+void BasicBlock::insertOpBack(std::unique_ptr<Operation> op) {
+  auto opPtr = op.release();
+  opPtr->setParentBasicBlock(this);
+  m_RegOps.insertBack(std::unique_ptr<detail::ListNode>(opPtr));
+}
+
+void BasicBlock::insertOpAfter(op_iterator pos, std::unique_ptr<Operation> op) {
+  auto opPtr = op.release();
+  opPtr->setParentBasicBlock(this);
+  m_RegOps.insertAfter(pos, std::unique_ptr<detail::ListNode>(opPtr));
+}
+
+void BasicBlock::insertOpAfter(const_op_iterator pos,
+                               std::unique_ptr<Operation> op) {
+  auto opPtr = op.release();
+  opPtr->setParentBasicBlock(this);
+  m_RegOps.insertAfter(pos, std::unique_ptr<detail::ListNode>(opPtr));
+}
+
+void BasicBlock::insertOpBefore(op_iterator pos,
+                                std::unique_ptr<Operation> op) {
+  auto opPtr = op.release();
+  opPtr->setParentBasicBlock(this);
+  m_RegOps.insertBefore(pos, std::unique_ptr<detail::ListNode>(opPtr));
+}
+
+void BasicBlock::insertOpBefore(const_op_iterator pos,
+                                std::unique_ptr<Operation> op) {
+  auto opPtr = op.release();
+  opPtr->setParentBasicBlock(this);
+  m_RegOps.insertBefore(pos, std::unique_ptr<detail::ListNode>(opPtr));
+}
+
+void BasicBlock::eraseOp(op_iterator pos) {
+  m_RegOps.erase(pos);
+}
+
+void BasicBlock::eraseOp(const_op_iterator pos) {
+  m_RegOps.erase(pos);
 }
 
 void BasicBlock::dump(std::ostream& os, const std::string& bbIdent) {
@@ -144,6 +192,8 @@ bool BasicBlock::verify(std::string& msg, bool isStart, bool isFinal) {
 }
 
 bool BasicBlock::verifyOps(std::string& msg, const std::string& bbName) {
+  // TODO check that phi and reg ops are not inter-mixed
+
   // Phi operations
   for (auto phiOpIt = m_PhiOps.begin(); phiOpIt != m_PhiOps.end(); ++phiOpIt) {
     const Operation& op = static_cast<const Operation&>(*phiOpIt);

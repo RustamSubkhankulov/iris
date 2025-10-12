@@ -131,6 +131,7 @@ void List::doErase(ListNode* nodePtr) {
   }
 
   nodePtr->unlink();
+  delete nodePtr;
   m_size -= 1LLU;
 }
 

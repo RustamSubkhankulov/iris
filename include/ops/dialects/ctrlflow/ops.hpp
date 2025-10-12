@@ -13,8 +13,6 @@
 #include <ops/generic/operation.hpp>
 #include <ops/generic/user.hpp>
 
-#include <graph/basic_block.hpp>
-
 namespace iris {
 namespace ctrlflow {
 

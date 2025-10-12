@@ -113,7 +113,7 @@ public:
     auto* opPtr = op.get();
 
     op->setID(m_currRegion->obtainIDForOperation());
-    m_currBasicBlock->addOp(std::move(op));
+    m_currBasicBlock->insertOpBack(std::move(op));
     return opPtr;
   }
 

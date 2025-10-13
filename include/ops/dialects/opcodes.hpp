@@ -6,6 +6,7 @@
 namespace iris {
 
 enum GlobalOpcodes : opcode_t {
+  /* Arith */
   ADD = nullopcode + 1,
   SUB,
   MUL,
@@ -13,8 +14,12 @@ enum GlobalOpcodes : opcode_t {
   CONST,
   CAST,
   CMP,
+
+  /* Builtin */
   PARAM,
   COPY,
+
+  /* Ctrlflow */
   CALL,
   JUMP,
   JUMPC,

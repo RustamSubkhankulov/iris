@@ -184,7 +184,7 @@ public:
     return m_ID;
   }
 
-  void print(std::ostream& os) const noexcept;
+  void print(std::ostream& os) const;
 
 private:
   // Operation code - unique for each operation

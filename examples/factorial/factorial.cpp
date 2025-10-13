@@ -17,7 +17,8 @@ int main() {
 
   // bb1: checking whether recursion is needed for computation
   builder.startNewBasicBlock();
-  auto v3 = builder.createAndAddOp<arith::CmpOp>(a0, c2, arith::CmpOp::Pred::B);
+  auto v3 =
+    builder.createAndAddOp<arith::CompareOp>(a0, c2, arith::CompareOp::Pred::B);
   auto done = builder.obtainIdForBasicBlock();
   /* n4 */ builder.createAndAddOp<ctrlflow::JumpcOp>(v3);
   auto& bb1 = builder.finalizeBasicBlock();

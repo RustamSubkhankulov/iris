@@ -72,7 +72,7 @@ private:
 // Inputs does not have to be the same data type as operation's data type
 using HeterogenArithOp = BinaryArithOp;
 
-class CmpOp final : public HeterogenArithOp {
+class CompareOp final : public HeterogenArithOp {
 public:
   enum class Pred : uint8_t {
     EQ,  // Equal
@@ -83,9 +83,21 @@ public:
     BE,  // Below or greater
   };
 
-  CmpOp(Input inputX, Input inputY, Pred pred)
+  CompareOp(Input inputX, Input inputY, Pred pred)
     : BinaryArithOp(GlobalOpcodes::CMP, DataType::BOOL, inputX, inputY)
-    , m_pred(pred) {}
+    , m_pred(pred) {
+    // clang-format off
+      switch (m_pred) {
+        case Pred::EQ:   [[fallthrough]];
+        case Pred::NEQ:  [[fallthrough]];
+        case Pred::A:    [[fallthrough]];
+        case Pred::B:    [[fallthrough]];
+        case Pred::AE:   [[fallthrough]];
+        case Pred::BE:   break;
+        default: throw IrisException("Unexpected predicate in CompareOp operation!");
+      }
+    // clang-format on
+  }
 
   std::string_view getMnemonic() const override {
     // clang-format off
@@ -96,7 +108,7 @@ public:
       case Pred::B:    return "cmp.b"; 
       case Pred::AE:   return "cmp.ae"; 
       case Pred::BE:   return "cmp.be";
-      default: throw IrisException("Unexpected predicate in CmpOp operation!");
+      default:         return "cmp.?";
     }
     // clang-format on
   }
@@ -158,7 +170,7 @@ public:
 
 class ConstantOp final : public ArithOp {
 public:
-  explicit ConstantOp(std::unique_ptr<ConstAttribute>&& attr)
+  explicit ConstantOp(std::unique_ptr<ConstAttribute> attr)
     : ArithOp(GlobalOpcodes::CONST, attr->getDataType())
     , m_attr(std::move(attr)) {}
 

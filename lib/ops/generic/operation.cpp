@@ -110,7 +110,7 @@ bool Operation::verify(std::string& msg) const noexcept {
   return true;
 }
 
-void Operation::print(std::ostream& os) const noexcept {
+void Operation::print(std::ostream& os) const {
   printID(os);
   if (hasResult()) {
     os << "." << m_dataType;

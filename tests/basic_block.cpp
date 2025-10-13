@@ -1,6 +1,3 @@
-#include "attributes.hpp"
-#include "ops/dialects/arith/ops.hpp"
-#include "ops/dialects/ctrlflow/ops.hpp"
 #include <gtest/gtest.h>
 
 #include <iris.hpp>
@@ -305,4 +302,20 @@ TEST(BASIC_BLOCK, EXFAIL_TERMINATOR_INSIDE) {
   EXPECT_FALSE(vres);
   EXPECT_TRUE(
     msg.contains("terminator operation is not the last one in the block"));
+}
+
+TEST(BASIC_BLOCK, EXFAIL_PHI_OP_NOT_IN_ITS_LIST) {
+  Region region("foo");
+
+  region.addBasicBlock(std::make_unique<BasicBlock>(1));
+  auto* bb1 = region.getBasicBlockByID(1);
+
+  bb1->insertOpBack(std::make_unique<ctrlflow::PhiOp>(nullptr, nullptr));
+  bb1->insertOpBack(std::make_unique<ctrlflow::ReturnOp>());
+
+  std::string msg;
+  bool vres = bb1->verify(msg, true, true);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("phi operation is not in the phi ops list"));
 }

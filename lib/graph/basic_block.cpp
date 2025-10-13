@@ -229,8 +229,6 @@ bool BasicBlock::verify(std::string& msg, bool isStart, bool isFinal) {
 }
 
 bool BasicBlock::verifyOps(std::string& msg, const std::string& bbName) {
-  // TODO check that phi and reg ops are not inter-mixed
-
   // Phi operations
   for (auto phiOpIt = m_PhiOps.begin(); phiOpIt != m_PhiOps.end(); ++phiOpIt) {
     const Operation& op = static_cast<const Operation&>(*phiOpIt);
@@ -248,9 +246,16 @@ bool BasicBlock::verifyOps(std::string& msg, const std::string& bbName) {
         bbName + " - terminator operation is not the last one in the block!";
       return false;
     }
+
+    if (op.isa(GlobalOpcodes::PHI)) {
+      msg = bbName + " - phi operation is not in the phi ops list!";
+      return false;
+    }
+
     if (!op.verify(msg)) {
       return false;
     }
+
     ++regOpIt;
   }
 

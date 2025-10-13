@@ -110,6 +110,6 @@ Tests include:
 - Separate test suites for each dialect and its operations' verifiers and construction pre-conditions (``tests/dialects/``);
 - Tests of verifiers (ex-fails) and API tests for:
     - Generic operation ``iris::Operation``;
-    - Basic block ``iris::BasicBlock`` (WIP);
+    - Basic block ``iris::BasicBlock``;
 
 Tests for regions (``iris::Region``) and IR-builder (``iris::IRBuilder``) will be added soon.

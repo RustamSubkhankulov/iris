@@ -1,4 +1,3 @@
-#include "ops/dialects/arith/ops.hpp"
 #include <gtest/gtest.h>
 
 #include <iris.hpp>

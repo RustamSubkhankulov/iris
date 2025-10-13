@@ -234,3 +234,14 @@ TEST(GENERIC_OPERATION, MANUAL_INPUT_SETTING) {
   EXPECT_EQ(cst_2.getUsersNum(), 0);
   EXPECT_EQ(newCst.getUsersNum(), 2);
 }
+
+TEST(GENERIC_OPERATION, ID_MANIPULATING) {
+  arith::AddOp op(nullptr, nullptr);
+
+  EXPECT_EQ(op.getID(), 0);
+
+  op_id_t newID = 1U;
+  op.setID(newID);
+
+  EXPECT_EQ(op.getID(), newID);
+}

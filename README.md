@@ -35,7 +35,7 @@ factorial:
       c2.ui32 arith.const (2) -> (v3)
   ^bb1 <from bb0> <to T:bb2 / F:bb3> :
       v3.b arith.cmp.b (a0 : ui32, c2 : ui32) -> (n4)
-      n4 ctrlflow.jmpc ^bb2 (v3 : b)
+      n4 ctrlflow.jmpc (v3 : b)
   ^bb3 <from bb1> <to bb2> :
       v5.ui32 arith.sub (a0 : ui32, c1 : ui32) -> (v6)
       v6.ui32 ctrlflow.call @factorial (v5 : ui32) -> (v7)

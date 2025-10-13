@@ -9,6 +9,7 @@ TEST(BUILTIN, PARAM) {
   EXPECT_EQ(prmOp.getDataType(), DataType::SI32);
   EXPECT_EQ(prmOp.getInputsNum(), 0);
   EXPECT_FALSE(prmOp.hasInputs());
+  EXPECT_FALSE(prmOp.isTerminator());
 
   std::string msg;
   bool vres = prmOp.verify(msg);
@@ -24,6 +25,7 @@ TEST(BUILTIN, COPY) {
   EXPECT_EQ(copyOp.getDataType(), DataType::SI32);
   EXPECT_EQ(copyOp.getInputsNum(), 1);
   EXPECT_TRUE(copyOp.hasInputs());
+  EXPECT_FALSE(copyOp.isTerminator());
 
   std::string msg;
   bool vres = copyOp.verify(msg);

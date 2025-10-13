@@ -3,14 +3,21 @@
 #include <iris.hpp>
 using namespace iris;
 
-TEST(BUILTIN, PARAM) {
+TEST(BUILTIN, PARAM_INVARIANTS) {
+  builtin::ParamOp op(DataType::SI32);
+
+  EXPECT_FALSE(op.hasInputs());
+  EXPECT_EQ(op.getInputsNum(), 0);
+
+  EXPECT_FALSE(op.isTerminator());
+  EXPECT_TRUE(op.isa(GlobalOpcodes::PARAM));
+}
+
+TEST(BUILTIN, PARAM_BASIC) {
   builtin::ParamOp prmOp(DataType::SI32);
 
-  EXPECT_EQ(prmOp.getDataType(), DataType::SI32);
-  EXPECT_EQ(prmOp.getInputsNum(), 0);
-  EXPECT_FALSE(prmOp.hasInputs());
-  EXPECT_FALSE(prmOp.isTerminator());
   EXPECT_TRUE(prmOp.hasResult());
+  EXPECT_EQ(prmOp.getDataType(), DataType::SI32);
 
   std::string msg;
   bool vres = prmOp.verify(msg);
@@ -19,15 +26,22 @@ TEST(BUILTIN, PARAM) {
   EXPECT_TRUE(msg.empty());
 }
 
+TEST(BUILTIN, COPY_INVARIANTS) {
+  builtin::CopyOp op(nullptr);
+
+  EXPECT_TRUE(op.hasInputs());
+  EXPECT_EQ(op.getInputsNum(), 1);
+
+  EXPECT_FALSE(op.isTerminator());
+  EXPECT_TRUE(op.isa(GlobalOpcodes::COPY));
+}
+
 TEST(BUILTIN, COPY) {
   builtin::ParamOp prmOp(DataType::SI32);
   builtin::CopyOp copyOp(&prmOp);
 
-  EXPECT_EQ(copyOp.getDataType(), DataType::SI32);
-  EXPECT_EQ(copyOp.getInputsNum(), 1);
-  EXPECT_TRUE(copyOp.hasInputs());
-  EXPECT_FALSE(copyOp.isTerminator());
   EXPECT_TRUE(copyOp.hasResult());
+  EXPECT_EQ(copyOp.getDataType(), DataType::SI32);
 
   std::string msg;
   bool vres = copyOp.verify(msg);

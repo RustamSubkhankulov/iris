@@ -3,14 +3,21 @@
 #include <iris.hpp>
 using namespace iris;
 
+TEST(CTRLFLOW, CALL_INVARIANTS) {
+  ctrlflow::CallOp op("foo", DataType::SI32, {});
+
+  EXPECT_FALSE(op.isTerminator());
+  EXPECT_TRUE(op.isa(GlobalOpcodes::CALL));
+}
+
 TEST(CTRLFLOW, CALL_NO_INPUTS) {
   ctrlflow::CallOp callOp("foo", DataType::SI32, {});
 
-  EXPECT_EQ(callOp.getDataType(), DataType::SI32);
-  EXPECT_EQ(callOp.getInputsNum(), 0);
-  EXPECT_FALSE(callOp.hasInputs());
-  EXPECT_FALSE(callOp.isTerminator());
   EXPECT_TRUE(callOp.hasResult());
+  EXPECT_EQ(callOp.getDataType(), DataType::SI32);
+
+  EXPECT_FALSE(callOp.hasInputs());
+  EXPECT_EQ(callOp.getInputsNum(), 0);
 
   std::string msg;
   bool vres = callOp.verify(msg);
@@ -24,11 +31,11 @@ TEST(CTRLFLOW, CALL_ONE_INPUT) {
 
   ctrlflow::CallOp callOp("foo", DataType::SI32, {&prmOp});
 
-  EXPECT_EQ(callOp.getDataType(), DataType::SI32);
-  EXPECT_EQ(callOp.getInputsNum(), 1);
-  EXPECT_TRUE(callOp.hasInputs());
-  EXPECT_FALSE(callOp.isTerminator());
   EXPECT_TRUE(callOp.hasResult());
+  EXPECT_EQ(callOp.getDataType(), DataType::SI32);
+
+  EXPECT_TRUE(callOp.hasInputs());
+  EXPECT_EQ(callOp.getInputsNum(), 1);
 
   std::string msg;
   bool vres = callOp.verify(msg);
@@ -43,11 +50,11 @@ TEST(CTRLFLOW, CALL_MULTIPLE_INPUT) {
 
   ctrlflow::CallOp callOp("foo", DataType::SI32, {&prmOp1, &prmOp2});
 
-  EXPECT_EQ(callOp.getDataType(), DataType::SI32);
-  EXPECT_EQ(callOp.getInputsNum(), 2);
-  EXPECT_TRUE(callOp.hasInputs());
-  EXPECT_FALSE(callOp.isTerminator());
   EXPECT_TRUE(callOp.hasResult());
+  EXPECT_EQ(callOp.getDataType(), DataType::SI32);
+
+  EXPECT_TRUE(callOp.hasInputs());
+  EXPECT_EQ(callOp.getInputsNum(), 2);
 
   std::string msg;
   bool vres = callOp.verify(msg);
@@ -59,11 +66,11 @@ TEST(CTRLFLOW, CALL_MULTIPLE_INPUT) {
 TEST(CTRLFLOW, CALL_NONE_RETURN_DATATYPE) {
   ctrlflow::CallOp callOp("foo", DataType::NONE, {});
 
-  EXPECT_EQ(callOp.getDataType(), DataType::NONE);
-  EXPECT_EQ(callOp.getInputsNum(), 0);
-  EXPECT_FALSE(callOp.hasInputs());
-  EXPECT_FALSE(callOp.isTerminator());
   EXPECT_FALSE(callOp.hasResult());
+  EXPECT_EQ(callOp.getDataType(), DataType::NONE);
+
+  EXPECT_FALSE(callOp.hasInputs());
+  EXPECT_EQ(callOp.getInputsNum(), 0);
 
   std::string msg;
   bool vres = callOp.verify(msg);
@@ -72,14 +79,21 @@ TEST(CTRLFLOW, CALL_NONE_RETURN_DATATYPE) {
   EXPECT_TRUE(msg.empty());
 }
 
-TEST(CTRLFLOW, JUMP) {
-  ctrlflow::JumpOp jumpOp;
+TEST(CTRLFLOW, JUMP_INVARIANTS) {
+  ctrlflow::JumpOp op;
 
-  EXPECT_EQ(jumpOp.getDataType(), DataType::NONE);
-  EXPECT_EQ(jumpOp.getInputsNum(), 0);
-  EXPECT_FALSE(jumpOp.hasInputs());
-  EXPECT_TRUE(jumpOp.isTerminator());
-  EXPECT_FALSE(jumpOp.hasResult());
+  EXPECT_FALSE(op.hasResult());
+  EXPECT_EQ(op.getDataType(), DataType::NONE);
+
+  EXPECT_FALSE(op.hasInputs());
+  EXPECT_EQ(op.getInputsNum(), 0);
+
+  EXPECT_TRUE(op.isTerminator());
+  EXPECT_TRUE(op.isa(GlobalOpcodes::JUMP));
+}
+
+TEST(CTRLFLOW, JUMP_BASIC) {
+  ctrlflow::JumpOp jumpOp;
 
   std::string msg;
   bool vres = jumpOp.verify(msg);
@@ -88,16 +102,23 @@ TEST(CTRLFLOW, JUMP) {
   EXPECT_TRUE(msg.empty());
 }
 
-TEST(CTRLFLOW, JUMPC) {
+TEST(CTRLFLOW, JUMPC_INVARIANTS) {
+  ctrlflow::JumpcOp op(nullptr);
+
+  EXPECT_FALSE(op.hasResult());
+  EXPECT_EQ(op.getDataType(), DataType::NONE);
+
+  EXPECT_TRUE(op.hasInputs());
+  EXPECT_EQ(op.getInputsNum(), 1);
+
+  EXPECT_TRUE(op.isTerminator());
+  EXPECT_TRUE(op.isa(GlobalOpcodes::JUMPC));
+}
+
+TEST(CTRLFLOW, JUMPC_BASIC) {
   builtin::ParamOp prmOp(DataType::BOOL);
 
   ctrlflow::JumpcOp jumpcOp(&prmOp);
-
-  EXPECT_EQ(jumpcOp.getDataType(), DataType::NONE);
-  EXPECT_EQ(jumpcOp.getInputsNum(), 1);
-  EXPECT_TRUE(jumpcOp.hasInputs());
-  EXPECT_TRUE(jumpcOp.isTerminator());
-  EXPECT_FALSE(jumpcOp.hasResult());
 
   std::string msg;
   bool vres = jumpcOp.verify(msg);
@@ -106,14 +127,21 @@ TEST(CTRLFLOW, JUMPC) {
   EXPECT_TRUE(msg.empty());
 }
 
+TEST(CTRLFLOW, RETURN_INVARIANTS) {
+  ctrlflow::ReturnOp op;
+
+  EXPECT_FALSE(op.hasResult());
+  EXPECT_EQ(op.getDataType(), DataType::NONE);
+
+  EXPECT_TRUE(op.isTerminator());
+  EXPECT_TRUE(op.isa(GlobalOpcodes::RETURN));
+}
+
 TEST(CTRLFLOW, RETURN_NO_INPUT) {
   ctrlflow::ReturnOp retOp;
 
-  EXPECT_EQ(retOp.getDataType(), DataType::NONE);
-  EXPECT_EQ(retOp.getInputsNum(), 0);
   EXPECT_FALSE(retOp.hasInputs());
-  EXPECT_TRUE(retOp.isTerminator());
-  EXPECT_FALSE(retOp.hasResult());
+  EXPECT_EQ(retOp.getInputsNum(), 0);
 
   std::string msg;
   bool vres = retOp.verify(msg);
@@ -127,11 +155,8 @@ TEST(CTRLFLOW, RETURN_WITH_INPUT) {
 
   ctrlflow::ReturnOp retOp(&prmOp);
 
-  EXPECT_EQ(retOp.getDataType(), DataType::NONE);
-  EXPECT_EQ(retOp.getInputsNum(), 1);
   EXPECT_TRUE(retOp.hasInputs());
-  EXPECT_TRUE(retOp.isTerminator());
-  EXPECT_FALSE(retOp.hasResult());
+  EXPECT_EQ(retOp.getInputsNum(), 1);
 
   std::string msg;
   bool vres = retOp.verify(msg);
@@ -140,16 +165,23 @@ TEST(CTRLFLOW, RETURN_WITH_INPUT) {
   EXPECT_TRUE(msg.empty());
 }
 
+TEST(CTRLFLOW, PHI_INVARIANTS) {
+  ctrlflow::PhiOp op({nullptr});
+
+  EXPECT_FALSE(op.isTerminator());
+  EXPECT_TRUE(op.isa(GlobalOpcodes::PHI));
+}
+
 TEST(CTRLFLOW, PHI_ONE_INPUT) {
   builtin::ParamOp prmOp(DataType::SI32);
 
   ctrlflow::PhiOp phiOp({&prmOp});
 
-  EXPECT_EQ(phiOp.getDataType(), DataType::SI32);
-  EXPECT_EQ(phiOp.getInputsNum(), 1);
-  EXPECT_TRUE(phiOp.hasInputs());
-  EXPECT_FALSE(phiOp.isTerminator());
   EXPECT_TRUE(phiOp.hasResult());
+  EXPECT_EQ(phiOp.getDataType(), DataType::SI32);
+
+  EXPECT_TRUE(phiOp.hasInputs());
+  EXPECT_EQ(phiOp.getInputsNum(), 1);
 
   std::string msg;
   bool vres = phiOp.verify(msg);
@@ -164,11 +196,11 @@ TEST(CTRLFLOW, PHI_TWO_INPUTS) {
 
   ctrlflow::PhiOp phiOp(&prmOp1, &prmOp2);
 
-  EXPECT_EQ(phiOp.getDataType(), DataType::SI32);
-  EXPECT_EQ(phiOp.getInputsNum(), 2);
-  EXPECT_TRUE(phiOp.hasInputs());
-  EXPECT_FALSE(phiOp.isTerminator());
   EXPECT_TRUE(phiOp.hasResult());
+  EXPECT_EQ(phiOp.getDataType(), DataType::SI32);
+
+  EXPECT_TRUE(phiOp.hasInputs());
+  EXPECT_EQ(phiOp.getInputsNum(), 2);
 
   std::string msg;
   bool vres = phiOp.verify(msg);
@@ -184,11 +216,11 @@ TEST(CTRLFLOW, PHI_MULTIPLE_INPUTS) {
 
   ctrlflow::PhiOp phiOp({&prmOp1, &prmOp2, &prmOp3});
 
-  EXPECT_EQ(phiOp.getDataType(), DataType::SI32);
-  EXPECT_EQ(phiOp.getInputsNum(), 3);
-  EXPECT_TRUE(phiOp.hasInputs());
-  EXPECT_FALSE(phiOp.isTerminator());
   EXPECT_TRUE(phiOp.hasResult());
+  EXPECT_EQ(phiOp.getDataType(), DataType::SI32);
+
+  EXPECT_TRUE(phiOp.hasInputs());
+  EXPECT_EQ(phiOp.getInputsNum(), 3);
 
   std::string msg;
   bool vres = phiOp.verify(msg);

@@ -1,16 +1,84 @@
+#include "ops/dialects/arith/ops.hpp"
 #include <gtest/gtest.h>
 
 #include <iris.hpp>
 using namespace iris;
 
-TEST(ARITH, CONSTANT) {
+TEST(ARITH, CONSTANT_INVARIANTS) {
+  arith::ConstantOp op(makeConstAttribute(1));
+
+  EXPECT_FALSE(op.isTerminator());
+  EXPECT_TRUE(op.isa(GlobalOpcodes::CONSTANT));
+
+  EXPECT_FALSE(op.hasInputs());
+  EXPECT_EQ(op.getInputsNum(), 0);
+}
+
+TEST(ARITH, ADD_INVARIANTS) {
+  arith::AddOp op(nullptr, nullptr);
+
+  EXPECT_FALSE(op.isTerminator());
+  EXPECT_TRUE(op.isa(GlobalOpcodes::ADD));
+
+  EXPECT_TRUE(op.hasInputs());
+  EXPECT_EQ(op.getInputsNum(), 2);
+}
+
+TEST(ARITH, SUB_INVARIANTS) {
+  arith::SubOp op(nullptr, nullptr);
+
+  EXPECT_FALSE(op.isTerminator());
+  EXPECT_TRUE(op.isa(GlobalOpcodes::SUB));
+
+  EXPECT_TRUE(op.hasInputs());
+  EXPECT_EQ(op.getInputsNum(), 2);
+}
+
+TEST(ARITH, MUL_INVARIANTS) {
+  arith::MulOp op(nullptr, nullptr);
+
+  EXPECT_FALSE(op.isTerminator());
+  EXPECT_TRUE(op.isa(GlobalOpcodes::MUL));
+
+  EXPECT_TRUE(op.hasInputs());
+  EXPECT_EQ(op.getInputsNum(), 2);
+}
+
+TEST(ARITH, DIV_INVARIANTS) {
+  arith::DivOp op(nullptr, nullptr);
+
+  EXPECT_FALSE(op.isTerminator());
+  EXPECT_TRUE(op.isa(GlobalOpcodes::DIV));
+
+  EXPECT_TRUE(op.hasInputs());
+  EXPECT_EQ(op.getInputsNum(), 2);
+}
+
+TEST(ARITH, CAST_INVARIANTS) {
+  arith::CastOp op(DataType::F32, nullptr);
+
+  EXPECT_FALSE(op.isTerminator());
+  EXPECT_TRUE(op.isa(GlobalOpcodes::CAST));
+
+  EXPECT_TRUE(op.hasInputs());
+  EXPECT_EQ(op.getInputsNum(), 1);
+}
+
+TEST(ARITH, COMPARE_INVARIANTS) {
+  arith::CompareOp op(nullptr, nullptr, arith::CompareOp::Pred::EQ);
+
+  EXPECT_FALSE(op.isTerminator());
+  EXPECT_TRUE(op.isa(GlobalOpcodes::COMPARE));
+
+  EXPECT_TRUE(op.hasInputs());
+  EXPECT_EQ(op.getInputsNum(), 2);
+}
+
+TEST(ARITH, CONSTANT_BASIC) {
   arith::ConstantOp constOp(makeConstAttribute(1));
 
-  EXPECT_EQ(constOp.getDataType(), DataType::SI32);
-  EXPECT_EQ(constOp.getInputsNum(), 0);
-  EXPECT_FALSE(constOp.hasInputs());
-  EXPECT_FALSE(constOp.isTerminator());
   EXPECT_TRUE(constOp.hasResult());
+  EXPECT_EQ(constOp.getDataType(), DataType::SI32);
 
   std::string msg;
   bool vres = constOp.verify(msg);
@@ -19,17 +87,14 @@ TEST(ARITH, CONSTANT) {
   EXPECT_TRUE(msg.empty());
 }
 
-TEST(ARITH, ADD) {
+TEST(ARITH, ADD_BASIC) {
   arith::ConstantOp constOp1(makeConstAttribute(1));
   arith::ConstantOp constOp2(makeConstAttribute(2));
 
   arith::AddOp addOp(&constOp1, &constOp2);
 
-  EXPECT_EQ(addOp.getDataType(), DataType::SI32);
-  EXPECT_EQ(addOp.getInputsNum(), 2);
-  EXPECT_TRUE(addOp.hasInputs());
-  EXPECT_FALSE(addOp.isTerminator());
   EXPECT_TRUE(addOp.hasResult());
+  EXPECT_EQ(addOp.getDataType(), DataType::SI32);
 
   std::string msg;
   bool vres = addOp.verify(msg);
@@ -38,17 +103,14 @@ TEST(ARITH, ADD) {
   EXPECT_TRUE(msg.empty());
 }
 
-TEST(ARITH, SUB) {
+TEST(ARITH, SUB_BASIC) {
   arith::ConstantOp constOp1(makeConstAttribute(1));
   arith::ConstantOp constOp2(makeConstAttribute(2));
 
   arith::SubOp subOp(&constOp1, &constOp2);
 
-  EXPECT_EQ(subOp.getDataType(), DataType::SI32);
-  EXPECT_EQ(subOp.getInputsNum(), 2);
-  EXPECT_TRUE(subOp.hasInputs());
-  EXPECT_FALSE(subOp.isTerminator());
   EXPECT_TRUE(subOp.hasResult());
+  EXPECT_EQ(subOp.getDataType(), DataType::SI32);
 
   std::string msg;
   bool vres = subOp.verify(msg);
@@ -57,17 +119,14 @@ TEST(ARITH, SUB) {
   EXPECT_TRUE(msg.empty());
 }
 
-TEST(ARITH, MUL) {
+TEST(ARITH, MUL_BASIC) {
   arith::ConstantOp constOp1(makeConstAttribute(1));
   arith::ConstantOp constOp2(makeConstAttribute(2));
 
   arith::MulOp mulOp(&constOp1, &constOp2);
 
-  EXPECT_EQ(mulOp.getDataType(), DataType::SI32);
-  EXPECT_EQ(mulOp.getInputsNum(), 2);
-  EXPECT_TRUE(mulOp.hasInputs());
-  EXPECT_FALSE(mulOp.isTerminator());
   EXPECT_TRUE(mulOp.hasResult());
+  EXPECT_EQ(mulOp.getDataType(), DataType::SI32);
 
   std::string msg;
   bool vres = mulOp.verify(msg);
@@ -76,17 +135,14 @@ TEST(ARITH, MUL) {
   EXPECT_TRUE(msg.empty());
 }
 
-TEST(ARITH, DIV) {
+TEST(ARITH, DIV_BASIC) {
   arith::ConstantOp constOp1(makeConstAttribute(1));
   arith::ConstantOp constOp2(makeConstAttribute(2));
 
   arith::DivOp divOp(&constOp1, &constOp2);
 
-  EXPECT_EQ(divOp.getDataType(), DataType::SI32);
-  EXPECT_EQ(divOp.getInputsNum(), 2);
-  EXPECT_TRUE(divOp.hasInputs());
-  EXPECT_FALSE(divOp.isTerminator());
   EXPECT_TRUE(divOp.hasResult());
+  EXPECT_EQ(divOp.getDataType(), DataType::SI32);
 
   std::string msg;
   bool vres = divOp.verify(msg);
@@ -95,15 +151,12 @@ TEST(ARITH, DIV) {
   EXPECT_TRUE(msg.empty());
 }
 
-TEST(ARITH, CAST) {
+TEST(ARITH, CAST_BASIC) {
   arith::ConstantOp cstOp(makeConstAttribute(1));
   arith::CastOp castOp(DataType::F32, &cstOp);
 
-  EXPECT_EQ(castOp.getDataType(), DataType::F32);
-  EXPECT_EQ(castOp.getInputsNum(), 1);
-  EXPECT_TRUE(castOp.hasInputs());
-  EXPECT_FALSE(castOp.isTerminator());
   EXPECT_TRUE(castOp.hasResult());
+  EXPECT_EQ(castOp.getDataType(), DataType::F32);
 
   std::string msg;
   bool vres = castOp.verify(msg);
@@ -112,17 +165,14 @@ TEST(ARITH, CAST) {
   EXPECT_TRUE(msg.empty());
 }
 
-TEST(ARITH, COMPARE) {
+TEST(ARITH, COMPARE_BASIC) {
   arith::ConstantOp constOp1(makeConstAttribute(1));
   arith::ConstantOp constOp2(makeConstAttribute(2));
 
   arith::CompareOp cmpOp(&constOp1, &constOp2, arith::CompareOp::Pred::EQ);
 
-  EXPECT_EQ(cmpOp.getDataType(), DataType::BOOL);
-  EXPECT_EQ(cmpOp.getInputsNum(), 2);
-  EXPECT_TRUE(cmpOp.hasInputs());
-  EXPECT_FALSE(cmpOp.isTerminator());
   EXPECT_TRUE(cmpOp.hasResult());
+  EXPECT_EQ(cmpOp.getDataType(), DataType::BOOL);
 
   std::string msg;
   bool vres = cmpOp.verify(msg);

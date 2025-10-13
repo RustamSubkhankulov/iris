@@ -84,7 +84,7 @@ public:
   };
 
   CompareOp(Input inputX, Input inputY, Pred pred)
-    : BinaryArithOp(GlobalOpcodes::CMP, DataType::BOOL, inputX, inputY)
+    : BinaryArithOp(GlobalOpcodes::COMPARE, DataType::BOOL, inputX, inputY)
     , m_pred(pred) {
     // clang-format off
       switch (m_pred) {
@@ -171,7 +171,7 @@ public:
 class ConstantOp final : public ArithOp {
 public:
   explicit ConstantOp(std::unique_ptr<ConstAttribute> attr)
-    : ArithOp(GlobalOpcodes::CONST, attr->getDataType())
+    : ArithOp(GlobalOpcodes::CONSTANT, attr->getDataType())
     , m_attr(std::move(attr)) {}
 
   std::string_view getMnemonic() const override {

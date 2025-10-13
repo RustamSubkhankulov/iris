@@ -11,9 +11,9 @@ enum GlobalOpcodes : opcode_t {
   SUB,
   MUL,
   DIV,
-  CONST,
+  CONSTANT,
   CAST,
-  CMP,
+  COMPARE,
 
   /* Builtin */
   PARAM,

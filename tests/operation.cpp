@@ -8,7 +8,25 @@ TEST(GENERIC_OPERATION, ISOLATED_OP) {
 
   EXPECT_EQ(cst.getUsersNum(), 0);
   EXPECT_FALSE(cst.hasUsers());
+
   EXPECT_FALSE(cst.hasParentBasicBlock());
+  EXPECT_EQ(cst.getParentBasicBlock(), nullptr);
+}
+
+TEST(GENERIC_OPERATION, OPERATIONS_INPUTS) {
+  arith::ConstantOp cst_1(makeConstAttribute(1));
+  arith::ConstantOp cst_2(makeConstAttribute(1));
+
+  arith::AddOp addOp(&cst_1, &cst_2);
+
+  EXPECT_FALSE(addOp.getInputAt(0).isEmpty());
+  EXPECT_FALSE(addOp.getInputAt(1).isEmpty());
+
+  EXPECT_EQ(addOp.getInputAt(0).getDefiningOp(), &cst_1);
+  EXPECT_EQ(addOp.getInputAt(1).getDefiningOp(), &cst_2);
+
+  EXPECT_EQ(addOp.getInputAt(0).getDataType(), DataType::SI32);
+  EXPECT_EQ(addOp.getInputAt(1).getDataType(), DataType::SI32);
 }
 
 TEST(GENERIC_OPERATION, ADDING_AS_USER_TO_INPUTS) {
@@ -48,6 +66,9 @@ TEST(GENERIC_OPERATION, MOVING_OPERATION) {
   EXPECT_EQ(cst_1.getUsersNum(), 1);
   EXPECT_EQ(cst_2.getUsersNum(), 1);
 
+  EXPECT_EQ(copyOp1.getInputAt(0).getDefiningOp(), &addOp);
+  EXPECT_EQ(copyOp2.getInputAt(0).getDefiningOp(), &addOp);
+
   arith::AddOp newAddOp = std::move(addOp);
 
   EXPECT_EQ(addOp.getUsersNum(), 0);
@@ -55,6 +76,9 @@ TEST(GENERIC_OPERATION, MOVING_OPERATION) {
 
   EXPECT_EQ(cst_1.getUsersNum(), 2);
   EXPECT_EQ(cst_2.getUsersNum(), 2);
+
+  EXPECT_EQ(copyOp1.getInputAt(0).getDefiningOp(), &newAddOp);
+  EXPECT_EQ(copyOp2.getInputAt(0).getDefiningOp(), &newAddOp);
 }
 
 TEST(GENERIC_OPERATION, CLEARING_OPERATIONS_USES) {

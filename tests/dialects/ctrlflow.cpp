@@ -10,6 +10,7 @@ TEST(CTRLFLOW, CALL_NO_INPUTS) {
   EXPECT_EQ(callOp.getInputsNum(), 0);
   EXPECT_FALSE(callOp.hasInputs());
   EXPECT_FALSE(callOp.isTerminator());
+  EXPECT_TRUE(callOp.hasResult());
 
   std::string msg;
   bool vres = callOp.verify(msg);
@@ -27,6 +28,7 @@ TEST(CTRLFLOW, CALL_ONE_INPUT) {
   EXPECT_EQ(callOp.getInputsNum(), 1);
   EXPECT_TRUE(callOp.hasInputs());
   EXPECT_FALSE(callOp.isTerminator());
+  EXPECT_TRUE(callOp.hasResult());
 
   std::string msg;
   bool vres = callOp.verify(msg);
@@ -45,6 +47,7 @@ TEST(CTRLFLOW, CALL_MULTIPLE_INPUT) {
   EXPECT_EQ(callOp.getInputsNum(), 2);
   EXPECT_TRUE(callOp.hasInputs());
   EXPECT_FALSE(callOp.isTerminator());
+  EXPECT_TRUE(callOp.hasResult());
 
   std::string msg;
   bool vres = callOp.verify(msg);
@@ -60,6 +63,7 @@ TEST(CTRLFLOW, CALL_NONE_RETURN_DATATYPE) {
   EXPECT_EQ(callOp.getInputsNum(), 0);
   EXPECT_FALSE(callOp.hasInputs());
   EXPECT_FALSE(callOp.isTerminator());
+  EXPECT_FALSE(callOp.hasResult());
 
   std::string msg;
   bool vres = callOp.verify(msg);
@@ -75,6 +79,7 @@ TEST(CTRLFLOW, JUMP) {
   EXPECT_EQ(jumpOp.getInputsNum(), 0);
   EXPECT_FALSE(jumpOp.hasInputs());
   EXPECT_TRUE(jumpOp.isTerminator());
+  EXPECT_FALSE(jumpOp.hasResult());
 
   std::string msg;
   bool vres = jumpOp.verify(msg);
@@ -92,6 +97,7 @@ TEST(CTRLFLOW, JUMPC) {
   EXPECT_EQ(jumpcOp.getInputsNum(), 1);
   EXPECT_TRUE(jumpcOp.hasInputs());
   EXPECT_TRUE(jumpcOp.isTerminator());
+  EXPECT_FALSE(jumpcOp.hasResult());
 
   std::string msg;
   bool vres = jumpcOp.verify(msg);
@@ -107,6 +113,7 @@ TEST(CTRLFLOW, RETURN_NO_INPUT) {
   EXPECT_EQ(retOp.getInputsNum(), 0);
   EXPECT_FALSE(retOp.hasInputs());
   EXPECT_TRUE(retOp.isTerminator());
+  EXPECT_FALSE(retOp.hasResult());
 
   std::string msg;
   bool vres = retOp.verify(msg);
@@ -124,6 +131,7 @@ TEST(CTRLFLOW, RETURN_WITH_INPUT) {
   EXPECT_EQ(retOp.getInputsNum(), 1);
   EXPECT_TRUE(retOp.hasInputs());
   EXPECT_TRUE(retOp.isTerminator());
+  EXPECT_FALSE(retOp.hasResult());
 
   std::string msg;
   bool vres = retOp.verify(msg);
@@ -141,6 +149,7 @@ TEST(CTRLFLOW, PHI_ONE_INPUT) {
   EXPECT_EQ(phiOp.getInputsNum(), 1);
   EXPECT_TRUE(phiOp.hasInputs());
   EXPECT_FALSE(phiOp.isTerminator());
+  EXPECT_TRUE(phiOp.hasResult());
 
   std::string msg;
   bool vres = phiOp.verify(msg);
@@ -159,6 +168,7 @@ TEST(CTRLFLOW, PHI_TWO_INPUTS) {
   EXPECT_EQ(phiOp.getInputsNum(), 2);
   EXPECT_TRUE(phiOp.hasInputs());
   EXPECT_FALSE(phiOp.isTerminator());
+  EXPECT_TRUE(phiOp.hasResult());
 
   std::string msg;
   bool vres = phiOp.verify(msg);
@@ -178,6 +188,7 @@ TEST(CTRLFLOW, PHI_MULTIPLE_INPUTS) {
   EXPECT_EQ(phiOp.getInputsNum(), 3);
   EXPECT_TRUE(phiOp.hasInputs());
   EXPECT_FALSE(phiOp.isTerminator());
+  EXPECT_TRUE(phiOp.hasResult());
 
   std::string msg;
   bool vres = phiOp.verify(msg);

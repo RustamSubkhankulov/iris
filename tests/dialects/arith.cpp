@@ -10,6 +10,7 @@ TEST(ARITH, CONSTANT) {
   EXPECT_EQ(constOp.getInputsNum(), 0);
   EXPECT_FALSE(constOp.hasInputs());
   EXPECT_FALSE(constOp.isTerminator());
+  EXPECT_TRUE(constOp.hasResult());
 
   std::string msg;
   bool vres = constOp.verify(msg);
@@ -28,6 +29,7 @@ TEST(ARITH, ADD) {
   EXPECT_EQ(addOp.getInputsNum(), 2);
   EXPECT_TRUE(addOp.hasInputs());
   EXPECT_FALSE(addOp.isTerminator());
+  EXPECT_TRUE(addOp.hasResult());
 
   std::string msg;
   bool vres = addOp.verify(msg);
@@ -46,6 +48,7 @@ TEST(ARITH, SUB) {
   EXPECT_EQ(subOp.getInputsNum(), 2);
   EXPECT_TRUE(subOp.hasInputs());
   EXPECT_FALSE(subOp.isTerminator());
+  EXPECT_TRUE(subOp.hasResult());
 
   std::string msg;
   bool vres = subOp.verify(msg);
@@ -64,6 +67,7 @@ TEST(ARITH, MUL) {
   EXPECT_EQ(mulOp.getInputsNum(), 2);
   EXPECT_TRUE(mulOp.hasInputs());
   EXPECT_FALSE(mulOp.isTerminator());
+  EXPECT_TRUE(mulOp.hasResult());
 
   std::string msg;
   bool vres = mulOp.verify(msg);
@@ -82,6 +86,7 @@ TEST(ARITH, DIV) {
   EXPECT_EQ(divOp.getInputsNum(), 2);
   EXPECT_TRUE(divOp.hasInputs());
   EXPECT_FALSE(divOp.isTerminator());
+  EXPECT_TRUE(divOp.hasResult());
 
   std::string msg;
   bool vres = divOp.verify(msg);
@@ -98,6 +103,7 @@ TEST(ARITH, CAST) {
   EXPECT_EQ(castOp.getInputsNum(), 1);
   EXPECT_TRUE(castOp.hasInputs());
   EXPECT_FALSE(castOp.isTerminator());
+  EXPECT_TRUE(castOp.hasResult());
 
   std::string msg;
   bool vres = castOp.verify(msg);
@@ -116,6 +122,7 @@ TEST(ARITH, COMPARE) {
   EXPECT_EQ(cmpOp.getInputsNum(), 2);
   EXPECT_TRUE(cmpOp.hasInputs());
   EXPECT_FALSE(cmpOp.isTerminator());
+  EXPECT_TRUE(cmpOp.hasResult());
 
   std::string msg;
   bool vres = cmpOp.verify(msg);

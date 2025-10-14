@@ -5,6 +5,8 @@
 #include <memory>
 #include <ostream>
 #include <string_view>
+#include <unordered_map>
+#include <unordered_set>
 
 #include <exception.hpp>
 #include <graph/basic_block.hpp>
@@ -24,6 +26,8 @@ public:
     return m_name;
   }
 
+  //--- ID providers ---
+
   bb_id_t obtainIDForBasicBlock() {
     return m_bbIDProvider.obtainID();
   }
@@ -32,13 +36,18 @@ public:
     return m_opIDProvider.obtainID();
   }
 
+  //--- Adding basic block ---
+
   void addBasicBlock(std::unique_ptr<BasicBlock> basicBlock) {
     basicBlock->setParentRegion(this);
     m_BasicBlocks.push_back(std::move(basicBlock));
+    expireDomInfo();
   }
 
   void addStartBasicBlock(std::unique_ptr<BasicBlock> basicBlock);
   void addFinalBasicBlock(std::unique_ptr<BasicBlock> basicBlock);
+
+  //--- Start & final basic blocks ---
 
   bool setStartBasicBlock(bb_id_t id);
   bool setStartBasicBlock(BasicBlock* basicBlock);
@@ -47,12 +56,15 @@ public:
   bool setFinalBasicBlock(BasicBlock* basicBlock);
 
   const BasicBlock& getStartBasicBlock() const;
-
   const BasicBlock& getFinalBasicBlock() const;
+
+  //--- RO Accessing basic blocks ---
 
   const std::list<std::unique_ptr<BasicBlock>>& getBasicBlocks() const {
     return m_BasicBlocks;
   }
+
+  //--- Basic block query ---
 
   BasicBlock* getBasicBlockByID(bb_id_t id);
   const BasicBlock* getBasicBlockByID(bb_id_t id) const;
@@ -63,13 +75,34 @@ public:
 
   bool isBasicBlockPresent(const BasicBlock* basicBlock) const;
 
+  //--- Removing basic block ---
+
   bool removeBasicBlock(BasicBlock* basicBlock);
   bool removeBasicBlock(bb_id_t id);
+
+  //--- Replacing basic block ---
 
   bool replaceBasicBlockWith(bb_id_t id,
                              std::unique_ptr<BasicBlock> newBasicBlock);
   bool replaceBasicBlockWith(BasicBlock* oldBasicBlock,
                              std::unique_ptr<BasicBlock> newBasicBlock);
+
+  //--- Dominators information ---
+
+  std::vector<BasicBlock*> getDFS() const;
+  std::vector<BasicBlock*> getRPO() const;
+
+  void collectDomInfo();
+
+  BasicBlock* getIDom(const BasicBlock* basicBlock) const;
+
+  std::vector<BasicBlock*>
+  getDominatedBlocks(const BasicBlock* basicBlock) const;
+
+  std::vector<BasicBlock*>
+  getDominatorsChain(const BasicBlock* basicBlock) const;
+
+  //--- Misc ---
 
   void dump(std::ostream& os);
   bool verify(std::string& msg) const;
@@ -82,6 +115,37 @@ private:
 
   detail::IDProvider<bb_id_t> m_bbIDProvider;
   detail::IDProvider<op_id_t> m_opIDProvider;
+
+  struct domInfo {
+    // BB -> its IDOM
+    std::unordered_map<BasicBlock*, BasicBlock*> idom;
+
+    // BB -> BBs that are dominated by it
+    std::unordered_map<BasicBlock*, std::vector<BasicBlock*>> dominated;
+
+    // By default dominators info is expired
+    // (it must be prepared before querying)
+    bool isExpired = true;
+
+  } m_domInfo;
+
+  void expireDomInfo() {
+    m_domInfo.isExpired = true;
+  }
+
+  bool isDomInfoExpired() {
+    return m_domInfo.isExpired;
+  }
+
+  void runDFSearchFrom(BasicBlock* basicBlock,
+                       std::unordered_set<BasicBlock*>& visited,
+                       std::vector<BasicBlock*>& order) const;
+  BasicBlock*
+  getLCAImmDominator(BasicBlock* b1, BasicBlock* b2,
+                     const std::unordered_map<BasicBlock*, BasicBlock*>& idom,
+                     const std::vector<BasicBlock*>& order) const;
+
+  void buildDominatedLists();
 };
 
 } // namespace iris

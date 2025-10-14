@@ -105,6 +105,7 @@ bool Region::removeBasicBlock(bb_id_t id) {
     if (bb.getID() == id) {
       bb.unlink();
       m_BasicBlocks.erase(bbIter);
+      expireDomInfo();
       return true;
     }
   }
@@ -140,6 +141,7 @@ bool Region::replaceBasicBlockWith(
       m_BasicBlocks.erase(bbIter);
       m_BasicBlocks.push_back(std::move(newBasicBlockPtr));
 
+      expireDomInfo();
       return true;
     }
   }

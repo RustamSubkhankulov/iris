@@ -42,6 +42,10 @@ int main() {
   bb1.linkSucc(&bb2, true);
 
   auto regionPtr = builder.obtainRegion();
+
+  regionPtr->setStartBasicBlock(&bb0);
+  regionPtr->setFinalBasicBlock(&bb2);
+
   regionPtr->dump(std::cout);
 
   std::string msg;

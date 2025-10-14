@@ -116,7 +116,13 @@ public:
     auto* opPtr = op.get();
 
     op->setID(m_currRegion->obtainIDForOperation());
-    m_currBasicBlock->insertOpBack(std::move(op));
+
+    if constexpr (std::is_same_v<OpTy, ctrlflow::PhiOp>) {
+      m_currBasicBlock->insertPhiOpBack(std::move(op));
+    } else {
+      m_currBasicBlock->insertOpBack(std::move(op));
+    }
+
     return opPtr;
   }
 

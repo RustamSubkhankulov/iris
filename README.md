@@ -111,5 +111,5 @@ Tests include:
 - Tests of verifiers (ex-fails) and API tests for:
     - Generic operation ``iris::Operation``;
     - Basic block ``iris::BasicBlock``;
-
-Tests for regions (``iris::Region``) and IR-builder (``iris::IRBuilder``) will be added soon.
+    - Region ``iris::Region`` (WIP);
+    - IR-builder ``iris::IRBuilder`` (WIP);

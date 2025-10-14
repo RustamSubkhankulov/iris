@@ -1,3 +1,5 @@
+#include <cassert>
+
 #include <graph/basic_block.hpp>
 #include <graph/region.hpp>
 
@@ -6,6 +8,7 @@
 namespace iris {
 
 void BasicBlock::insertPhiOpBack(std::unique_ptr<ctrlflow::PhiOp> op) {
+  assert(!!op);
   op->setParentBasicBlock(this);
   m_PhiOps.insertBack(std::move(op));
 }
@@ -19,6 +22,8 @@ void BasicBlock::erasePhiOp(const_op_iterator pos) {
 }
 
 void BasicBlock::doReplaceOpWith(Operation* opPtr, Operation* nodePtr) {
+  // Set parent basic block
+  opPtr->setParentBasicBlock(this);
   // Replace all uses of the previous operation with new one
   opPtr->replaceAllUsesOf(*nodePtr);
   // Replace list node
@@ -27,6 +32,7 @@ void BasicBlock::doReplaceOpWith(Operation* opPtr, Operation* nodePtr) {
 
 void BasicBlock::replacePhiOpWith(op_iterator pos,
                                   std::unique_ptr<ctrlflow::PhiOp> op) {
+  assert(!!op);
   auto opPtr = op.release();
   auto nodePtr = pos.get();
   doReplaceOpWith(opPtr, nodePtr);
@@ -35,6 +41,7 @@ void BasicBlock::replacePhiOpWith(op_iterator pos,
 
 void BasicBlock::replacePhiOpWith(const_op_iterator pos,
                                   std::unique_ptr<ctrlflow::PhiOp> op) {
+  assert(!!op);
   auto opPtr = op.release();
   auto nodePtr = const_cast<Operation*>(pos.get());
   doReplaceOpWith(opPtr, nodePtr);
@@ -42,22 +49,26 @@ void BasicBlock::replacePhiOpWith(const_op_iterator pos,
 }
 
 void BasicBlock::insertOpFront(std::unique_ptr<Operation> op) {
+  assert(!!op);
   op->setParentBasicBlock(this);
   m_RegOps.insertFront(std::move(op));
 }
 
 void BasicBlock::insertOpBack(std::unique_ptr<Operation> op) {
+  assert(!!op);
   op->setParentBasicBlock(this);
   m_RegOps.insertBack(std::move(op));
 }
 
 void BasicBlock::insertOpAfter(op_iterator pos, std::unique_ptr<Operation> op) {
+  assert(!!op);
   op->setParentBasicBlock(this);
   m_RegOps.insertAfter(pos, std::move(op));
 }
 
 void BasicBlock::insertOpAfter(const_op_iterator pos,
                                std::unique_ptr<Operation> op) {
+  assert(!!op);
   op->setParentBasicBlock(this);
   m_RegOps.insertAfter(pos, std::move(op));
 }
@@ -70,6 +81,7 @@ void BasicBlock::insertOpBefore(op_iterator pos,
 
 void BasicBlock::insertOpBefore(const_op_iterator pos,
                                 std::unique_ptr<Operation> op) {
+  assert(!!op);
   op->setParentBasicBlock(this);
   m_RegOps.insertBefore(pos, std::move(op));
 }
@@ -83,6 +95,7 @@ void BasicBlock::eraseOp(const_op_iterator pos) {
 }
 
 void BasicBlock::replaceOpWith(op_iterator pos, std::unique_ptr<Operation> op) {
+  assert(!!op);
   auto opPtr = op.release();
   auto nodePtr = pos.get();
   doReplaceOpWith(opPtr, nodePtr);
@@ -90,6 +103,7 @@ void BasicBlock::replaceOpWith(op_iterator pos, std::unique_ptr<Operation> op) {
 }
 void BasicBlock::replaceOpWith(const_op_iterator pos,
                                std::unique_ptr<Operation> op) {
+  assert(!!op);
   auto opPtr = op.release();
   auto nodePtr = const_cast<Operation*>(pos.get());
   doReplaceOpWith(opPtr, nodePtr);

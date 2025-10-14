@@ -101,11 +101,11 @@ void ListNode<Derived>::replaceWith(ListNode& that) noexcept {
   that.unlink();
   if (m_prev != nullptr) {
     m_prev->m_next = static_cast<Derived*>(&that);
-    m_prev = nullptr;
+    that.m_prev = std::exchange(m_prev, nullptr);
   }
   if (m_next != nullptr) {
     m_next->m_prev = static_cast<Derived*>(&that);
-    m_next = nullptr;
+    that.m_next = std::exchange(m_next, nullptr);
   }
 }
 

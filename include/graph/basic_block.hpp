@@ -45,6 +45,10 @@ public:
     m_ParentRegion = region;
   }
 
+  void clearParentRegion() {
+    m_ParentRegion = nullptr;
+  }
+
   //--- BB's predecessors ---
 
   const std::list<BasicBlock*>& getPreds() const {
@@ -102,7 +106,7 @@ public:
 
   //--- Operations ---
 
-  using OpList = detail::List;
+  using OpList = detail::List<Operation>;
   using op_iterator = OpList::iterator;
   using const_op_iterator = OpList::const_iterator;
 
@@ -175,7 +179,7 @@ private:
 
   void removeFromPredsAsSucc();
 
-  void doReplaceOpWith(Operation* opPtr, detail::ListNode* nodePtr);
+  void doReplaceOpWith(Operation* opPtr, Operation* nodePtr);
 };
 
 } // namespace iris

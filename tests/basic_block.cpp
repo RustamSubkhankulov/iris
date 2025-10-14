@@ -13,7 +13,22 @@ TEST(BASIC_BLOCK, DEFAULT) {
   EXPECT_FALSE(bb.hasSucc(false));
 }
 
-TEST(BASIC_BLOCK, CONNECTION_P2P) {
+TEST(BASIC_BLOCK, PARENT_REGION) {
+  BasicBlock bb;
+  Region region("foo");
+
+  bb.setParentRegion(&region);
+
+  EXPECT_TRUE(bb.hasParentRegion());
+  EXPECT_EQ(bb.getParentRegion(), &region);
+
+  bb.clearParentRegion();
+
+  EXPECT_FALSE(bb.hasParentRegion());
+  EXPECT_EQ(bb.getParentRegion(), nullptr);
+}
+
+TEST(BASIC_BLOCK, CONNECTION_TRUE) {
   BasicBlock bb1(1);
   BasicBlock bb2(2);
 
@@ -27,6 +42,50 @@ TEST(BASIC_BLOCK, CONNECTION_P2P) {
 
   EXPECT_EQ(bb1.getSuccID(true), 2);
   EXPECT_EQ(bb1.getSuccID(false), -1);
+}
+
+TEST(BASIC_BLOCK, UNLINK) {
+  BasicBlock bbPred(1);
+  BasicBlock bb(2);
+  BasicBlock bbSuccT(3);
+  BasicBlock bbSuccF(4);
+
+  bbPred.linkSucc(&bb);
+  bb.linkSucc(&bbSuccT, true);
+  bb.linkSucc(&bbSuccF, false);
+
+  EXPECT_TRUE(bbPred.hasSucc());
+  EXPECT_EQ(bbPred.getSuccID(), 2);
+
+  EXPECT_TRUE(bb.hasSucc(true));
+  EXPECT_EQ(bb.getSuccID(true), 3);
+
+  EXPECT_TRUE(bb.hasSucc(false));
+  EXPECT_EQ(bb.getSuccID(false), 4);
+
+  EXPECT_EQ(bb.getPredsNum(), 1);
+  EXPECT_EQ(bb.getPreds().front(), &bbPred);
+
+  EXPECT_EQ(bbSuccT.getPredsNum(), 1);
+  EXPECT_EQ(bbSuccT.getPreds().front(), &bb);
+
+  EXPECT_EQ(bbSuccF.getPredsNum(), 1);
+  EXPECT_EQ(bbSuccF.getPreds().front(), &bb);
+
+  bb.unlink();
+
+  EXPECT_FALSE(bbPred.hasSucc());
+  EXPECT_EQ(bbPred.getSuccID(), -1);
+
+  EXPECT_FALSE(bb.hasSucc(true));
+  EXPECT_EQ(bb.getSuccID(true), -1);
+
+  EXPECT_FALSE(bb.hasSucc(false));
+  EXPECT_EQ(bb.getSuccID(false), -1);
+
+  EXPECT_EQ(bb.getPredsNum(), 0);
+  EXPECT_EQ(bbSuccT.getPredsNum(), 0);
+  EXPECT_EQ(bbSuccF.getPredsNum(), 0);
 }
 
 TEST(BASIC_BLOCK, DELETION) {
@@ -79,6 +138,7 @@ TEST(BASIC_BLOCK, CONNECTION_TRUE_AND_FALSE) {
   EXPECT_EQ(bb1.getSuccID(false), 3);
 }
 
+// TODO: to region tests
 TEST(BASIC_BLOCK, EXFAIL_ORPHAN) {
   BasicBlock bb;
   std::string msg;
@@ -88,6 +148,7 @@ TEST(BASIC_BLOCK, EXFAIL_ORPHAN) {
   EXPECT_TRUE(msg.contains("has no parent region"));
 }
 
+// TODO: to region tests
 TEST(BASIC_BLOCK, EXFAIL_START_WITH_PREDECESSORS) {
   Region region("foo");
 
@@ -105,6 +166,7 @@ TEST(BASIC_BLOCK, EXFAIL_START_WITH_PREDECESSORS) {
   EXPECT_TRUE(msg.contains("is starting bb, but has predecessor"));
 }
 
+// TODO: to region tests
 TEST(BASIC_BLOCK, EXFAIL_FINAL_WITH_SUCCESSORS) {
   Region region("foo");
 
@@ -122,6 +184,7 @@ TEST(BASIC_BLOCK, EXFAIL_FINAL_WITH_SUCCESSORS) {
   EXPECT_TRUE(msg.contains("is final bb, but has successors"));
 }
 
+// TODO: to region tests
 TEST(BASIC_BLOCK, EXFAIL_TRUE_SUCCESSOR_NOT_IN_REGION) {
   Region region("foo");
 
@@ -138,6 +201,7 @@ TEST(BASIC_BLOCK, EXFAIL_TRUE_SUCCESSOR_NOT_IN_REGION) {
   EXPECT_TRUE(msg.contains("true successor is not in the region"));
 }
 
+// TODO: to region tests
 TEST(BASIC_BLOCK, EXFAIL_FALSE_SUCCESSOR_NOT_IN_REGION) {
   Region region("foo");
 
@@ -172,6 +236,7 @@ TEST(BASIC_BLOCK, EXFAIL_FALSE_BUT_NO_TRUE_SUCCESSORS) {
     "has false successor specified, but true successor is missing"));
 }
 
+// TODO: to region tests
 TEST(BASIC_BLOCK, EXFAIL_NOT_FINAL_HAS_NO_SUCCESSORS) {
   Region region("foo");
 
@@ -202,6 +267,7 @@ TEST(BASIC_BLOCK, EXFAIL_EMPTY_BB) {
   EXPECT_TRUE(msg.contains("is empty"));
 }
 
+// TODO: to region tests
 TEST(BASIC_BLOCK, EXFAIL_FINAL_HAS_NO_RETURN) {
   Region region("foo");
 
@@ -217,7 +283,8 @@ TEST(BASIC_BLOCK, EXFAIL_FINAL_HAS_NO_RETURN) {
   EXPECT_TRUE(msg.contains("last operation is not an \'ctrlflow.return\'"));
 }
 
-TEST(BASIC_BLOCK, EXFAIL_TWO_SUCC_IDENTIVAL) {
+// TODO: to region tests
+TEST(BASIC_BLOCK, EXFAIL_TWO_SUCC_IDENTICAL) {
   Region region("foo");
 
   region.addBasicBlock(std::make_unique<BasicBlock>(1));

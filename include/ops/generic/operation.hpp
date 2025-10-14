@@ -21,7 +21,7 @@ class User;
 class BasicBlock;
 
 // Operation base class
-class Operation : private detail::ListNode {
+class Operation : public detail::ListNode<Operation> {
 public:
   // Default constructor - constructs an empty op.
   // Opcode 'nullopcode' is reserved to represent an empty op.

@@ -6,9 +6,8 @@
 namespace iris {
 
 void BasicBlock::insertPhiOpBack(std::unique_ptr<ctrlflow::PhiOp> op) {
-  auto opPtr = op.release();
-  opPtr->setParentBasicBlock(this);
-  m_PhiOps.insertBack(std::unique_ptr<detail::ListNode>(opPtr));
+  op->setParentBasicBlock(this);
+  m_PhiOps.insertBack(std::move(op));
 }
 
 void BasicBlock::erasePhiOp(op_iterator pos) {
@@ -19,11 +18,11 @@ void BasicBlock::erasePhiOp(const_op_iterator pos) {
   m_PhiOps.erase(pos);
 }
 
-void BasicBlock::doReplaceOpWith(Operation* opPtr, detail::ListNode* nodePtr) {
+void BasicBlock::doReplaceOpWith(Operation* opPtr, Operation* nodePtr) {
   // Replace all uses of the previous operation with new one
-  opPtr->replaceAllUsesOf(*static_cast<Operation*>(nodePtr));
+  opPtr->replaceAllUsesOf(*nodePtr);
   // Replace list node
-  nodePtr->replaceWith(*static_cast<detail::ListNode*>(opPtr));
+  nodePtr->replaceWith(*opPtr);
 }
 
 void BasicBlock::replacePhiOpWith(op_iterator pos,
@@ -37,48 +36,42 @@ void BasicBlock::replacePhiOpWith(op_iterator pos,
 void BasicBlock::replacePhiOpWith(const_op_iterator pos,
                                   std::unique_ptr<ctrlflow::PhiOp> op) {
   auto opPtr = op.release();
-  auto nodePtr = const_cast<detail::ListNode*>(pos.get());
+  auto nodePtr = const_cast<Operation*>(pos.get());
   doReplaceOpWith(opPtr, nodePtr);
   m_PhiOps.erase(pos);
 }
 
 void BasicBlock::insertOpFront(std::unique_ptr<Operation> op) {
-  auto opPtr = op.release();
-  opPtr->setParentBasicBlock(this);
-  m_RegOps.insertFront(std::unique_ptr<detail::ListNode>(opPtr));
+  op->setParentBasicBlock(this);
+  m_RegOps.insertFront(std::move(op));
 }
 
 void BasicBlock::insertOpBack(std::unique_ptr<Operation> op) {
-  auto opPtr = op.release();
-  opPtr->setParentBasicBlock(this);
-  m_RegOps.insertBack(std::unique_ptr<detail::ListNode>(opPtr));
+  op->setParentBasicBlock(this);
+  m_RegOps.insertBack(std::move(op));
 }
 
 void BasicBlock::insertOpAfter(op_iterator pos, std::unique_ptr<Operation> op) {
-  auto opPtr = op.release();
-  opPtr->setParentBasicBlock(this);
-  m_RegOps.insertAfter(pos, std::unique_ptr<detail::ListNode>(opPtr));
+  op->setParentBasicBlock(this);
+  m_RegOps.insertAfter(pos, std::move(op));
 }
 
 void BasicBlock::insertOpAfter(const_op_iterator pos,
                                std::unique_ptr<Operation> op) {
-  auto opPtr = op.release();
-  opPtr->setParentBasicBlock(this);
-  m_RegOps.insertAfter(pos, std::unique_ptr<detail::ListNode>(opPtr));
+  op->setParentBasicBlock(this);
+  m_RegOps.insertAfter(pos, std::move(op));
 }
 
 void BasicBlock::insertOpBefore(op_iterator pos,
                                 std::unique_ptr<Operation> op) {
-  auto opPtr = op.release();
-  opPtr->setParentBasicBlock(this);
-  m_RegOps.insertBefore(pos, std::unique_ptr<detail::ListNode>(opPtr));
+  op->setParentBasicBlock(this);
+  m_RegOps.insertBefore(pos, std::move(op));
 }
 
 void BasicBlock::insertOpBefore(const_op_iterator pos,
                                 std::unique_ptr<Operation> op) {
-  auto opPtr = op.release();
-  opPtr->setParentBasicBlock(this);
-  m_RegOps.insertBefore(pos, std::unique_ptr<detail::ListNode>(opPtr));
+  op->setParentBasicBlock(this);
+  m_RegOps.insertBefore(pos, std::move(op));
 }
 
 void BasicBlock::eraseOp(op_iterator pos) {
@@ -98,7 +91,7 @@ void BasicBlock::replaceOpWith(op_iterator pos, std::unique_ptr<Operation> op) {
 void BasicBlock::replaceOpWith(const_op_iterator pos,
                                std::unique_ptr<Operation> op) {
   auto opPtr = op.release();
-  auto nodePtr = const_cast<detail::ListNode*>(pos.get());
+  auto nodePtr = const_cast<Operation*>(pos.get());
   doReplaceOpWith(opPtr, nodePtr);
   m_RegOps.erase(pos);
 }
@@ -129,10 +122,10 @@ void BasicBlock::dump(std::ostream& os, const std::string& bbIdent) {
 
   std::string opIdent = bbIdent + "    ";
   for (auto phiOpIt = m_PhiOps.begin(); phiOpIt != m_PhiOps.end(); ++phiOpIt) {
-    os << opIdent << static_cast<Operation&>(*phiOpIt) << std::endl;
+    os << opIdent << *phiOpIt << std::endl;
   }
   for (auto regOpIt = m_RegOps.begin(); regOpIt != m_RegOps.end(); ++regOpIt) {
-    os << opIdent << static_cast<Operation&>(*regOpIt) << std::endl;
+    os << opIdent << *regOpIt << std::endl;
   }
 }
 
@@ -193,7 +186,7 @@ bool BasicBlock::verify(std::string& msg, bool isStart, bool isFinal) {
     return false;
   }
 
-  const Operation& lastOp = static_cast<const Operation&>(m_RegOps.cback());
+  const Operation& lastOp = m_RegOps.cback();
 
   if (isFinal && !lastOp.isa(GlobalOpcodes::RETURN)) {
     msg = bbName +
@@ -231,7 +224,7 @@ bool BasicBlock::verify(std::string& msg, bool isStart, bool isFinal) {
 bool BasicBlock::verifyOps(std::string& msg, const std::string& bbName) {
   // Phi operations
   for (auto phiOpIt = m_PhiOps.begin(); phiOpIt != m_PhiOps.end(); ++phiOpIt) {
-    const Operation& op = static_cast<const Operation&>(*phiOpIt);
+    const Operation& op = *phiOpIt;
     if (!op.verify(msg)) {
       return false;
     }
@@ -240,7 +233,7 @@ bool BasicBlock::verifyOps(std::string& msg, const std::string& bbName) {
   // Regular operations
   auto regOpIt = m_RegOps.begin();
   for (std::size_t opIdx = 0U; opIdx < m_RegOps.size(); ++opIdx) {
-    const Operation& op = static_cast<const Operation&>(*regOpIt);
+    const Operation& op = *regOpIt;
     if (opIdx + 1U != m_RegOps.size() && op.isTerminator()) {
       msg =
         bbName + " - terminator operation is not the last one in the block!";
@@ -273,6 +266,7 @@ void BasicBlock::removeFromPredsAsSucc() {
       bb->m_succFalse = nullptr;
     }
   }
+  m_preds.clear();
 }
 
 } // namespace iris

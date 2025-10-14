@@ -11,7 +11,7 @@ void Region::addStartBasicBlock(std::unique_ptr<BasicBlock> basicBlock) {
 }
 
 void Region::addFinalBasicBlock(std::unique_ptr<BasicBlock> basicBlock) {
-  if (m_startBB != nullptr) {
+  if (m_finalBB != nullptr) {
     throw IrisException("Final bb is already specified!");
   }
   m_finalBB = basicBlock.get();

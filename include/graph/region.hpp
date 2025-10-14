@@ -95,12 +95,17 @@ public:
   void collectDomInfo();
 
   BasicBlock* getIDom(const BasicBlock* basicBlock) const;
+  BasicBlock* getIDomByID(bb_id_t id) const;
 
   std::vector<BasicBlock*>
   getDominatedBlocks(const BasicBlock* basicBlock) const;
 
+  std::vector<BasicBlock*> getDominatedBlocksByID(bb_id_t id) const;
+
   std::vector<BasicBlock*>
   getDominatorsChain(const BasicBlock* basicBlock) const;
+
+  std::vector<BasicBlock*> getDominatorsChainByID(bb_id_t id) const;
 
   //--- Misc ---
 
@@ -137,9 +142,14 @@ private:
     return m_domInfo.isExpired;
   }
 
-  void runDFSearchFrom(BasicBlock* basicBlock,
-                       std::unordered_set<BasicBlock*>& visited,
-                       std::vector<BasicBlock*>& order) const;
+  void runDFSFrom(BasicBlock* basicBlock,
+                  std::unordered_set<BasicBlock*>& visited,
+                  std::vector<BasicBlock*>& order) const;
+
+  void runRPOFrom(BasicBlock* basicBlock,
+                  std::unordered_set<BasicBlock*>& visited,
+                  std::vector<BasicBlock*>& order) const;
+
   BasicBlock*
   getLCAImmDominator(BasicBlock* b1, BasicBlock* b2,
                      const std::unordered_map<BasicBlock*, BasicBlock*>& idom,

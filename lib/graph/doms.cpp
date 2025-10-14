@@ -2,23 +2,24 @@
 
 namespace iris {
 
-void Region::runDFSearchFrom(BasicBlock* basicBlock,
-                             std::unordered_set<BasicBlock*>& visited,
-                             std::vector<BasicBlock*>& order) const {
-  if (visited.find(basicBlock) != visited.end()) {
+void Region::runDFSFrom(BasicBlock* basicBlock,
+                        std::unordered_set<BasicBlock*>& visited,
+                        std::vector<BasicBlock*>& order) const {
+  if (visited.count(basicBlock)) {
     // This BB is already marked visited
     return;
   }
 
+  visited.insert(basicBlock);
+  order.push_back(basicBlock);
+
   if (auto* succT = basicBlock->getSucc(true)) {
-    runDFSearchFrom(succT, visited, order);
+    runDFSFrom(succT, visited, order);
   }
 
   if (auto* succF = basicBlock->getSucc(false)) {
-    runDFSearchFrom(succF, visited, order);
+    runDFSFrom(succF, visited, order);
   }
-
-  order.push_back(basicBlock);
 }
 
 std::vector<BasicBlock*> Region::getDFS() const {
@@ -29,14 +30,43 @@ std::vector<BasicBlock*> Region::getDFS() const {
   std::unordered_set<BasicBlock*> visited;
   std::vector<BasicBlock*> order;
 
-  runDFSearchFrom(m_startBB, visited, order);
+  runDFSFrom(m_startBB, visited, order);
   return order;
 }
 
+void Region::runRPOFrom(BasicBlock* basicBlock,
+                        std::unordered_set<BasicBlock*>& visited,
+                        std::vector<BasicBlock*>& order) const {
+  if (visited.count(basicBlock)) {
+    // This BB is already marked visited
+    return;
+  }
+
+  visited.insert(basicBlock);
+
+  if (auto* succT = basicBlock->getSucc(true)) {
+    runRPOFrom(succT, visited, order);
+  }
+
+  if (auto* succF = basicBlock->getSucc(false)) {
+    runRPOFrom(succF, visited, order);
+  }
+
+  order.push_back(basicBlock);
+}
+
 std::vector<BasicBlock*> Region::getRPO() const {
-  auto res = getDFS();
-  std::reverse(res.begin(), res.end());
-  return res;
+  if (m_startBB == nullptr) {
+    throw IrisException("Cannot run RPO with no start basic block specified!");
+  }
+
+  std::unordered_set<BasicBlock*> visited;
+  std::vector<BasicBlock*> order;
+
+  runRPOFrom(m_startBB, visited, order);
+  std::reverse(order.begin(), order.end());
+
+  return order;
 }
 
 void Region::collectDomInfo() {
@@ -56,7 +86,6 @@ void Region::collectDomInfo() {
 
   bool changed = false;
   do {
-
     // For every basic block in RPO order ...
     for (auto* bbPtr : rpo) {
       // ... besides the starting one
@@ -67,9 +96,9 @@ void Region::collectDomInfo() {
       BasicBlock* iDomCandidate = nullptr;
 
       // Find predecessor, which has idom defined
-      for (auto* pred : bbPtr->getPreds()) {
-        if (m_domInfo.idom.count(pred)) {
-          iDomCandidate = pred;
+      for (auto* predPtr : bbPtr->getPreds()) {
+        if (m_domInfo.idom.count(predPtr)) {
+          iDomCandidate = predPtr;
           break;
         }
       }
@@ -90,13 +119,15 @@ void Region::collectDomInfo() {
       }
 
       auto& idom = m_domInfo.idom[bbPtr];
+
       if (idom != iDomCandidate) {
         // IDom changed, continue iterating
         idom = iDomCandidate;
         changed = true;
+      } else {
+        changed = false;
       }
     } // for (auto* bbPtr : rpo)
-
   } while (changed == true);
 
   buildDominatedLists();
@@ -116,6 +147,10 @@ BasicBlock* Region::getIDom(const BasicBlock* basicBlock) const {
   return iter->second;
 }
 
+BasicBlock* Region::getIDomByID(bb_id_t id) const {
+  return getIDom(getBasicBlockByID(id));
+}
+
 std::vector<BasicBlock*>
 Region::getDominatedBlocks(const BasicBlock* basicBlock) const {
   if (m_domInfo.isExpired == true) {
@@ -128,6 +163,10 @@ Region::getDominatedBlocks(const BasicBlock* basicBlock) const {
   }
 
   return iter->second;
+}
+
+std::vector<BasicBlock*> Region::getDominatedBlocksByID(bb_id_t id) const {
+  return getDominatedBlocks(getBasicBlockByID(id));
 }
 
 std::vector<BasicBlock*>
@@ -145,6 +184,10 @@ Region::getDominatorsChain(const BasicBlock* basicBlock) const {
   }
 
   return domChain;
+}
+
+std::vector<BasicBlock*> Region::getDominatorsChainByID(bb_id_t id) const {
+  return getDominatorsChain(getBasicBlockByID(id));
 }
 
 BasicBlock* Region::getLCAImmDominator(

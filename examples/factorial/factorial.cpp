@@ -13,7 +13,7 @@ int main() {
     makeConstAttribute(static_cast<uint32_t>(1)));
   auto c2 = builder.createAndAddOp<arith::ConstantOp>(
     makeConstAttribute(static_cast<uint32_t>(2)));
-  auto& bb0 = builder.finalizeBasicBlock();
+  auto& bb0 = builder.finalizeCurBasicBlock();
 
   // bb1: checking whether recursion is needed for computation
   builder.startNewBasicBlock();
@@ -21,7 +21,7 @@ int main() {
     builder.createAndAddOp<arith::CompareOp>(a0, c2, arith::CompareOp::Pred::B);
   auto done = builder.obtainIdForBasicBlock();
   /* n4 */ builder.createAndAddOp<ctrlflow::JumpcOp>(v3);
-  auto& bb1 = builder.finalizeBasicBlock();
+  auto& bb1 = builder.finalizeCurBasicBlock();
   bb0.linkSucc(&bb1);
 
   // bb3:
@@ -30,14 +30,14 @@ int main() {
   auto v6 = builder.createAndAddOp<ctrlflow::CallOp>(
     builder.getCurRegion().getName(), DataType::UI32, InputList{v5});
   auto v7 = builder.createAndAddOp<arith::MulOp>(a0, v6);
-  auto& bb3 = builder.finalizeBasicBlock();
+  auto& bb3 = builder.finalizeCurBasicBlock();
   bb1.linkSucc(&bb3, false);
 
   // bb2:
   builder.startNewBasicBlock(done);
   auto v8 = builder.createAndAddOp<ctrlflow::PhiOp>(c1, v7);
   /* n9 */ builder.createAndAddOp<ctrlflow::ReturnOp>(v8);
-  auto& bb2 = builder.finalizeBasicBlock();
+  auto& bb2 = builder.finalizeCurBasicBlock();
   bb3.linkSucc(&bb2);
   bb1.linkSucc(&bb2, true);
 

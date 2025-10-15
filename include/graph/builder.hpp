@@ -36,19 +36,19 @@ public:
 
   const Region& getCurRegion() const {
     if (!isRegionBuilding()) {
-      throw IrisException("No region is in process currently");
+      throw IrisException("No region is building!");
     }
     return *m_currRegion;
   }
 
   Region& getCurRegion() {
     if (!isRegionBuilding()) {
-      throw IrisException("No region is in process currently");
+      throw IrisException("No region is building!");
     }
     return *m_currRegion;
   }
 
-  void dropRegion() {
+  void dropCurRegion() {
     if (!isRegionBuilding()) {
       throw IrisException("No region is building!");
     }
@@ -136,28 +136,28 @@ public:
 
   const BasicBlock& getCurBasicBlock() const {
     if (!isBasicBlockBuilding()) {
-      throw IrisException("No basic block in building!");
+      throw IrisException("No basic block is building!");
     }
     return *m_currBasicBlock;
   }
 
   BasicBlock& getCurBasicBlock() {
     if (!isBasicBlockBuilding()) {
-      throw IrisException("No basic block in building!");
+      throw IrisException("No basic block is building!");
     }
     return *m_currBasicBlock;
   }
 
-  void dropBasicBlock() {
+  void dropCurBasicBlock() {
     if (!isBasicBlockBuilding()) {
       throw IrisException("No basic block is building!");
     }
     m_currBasicBlock.reset();
   }
 
-  BasicBlock& finalizeBasicBlock() {
+  BasicBlock& finalizeCurBasicBlock() {
     if (!isBasicBlockBuilding()) {
-      throw IrisException("No basic block in building!");
+      throw IrisException("No basic block is building!");
     }
 
     auto& bb = *m_currBasicBlock;

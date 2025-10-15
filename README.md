@@ -119,5 +119,5 @@ Tests include:
     - Generic operation ``iris::Operation``;
     - Basic block ``iris::BasicBlock``;
     - Region ``iris::Region``;
-    - IR-builder ``iris::IRBuilder`` (WIP);
+    - IR-builder ``iris::IRBuilder``;
 - Immediate dominators calculation tests (``tests/dom_info.cpp``);

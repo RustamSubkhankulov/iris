@@ -118,6 +118,6 @@ Tests include:
 - Tests of verifiers (ex-fails) and API tests for:
     - Generic operation ``iris::Operation``;
     - Basic block ``iris::BasicBlock``;
-    - Region ``iris::Region`` (WIP);
+    - Region ``iris::Region``;
     - IR-builder ``iris::IRBuilder`` (WIP);
 - Immediate dominators calculation tests (``tests/dom_info.cpp``);

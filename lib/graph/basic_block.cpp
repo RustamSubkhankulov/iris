@@ -7,6 +7,31 @@
 
 namespace iris {
 
+void BasicBlock::replaceWith(BasicBlock& that) {
+  that.unlink();
+
+  for (auto pred : m_preds) {
+    if (pred->m_succTrue == this) {
+      pred->m_succTrue = &that;
+    }
+    if (pred->m_succFalse == this) {
+      pred->m_succFalse = &that;
+    }
+  }
+
+  that.m_preds = std::move(m_preds);
+
+  if (auto succT = m_succTrue) {
+    clearSucc(true);
+    that.linkSucc(succT, true);
+  }
+
+  if (auto succF = m_succFalse) {
+    clearSucc(false);
+    that.linkSucc(succF, false);
+  }
+}
+
 void BasicBlock::insertPhiOpBack(std::unique_ptr<ctrlflow::PhiOp> op) {
   assert(!!op);
   op->setParentBasicBlock(this);
@@ -163,7 +188,7 @@ bool BasicBlock::verify(std::string& msg, bool isStart, bool isFinal) {
 
   // TODO move to region's verifier maybe?
   for (auto pred : m_preds) {
-    if (!m_ParentRegion->isBasicBlockPresent(pred->m_ID)) {
+    if (!m_ParentRegion->isBasicBlockPresentByID(pred->m_ID)) {
       msg = bbName + "'s pred " + std::to_string(pred->m_ID) +
             " is not in the region!";
       return false;
@@ -172,14 +197,14 @@ bool BasicBlock::verify(std::string& msg, bool isStart, bool isFinal) {
 
   // TODO move to region's verifier maybe?
   if (m_succTrue != nullptr &&
-      !m_ParentRegion->isBasicBlockPresent(m_succTrue->m_ID)) {
+      !m_ParentRegion->isBasicBlockPresentByID(m_succTrue->m_ID)) {
     msg = bbName + "'s true successor is not in the region!";
     return false;
   }
 
   // TODO move to region's verifier maybe?
   if (m_succFalse != nullptr &&
-      !m_ParentRegion->isBasicBlockPresent(m_succFalse->m_ID)) {
+      !m_ParentRegion->isBasicBlockPresentByID(m_succFalse->m_ID)) {
     msg = bbName + "'s false successor is not in the region!";
     return false;
   }

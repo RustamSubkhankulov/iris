@@ -3,33 +3,15 @@
 namespace iris {
 
 void Region::addStartBasicBlock(std::unique_ptr<BasicBlock> basicBlock) {
-  if (m_startBB != nullptr) {
-    throw IrisException("Start bb is already specified!");
-  }
+  assert(!!basicBlock);
   m_startBB = basicBlock.get();
   addBasicBlock(std::move(basicBlock));
 }
 
 void Region::addFinalBasicBlock(std::unique_ptr<BasicBlock> basicBlock) {
-  if (m_finalBB != nullptr) {
-    throw IrisException("Final bb is already specified!");
-  }
+  assert(!!basicBlock);
   m_finalBB = basicBlock.get();
   addBasicBlock(std::move(basicBlock));
-}
-
-const BasicBlock& Region::getStartBasicBlock() const {
-  if (m_startBB != nullptr) {
-    throw IrisException("No start basic block is specified!");
-  }
-  return *m_startBB;
-}
-
-const BasicBlock& Region::getFinalBasicBlock() const {
-  if (m_finalBB != nullptr) {
-    throw IrisException("No final basic block is specified!");
-  }
-  return *m_finalBB;
 }
 
 BasicBlock* Region::getBasicBlockByID(bb_id_t id) {
@@ -59,7 +41,7 @@ bool Region::isBasicBlockPresent(const BasicBlock* basicBlock) const {
   return false;
 }
 
-bool Region::setStartBasicBlock(bb_id_t id) {
+bool Region::setStartBasicBlockByID(bb_id_t id) {
   if (auto* ptr = getBasicBlockByID(id)) {
     m_startBB = ptr;
     return true;
@@ -68,6 +50,7 @@ bool Region::setStartBasicBlock(bb_id_t id) {
 }
 
 bool Region::setStartBasicBlock(BasicBlock* basicBlock) {
+  assert(basicBlock != nullptr);
   if (isBasicBlockPresent(basicBlock)) {
     m_startBB = basicBlock;
     return true;
@@ -75,7 +58,7 @@ bool Region::setStartBasicBlock(BasicBlock* basicBlock) {
   return false;
 }
 
-bool Region::setFinalBasicBlock(bb_id_t id) {
+bool Region::setFinalBasicBlockByID(bb_id_t id) {
   if (auto* ptr = getBasicBlockByID(id)) {
     m_finalBB = ptr;
     return true;
@@ -84,6 +67,7 @@ bool Region::setFinalBasicBlock(bb_id_t id) {
 }
 
 bool Region::setFinalBasicBlock(BasicBlock* basicBlock) {
+  assert(basicBlock != nullptr);
   if (isBasicBlockPresent(basicBlock)) {
     m_finalBB = basicBlock;
     return true;
@@ -93,10 +77,10 @@ bool Region::setFinalBasicBlock(BasicBlock* basicBlock) {
 
 bool Region::removeBasicBlock(BasicBlock* basicBlock) {
   assert(basicBlock != nullptr);
-  return removeBasicBlock(basicBlock->getID());
+  return removeBasicBlockByID(basicBlock->getID());
 }
 
-bool Region::removeBasicBlock(bb_id_t id) {
+bool Region::removeBasicBlockByID(bb_id_t id) {
   for (auto bbIter = m_BasicBlocks.begin(); bbIter != m_BasicBlocks.end();
        ++bbIter) {
     auto& bbPtr = *bbIter;
@@ -104,6 +88,15 @@ bool Region::removeBasicBlock(bb_id_t id) {
 
     if (bb.getID() == id) {
       bb.unlink();
+
+      if (bbPtr.get() == m_startBB) {
+        m_startBB = nullptr;
+      }
+
+      if (bbPtr.get() == m_finalBB) {
+        m_finalBB = nullptr;
+      }
+
       m_BasicBlocks.erase(bbIter);
       expireDomInfo();
       return true;
@@ -112,24 +105,17 @@ bool Region::removeBasicBlock(bb_id_t id) {
   return false;
 }
 
-bool Region::replaceBasicBlockWith(
+bool Region::replaceBasicBlockWithByID(
   bb_id_t id, std::unique_ptr<BasicBlock> newBasicBlockPtr) {
+  assert(!!newBasicBlockPtr);
+
   for (auto bbIter = m_BasicBlocks.begin(); bbIter != m_BasicBlocks.end();
        ++bbIter) {
     auto& oldBasicBlockPtr = *bbIter;
-    auto& oldBasicBlock = *oldBasicBlockPtr;
 
-    if (oldBasicBlock.getID() == id) {
+    if (oldBasicBlockPtr->getID() == id) {
 
-      auto& newBasicBlock = *newBasicBlockPtr;
-      if (auto* succ = oldBasicBlock.getSucc(true)) {
-        newBasicBlock.linkSucc(succ, true);
-      }
-      if (auto* succ = oldBasicBlock.getSucc(false)) {
-        newBasicBlock.linkSucc(succ, false);
-      }
-
-      oldBasicBlock.unlink();
+      oldBasicBlockPtr->replaceWith(*newBasicBlockPtr);
 
       if (oldBasicBlockPtr.get() == m_startBB) {
         m_startBB = newBasicBlockPtr.get();
@@ -151,8 +137,10 @@ bool Region::replaceBasicBlockWith(
 bool Region::replaceBasicBlockWith(BasicBlock* oldBasicBlock,
                                    std::unique_ptr<BasicBlock> newBasicBlock) {
   assert(oldBasicBlock != nullptr);
-  return replaceBasicBlockWith(oldBasicBlock->getID(),
-                               std::move(newBasicBlock));
+  assert(!!newBasicBlock);
+
+  return replaceBasicBlockWithByID(oldBasicBlock->getID(),
+                                   std::move(newBasicBlock));
 }
 
 void Region::dump(std::ostream& os) {

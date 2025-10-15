@@ -1,6 +1,7 @@
 #ifndef INCLUDE_GRAPH_REGION_HPP
 #define INCLUDE_GRAPH_REGION_HPP
 
+#include <cassert>
 #include <list>
 #include <memory>
 #include <ostream>
@@ -39,6 +40,7 @@ public:
   //--- Adding basic block ---
 
   void addBasicBlock(std::unique_ptr<BasicBlock> basicBlock) {
+    assert(!!basicBlock);
     basicBlock->setParentRegion(this);
     m_BasicBlocks.push_back(std::move(basicBlock));
     expireDomInfo();
@@ -49,14 +51,35 @@ public:
 
   //--- Start & final basic blocks ---
 
-  bool setStartBasicBlock(bb_id_t id);
+  bool setStartBasicBlockByID(bb_id_t id);
   bool setStartBasicBlock(BasicBlock* basicBlock);
 
-  bool setFinalBasicBlock(bb_id_t id);
+  bool setFinalBasicBlockByID(bb_id_t id);
   bool setFinalBasicBlock(BasicBlock* basicBlock);
 
-  const BasicBlock& getStartBasicBlock() const;
-  const BasicBlock& getFinalBasicBlock() const;
+  bool hasStartBasicBlock() const {
+    return (m_startBB != nullptr);
+  }
+
+  bool hasFinalBasicBlock() const {
+    return (m_finalBB != nullptr);
+  }
+
+  const BasicBlock* getStartBasicBlock() const {
+    return m_startBB;
+  }
+
+  const BasicBlock* getFinalBasicBlock() const {
+    return m_finalBB;
+  }
+
+  BasicBlock* getStartBasicBlock() {
+    return m_startBB;
+  }
+
+  BasicBlock* getFinalBasicBlock() {
+    return m_finalBB;
+  }
 
   //--- RO Accessing basic blocks ---
 
@@ -69,7 +92,7 @@ public:
   BasicBlock* getBasicBlockByID(bb_id_t id);
   const BasicBlock* getBasicBlockByID(bb_id_t id) const;
 
-  bool isBasicBlockPresent(bb_id_t id) const {
+  bool isBasicBlockPresentByID(bb_id_t id) const {
     return (getBasicBlockByID(id) != nullptr);
   }
 
@@ -78,12 +101,12 @@ public:
   //--- Removing basic block ---
 
   bool removeBasicBlock(BasicBlock* basicBlock);
-  bool removeBasicBlock(bb_id_t id);
+  bool removeBasicBlockByID(bb_id_t id);
 
   //--- Replacing basic block ---
 
-  bool replaceBasicBlockWith(bb_id_t id,
-                             std::unique_ptr<BasicBlock> newBasicBlock);
+  bool replaceBasicBlockWithByID(bb_id_t id,
+                                 std::unique_ptr<BasicBlock> newBasicBlock);
   bool replaceBasicBlockWith(BasicBlock* oldBasicBlock,
                              std::unique_ptr<BasicBlock> newBasicBlock);
 

@@ -96,7 +96,7 @@ public:
       throw IrisException("Current block is still building!");
     }
 
-    if (m_currRegion->isBasicBlockPresent(id)) {
+    if (m_currRegion->isBasicBlockPresentByID(id)) {
       // Attempt to create a basic block with an ID
       // that is already used in the region
       throw IrisException("ID is already used in the current region!");

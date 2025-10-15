@@ -58,7 +58,7 @@ TEST(BASIC_BLOCK, CONNECTION_TRUE) {
   EXPECT_EQ(bb1.getSuccID(false), -1);
 }
 
-TEST(BASIC_BLOCK, UNLINK) {
+TEST(BASIC_BLOCK, REPLACE) {
   BasicBlock bbPred(1);
   BasicBlock bb(2);
   BasicBlock bbSuccT(3);
@@ -68,23 +68,45 @@ TEST(BASIC_BLOCK, UNLINK) {
   bb.linkSucc(&bbSuccT, true);
   bb.linkSucc(&bbSuccF, false);
 
+  BasicBlock newBB(5);
+  bb.replaceWith(newBB);
+
   EXPECT_TRUE(bbPred.hasSucc());
-  EXPECT_EQ(bbPred.getSuccID(), 2);
+  EXPECT_EQ(bbPred.getSucc(), &newBB);
 
-  EXPECT_TRUE(bb.hasSucc(true));
-  EXPECT_EQ(bb.getSuccID(true), 3);
+  EXPECT_EQ(bb.getPredsNum(), 0);
 
-  EXPECT_TRUE(bb.hasSucc(false));
-  EXPECT_EQ(bb.getSuccID(false), 4);
+  EXPECT_EQ(newBB.getPredsNum(), 1);
+  EXPECT_EQ(newBB.getPreds().front(), &bbPred);
 
-  EXPECT_EQ(bb.getPredsNum(), 1);
-  EXPECT_EQ(bb.getPreds().front(), &bbPred);
+  EXPECT_FALSE(bb.hasSucc(true));
+  EXPECT_FALSE(bb.hasSucc(false));
+
+  EXPECT_EQ(bb.getSucc(true), nullptr);
+  EXPECT_EQ(bb.getSucc(false), nullptr);
+
+  EXPECT_TRUE(newBB.hasSucc(true));
+  EXPECT_TRUE(newBB.hasSucc(false));
+
+  EXPECT_EQ(newBB.getSucc(true), &bbSuccT);
+  EXPECT_EQ(newBB.getSucc(false), &bbSuccF);
 
   EXPECT_EQ(bbSuccT.getPredsNum(), 1);
-  EXPECT_EQ(bbSuccT.getPreds().front(), &bb);
-
   EXPECT_EQ(bbSuccF.getPredsNum(), 1);
-  EXPECT_EQ(bbSuccF.getPreds().front(), &bb);
+
+  EXPECT_EQ(bbSuccT.getPreds().front(), &newBB);
+  EXPECT_EQ(bbSuccF.getPreds().front(), &newBB);
+}
+
+TEST(BASIC_BLOCK, UNLINK) {
+  BasicBlock bbPred(1);
+  BasicBlock bb(2);
+  BasicBlock bbSuccT(3);
+  BasicBlock bbSuccF(4);
+
+  bbPred.linkSucc(&bb);
+  bb.linkSucc(&bbSuccT, true);
+  bb.linkSucc(&bbSuccF, false);
 
   bb.unlink();
 

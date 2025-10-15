@@ -61,6 +61,8 @@ public:
 
   //--- BB's successor ---
 
+  void replaceWith(BasicBlock& that);
+
   void unlink() {
     clearSucc(true);
     clearSucc(false);

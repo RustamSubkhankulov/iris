@@ -597,3 +597,58 @@ TEST(REGION, REPLACE_FINAL_BB_BY_ID) {
   EXPECT_TRUE(region.hasFinalBasicBlock());
   EXPECT_EQ(region.getFinalBasicBlock(), newBBPtr);
 }
+
+TEST(REGION, DOM_INFO) {
+  Region region("foo");
+  EXPECT_TRUE(region.isDomInfoExpired());
+
+  region.addStartBasicBlock(std::make_unique<BasicBlock>(0));
+
+  region.collectDomInfo();
+  EXPECT_FALSE(region.isDomInfoExpired());
+
+  region.addBasicBlock(std::make_unique<BasicBlock>(1));
+  EXPECT_TRUE(region.isDomInfoExpired());
+}
+
+TEST(REGION, EXFAIL_COLLECT_DOM_INFO_NO_START_BB) {
+  Region region("foo");
+
+  try {
+    region.collectDomInfo();
+  } catch (const IrisException& exc) {
+    std::string str = exc.what();
+    EXPECT_TRUE(!str.compare(
+      "Cannot collect dom info with no start basic block specified!"));
+    return;
+  }
+  FAIL();
+}
+
+TEST(REGION, EXFAIL_GET_DFS_NO_START_BB) {
+  Region region("foo");
+
+  try {
+    [[maybe_unused]] auto dfs = region.getDFS();
+  } catch (const IrisException& exc) {
+    std::string str = exc.what();
+    EXPECT_TRUE(
+      !str.compare("Cannot run DFS with no start basic block specified!"));
+    return;
+  }
+  FAIL();
+}
+
+TEST(REGION, EXFAIL_GET_RPO_NO_START_BB) {
+  Region region("foo");
+
+  try {
+    [[maybe_unused]] auto rpo = region.getRPO();
+  } catch (const IrisException& exc) {
+    std::string str = exc.what();
+    EXPECT_TRUE(
+      !str.compare("Cannot run RPO with no start basic block specified!"));
+    return;
+  }
+  FAIL();
+}

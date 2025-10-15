@@ -116,6 +116,9 @@ public:
   std::vector<BasicBlock*> getRPO() const;
 
   void collectDomInfo();
+  bool isDomInfoExpired() {
+    return m_domInfo.isExpired;
+  }
 
   BasicBlock* getIDom(const BasicBlock* basicBlock) const;
   BasicBlock* getIDomByID(bb_id_t id) const;
@@ -159,10 +162,6 @@ private:
 
   void expireDomInfo() {
     m_domInfo.isExpired = true;
-  }
-
-  bool isDomInfoExpired() {
-    return m_domInfo.isExpired;
   }
 
   void runDFSFrom(BasicBlock* basicBlock,

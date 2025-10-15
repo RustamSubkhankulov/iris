@@ -120,4 +120,4 @@ Tests include:
     - Basic block ``iris::BasicBlock``;
     - Region ``iris::Region`` (WIP);
     - IR-builder ``iris::IRBuilder`` (WIP);
-- Immediate dominators calculation tests (``tests/doms.cpp``);
+- Immediate dominators calculation tests (``tests/dom_info.cpp``);

@@ -71,7 +71,8 @@ std::vector<BasicBlock*> Region::getRPO() const {
 
 void Region::collectDomInfo() {
   if (m_startBB == nullptr) {
-    throw IrisException("Cannot run DFS with no start basic block specified!");
+    throw IrisException(
+      "Cannot collect dom info with no start basic block specified!");
   }
 
   if (m_domInfo.isExpired == false) {

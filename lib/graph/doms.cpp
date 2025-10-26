@@ -1,10 +1,12 @@
+#include <graph/doms.hpp>
 #include <graph/region.hpp>
 
 namespace iris {
+namespace doms {
 
-void Region::runDFSFrom(BasicBlock* basicBlock,
-                        std::unordered_set<BasicBlock*>& visited,
-                        std::vector<BasicBlock*>& order) const {
+void DomInfo::runDFSFrom(const BasicBlock* basicBlock,
+                         std::unordered_set<const BasicBlock*>& visited,
+                         std::vector<const BasicBlock*>& order) {
   if (visited.count(basicBlock)) {
     // This BB is already marked visited
     return;
@@ -22,21 +24,22 @@ void Region::runDFSFrom(BasicBlock* basicBlock,
   }
 }
 
-std::vector<BasicBlock*> Region::getDFS() const {
-  if (m_startBB == nullptr) {
+std::vector<const BasicBlock*> DomInfo::getDFS(const Region& region) {
+  auto startBB = region.getStartBasicBlock();
+  if (startBB == nullptr) {
     throw IrisException("Cannot run DFS with no start basic block specified!");
   }
 
-  std::unordered_set<BasicBlock*> visited;
-  std::vector<BasicBlock*> order;
+  std::unordered_set<const BasicBlock*> visited;
+  std::vector<const BasicBlock*> order;
 
-  runDFSFrom(m_startBB, visited, order);
+  runDFSFrom(startBB, visited, order);
   return order;
 }
 
-void Region::runRPOFrom(BasicBlock* basicBlock,
-                        std::unordered_set<BasicBlock*>& visited,
-                        std::vector<BasicBlock*>& order) const {
+void DomInfo::runRPOFrom(const BasicBlock* basicBlock,
+                         std::unordered_set<const BasicBlock*>& visited,
+                         std::vector<const BasicBlock*>& order) {
   if (visited.count(basicBlock)) {
     // This BB is already marked visited
     return;
@@ -55,50 +58,53 @@ void Region::runRPOFrom(BasicBlock* basicBlock,
   order.push_back(basicBlock);
 }
 
-std::vector<BasicBlock*> Region::getRPO() const {
-  if (m_startBB == nullptr) {
+std::vector<const BasicBlock*> DomInfo::getRPO(const Region& region) {
+  auto startBB = region.getStartBasicBlock();
+  if (startBB == nullptr) {
     throw IrisException("Cannot run RPO with no start basic block specified!");
   }
 
-  std::unordered_set<BasicBlock*> visited;
-  std::vector<BasicBlock*> order;
+  std::unordered_set<const BasicBlock*> visited;
+  std::vector<const BasicBlock*> order;
 
-  runRPOFrom(m_startBB, visited, order);
+  runRPOFrom(startBB, visited, order);
   std::reverse(order.begin(), order.end());
 
   return order;
 }
 
-void Region::collectDomInfo() {
-  if (m_startBB == nullptr) {
+void DomInfo::analyze(const Region& region) {
+  auto startBB = region.getStartBasicBlock();
+
+  if (startBB == nullptr) {
     throw IrisException(
       "Cannot collect dom info with no start basic block specified!");
   }
 
-  if (m_domInfo.isExpired == false) {
+  if (m_isExpired == false) {
     return;
   }
 
-  m_domInfo.idom.clear();
-  m_domInfo.dominated.clear();
+  m_idom.clear();
+  m_dominated.clear();
 
-  auto rpo = getRPO();
-  m_domInfo.idom[m_startBB] = m_startBB;
+  auto rpo = getRPO(region);
+  m_idom[startBB] = startBB;
 
   bool changed = false;
   do {
     // For every basic block in RPO order ...
     for (auto* bbPtr : rpo) {
       // ... besides the starting one
-      if (bbPtr == m_startBB) {
+      if (bbPtr == startBB) {
         continue;
       }
 
-      BasicBlock* iDomCandidate = nullptr;
+      const BasicBlock* iDomCandidate = nullptr;
 
       // Find predecessor, which has idom defined
       for (auto* predPtr : bbPtr->getPreds()) {
-        if (m_domInfo.idom.count(predPtr)) {
+        if (m_idom.count(predPtr)) {
           iDomCandidate = predPtr;
           break;
         }
@@ -111,15 +117,14 @@ void Region::collectDomInfo() {
 
       for (auto* predPtr : bbPtr->getPreds()) {
         // For every other predecessor, which has its idom defined
-        if (predPtr == iDomCandidate || m_domInfo.idom.count(predPtr) == 0) {
+        if (predPtr == iDomCandidate || m_idom.count(predPtr) == 0) {
           continue;
         }
 
-        iDomCandidate =
-          getLCAImmDominator(predPtr, iDomCandidate, m_domInfo.idom, rpo);
+        iDomCandidate = getLCAImmDominator(predPtr, iDomCandidate, m_idom, rpo);
       }
 
-      auto& idom = m_domInfo.idom[bbPtr];
+      auto& idom = m_idom[bbPtr];
 
       if (idom != iDomCandidate) {
         // IDom changed, continue iterating
@@ -132,52 +137,53 @@ void Region::collectDomInfo() {
   } while (changed == true);
 
   buildDominatedLists();
-  m_domInfo.isExpired = false;
+  m_isExpired = false;
 }
 
-BasicBlock* Region::getIDom(const BasicBlock* basicBlock) const {
-  if (m_domInfo.isExpired == true) {
+const BasicBlock* DomInfo::getIDom(const BasicBlock* basicBlock) const {
+  if (m_isExpired == true) {
     throw IrisException("Dom info is expired!");
   }
 
-  auto iter = m_domInfo.idom.find(const_cast<BasicBlock*>(basicBlock));
-  if (iter == m_domInfo.idom.end()) {
+  auto iter = m_idom.find(const_cast<BasicBlock*>(basicBlock));
+  if (iter == m_idom.end()) {
     return nullptr;
   }
 
   return iter->second;
 }
 
-BasicBlock* Region::getIDomByID(bb_id_t id) const {
-  return getIDom(getBasicBlockByID(id));
+const BasicBlock* DomInfo::getIDomByID(bb_id_t id, const Region& region) const {
+  return getIDom(region.getBasicBlockByID(id));
 }
 
-std::vector<BasicBlock*>
-Region::getDominatedBlocks(const BasicBlock* basicBlock) const {
-  if (m_domInfo.isExpired == true) {
+std::vector<const BasicBlock*>
+DomInfo::getDominatedBlocks(const BasicBlock* basicBlock) const {
+  if (m_isExpired == true) {
     throw IrisException("Dom info is expired!");
   }
 
-  auto iter = m_domInfo.dominated.find(const_cast<BasicBlock*>(basicBlock));
-  if (iter == m_domInfo.dominated.end()) {
+  auto iter = m_dominated.find(const_cast<BasicBlock*>(basicBlock));
+  if (iter == m_dominated.end()) {
     return {};
   }
 
   return iter->second;
 }
 
-std::vector<BasicBlock*> Region::getDominatedBlocksByID(bb_id_t id) const {
-  return getDominatedBlocks(getBasicBlockByID(id));
+std::vector<const BasicBlock*>
+DomInfo::getDominatedBlocksByID(bb_id_t id, const Region& region) const {
+  return getDominatedBlocks(region.getBasicBlockByID(id));
 }
 
-std::vector<BasicBlock*>
-Region::getDominatorsChain(const BasicBlock* basicBlock) const {
-  if (m_domInfo.isExpired == true) {
+std::vector<const BasicBlock*>
+DomInfo::getDominatorsChain(const BasicBlock* basicBlock) const {
+  if (m_isExpired == true) {
     throw IrisException("Dom info is expired!");
   }
 
-  std::vector<BasicBlock*> domChain;
-  auto curBasicBlock = const_cast<BasicBlock*>(basicBlock);
+  std::vector<const BasicBlock*> domChain;
+  auto curBasicBlock = basicBlock;
 
   while (curBasicBlock) {
     domChain.push_back(curBasicBlock);
@@ -187,17 +193,18 @@ Region::getDominatorsChain(const BasicBlock* basicBlock) const {
   return domChain;
 }
 
-std::vector<BasicBlock*> Region::getDominatorsChainByID(bb_id_t id) const {
-  return getDominatorsChain(getBasicBlockByID(id));
+std::vector<const BasicBlock*>
+DomInfo::getDominatorsChainByID(bb_id_t id, const Region& region) const {
+  return getDominatorsChain(region.getBasicBlockByID(id));
 }
 
-BasicBlock* Region::getLCAImmDominator(
-  BasicBlock* b1, BasicBlock* b2,
-  const std::unordered_map<BasicBlock*, BasicBlock*>& idom,
-  const std::vector<BasicBlock*>& rpo) const {
+const BasicBlock* DomInfo::getLCAImmDominator(
+  const BasicBlock* b1, const BasicBlock* b2,
+  const std::unordered_map<const BasicBlock*, const BasicBlock*>& idom,
+  const std::vector<const BasicBlock*>& rpo) const {
 
   // Invert RPO
-  std::unordered_map<BasicBlock*, std::size_t> index;
+  std::unordered_map<const BasicBlock*, std::size_t> index;
   for (std::size_t idx = 0; idx < rpo.size(); ++idx) {
     index[rpo[idx]] = idx;
   }
@@ -214,13 +221,14 @@ BasicBlock* Region::getLCAImmDominator(
   return b1;
 }
 
-void Region::buildDominatedLists() {
-  for (auto& [basicBlock, idom] : m_domInfo.idom) {
+void DomInfo::buildDominatedLists() {
+  for (auto& [basicBlock, idom] : m_idom) {
     if (basicBlock == idom) {
       continue;
     }
-    m_domInfo.dominated[idom].push_back(basicBlock);
+    m_dominated[idom].push_back(basicBlock);
   }
 }
 
+} // namespace doms
 } // namespace iris

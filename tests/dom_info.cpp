@@ -3,216 +3,169 @@
 #include <iris.hpp>
 using namespace iris;
 
-TEST(DOM_INFO, EXAMPLE_1) {
-  /*
-  A → B → C → D
-      ↓
-      F → E → D
-      ↓
-      G → D
-  */
-  Region region("foo");
+TEST(DOM_INFO, DEFAULT) {
+  doms::DomInfo domInfo;
 
-  auto blockA = std::make_unique<BasicBlock>(0);
-  auto blockB = std::make_unique<BasicBlock>(1);
-  auto blockC = std::make_unique<BasicBlock>(2);
-  auto blockD = std::make_unique<BasicBlock>(3);
-  auto blockE = std::make_unique<BasicBlock>(4);
-  auto blockF = std::make_unique<BasicBlock>(5);
-  auto blockG = std::make_unique<BasicBlock>(6);
-
-  // A -> B
-  blockA->linkSucc(blockB.get());
-
-  // B -> C, F
-  blockB->linkSucc(blockC.get(), true);
-  blockB->linkSucc(blockF.get(), false);
-
-  // C -> D
-  blockC->linkSucc(blockD.get());
-
-  // E -> D
-  blockE->linkSucc(blockD.get());
-
-  // F -> E, G
-  blockF->linkSucc(blockE.get(), true);
-  blockF->linkSucc(blockG.get(), false);
-
-  // G -> D
-  blockG->linkSucc(blockD.get());
-
-  region.addStartBasicBlock(std::move(blockA));
-  region.addBasicBlock(std::move(blockB));
-  region.addBasicBlock(std::move(blockC));
-  region.addBasicBlock(std::move(blockE));
-  region.addBasicBlock(std::move(blockF));
-  region.addBasicBlock(std::move(blockG));
-  region.addFinalBasicBlock(std::move(blockD));
-
-  region.collectDomInfo();
-
-  EXPECT_EQ(region.getIDomByID(0)->getID(), 0); // idom(A) = A
-  EXPECT_EQ(region.getIDomByID(1)->getID(), 0); // idom(B) = A
-  EXPECT_EQ(region.getIDomByID(2)->getID(), 1); // idom(C) = B
-  EXPECT_EQ(region.getIDomByID(3)->getID(), 1); // idom(D) = B
-  EXPECT_EQ(region.getIDomByID(4)->getID(), 5); // idom(E) = F
-  EXPECT_EQ(region.getIDomByID(5)->getID(), 1); // idom(F) = B
-  EXPECT_EQ(region.getIDomByID(6)->getID(), 5); // idom(G) = F
+  EXPECT_TRUE(domInfo.isExpired());
 }
 
-TEST(DOM_INFO, EXAMPLE_2) {
-  /*
-  A → B → C → D → E → F → G → I → K
-      ↓       ↓       ↓   ↓
-      J → C   C       E   H → B
-  */
+TEST(DOM_INFO, BASIC) {
+  doms::DomInfo domInfo;
+
   Region region("foo");
+  region.addStartBasicBlock(std::make_unique<BasicBlock>(0));
 
-  auto blockA = std::make_unique<BasicBlock>(0);
-  auto blockB = std::make_unique<BasicBlock>(1);
-  auto blockC = std::make_unique<BasicBlock>(2);
-  auto blockD = std::make_unique<BasicBlock>(3);
-  auto blockE = std::make_unique<BasicBlock>(4);
-  auto blockF = std::make_unique<BasicBlock>(5);
-  auto blockG = std::make_unique<BasicBlock>(6);
-  auto blockH = std::make_unique<BasicBlock>(7);
-  auto blockI = std::make_unique<BasicBlock>(8);
-  auto blockJ = std::make_unique<BasicBlock>(9);
-  auto blockK = std::make_unique<BasicBlock>(10);
-
-  // A -> B
-  blockA->linkSucc(blockB.get());
-
-  // B -> C, J
-  blockB->linkSucc(blockC.get(), true);
-  blockB->linkSucc(blockJ.get(), false);
-
-  // C -> D
-  blockC->linkSucc(blockD.get());
-
-  // D -> C, E
-  blockD->linkSucc(blockC.get(), true);
-  blockD->linkSucc(blockE.get(), false);
-
-  // E -> F
-  blockE->linkSucc(blockF.get());
-
-  // F -> E, G
-  blockF->linkSucc(blockE.get(), true);
-  blockF->linkSucc(blockG.get(), false);
-
-  // G -> H, I
-  blockG->linkSucc(blockH.get(), true);
-  blockG->linkSucc(blockI.get(), false);
-
-  // H -> B
-  blockH->linkSucc(blockB.get());
-
-  // I -> K
-  blockI->linkSucc(blockK.get());
-
-  // J -> C
-  blockJ->linkSucc(blockC.get());
-
-  region.addStartBasicBlock(std::move(blockA));
-  region.addBasicBlock(std::move(blockB));
-  region.addBasicBlock(std::move(blockC));
-  region.addBasicBlock(std::move(blockD));
-  region.addBasicBlock(std::move(blockE));
-  region.addBasicBlock(std::move(blockF));
-  region.addBasicBlock(std::move(blockG));
-  region.addBasicBlock(std::move(blockH));
-  region.addBasicBlock(std::move(blockI));
-  region.addBasicBlock(std::move(blockJ));
-  region.addFinalBasicBlock(std::move(blockK));
-
-  region.collectDomInfo();
-
-  EXPECT_EQ(region.getIDomByID(0)->getID(), 0);  // idom(A) = A
-  EXPECT_EQ(region.getIDomByID(1)->getID(), 0);  // idom(B) = A
-  EXPECT_EQ(region.getIDomByID(2)->getID(), 1);  // idom(C) = B
-  EXPECT_EQ(region.getIDomByID(3)->getID(), 2);  // idom(D) = C
-  EXPECT_EQ(region.getIDomByID(4)->getID(), 3);  // idom(E) = D
-  EXPECT_EQ(region.getIDomByID(5)->getID(), 4);  // idom(F) = E
-  EXPECT_EQ(region.getIDomByID(6)->getID(), 5);  // idom(G) = F
-  EXPECT_EQ(region.getIDomByID(7)->getID(), 6);  // idom(H) = G
-  EXPECT_EQ(region.getIDomByID(8)->getID(), 6);  // idom(I) = G
-  EXPECT_EQ(region.getIDomByID(9)->getID(), 1);  // idom(J) = B
-  EXPECT_EQ(region.getIDomByID(10)->getID(), 8); // idom(K) = I
+  domInfo.analyze(region);
+  EXPECT_FALSE(domInfo.isExpired());
 }
 
-TEST(DOM_INFO, EXAMPLE_3) {
-  /*
-  A → B → C → D → G → I
-      ↓           ↓
-      E → D       C
-      ↓
-      F → B
-      ↓
-      H → G
-      ↓
-      I
-  */
+TEST(DOM_INFO, EXFAIL_GET_DFS_NO_START_BB) {
   Region region("foo");
 
-  auto blockA = std::make_unique<BasicBlock>(0);
-  auto blockB = std::make_unique<BasicBlock>(1);
-  auto blockC = std::make_unique<BasicBlock>(2);
-  auto blockD = std::make_unique<BasicBlock>(3);
-  auto blockE = std::make_unique<BasicBlock>(4);
-  auto blockF = std::make_unique<BasicBlock>(5);
-  auto blockG = std::make_unique<BasicBlock>(6);
-  auto blockH = std::make_unique<BasicBlock>(7);
-  auto blockI = std::make_unique<BasicBlock>(8);
+  try {
+    [[maybe_unused]] auto dfs = doms::DomInfo::getDFS(region);
+  } catch (const IrisException& exc) {
+    std::string str = exc.what();
+    EXPECT_TRUE(
+      !str.compare("Cannot run DFS with no start basic block specified!"));
+    return;
+  }
+  FAIL();
+}
 
-  // A -> B
-  blockA->linkSucc(blockB.get());
+TEST(DOM_INFO, EXFAIL_GET_RPO_NO_START_BB) {
+  Region region("foo");
 
-  // B -> C, E
-  blockB->linkSucc(blockC.get(), true);
-  blockB->linkSucc(blockE.get(), false);
+  try {
+    [[maybe_unused]] auto rpo = doms::DomInfo::getRPO(region);
+  } catch (const IrisException& exc) {
+    std::string str = exc.what();
+    EXPECT_TRUE(
+      !str.compare("Cannot run RPO with no start basic block specified!"));
+    return;
+  }
+  FAIL();
+}
 
-  // C -> D
-  blockC->linkSucc(blockD.get());
+TEST(DOM_INFO, EXFAIL_GET_IDOM_EXPIRED_DOM_INFO) {
+  Region region("foo");
 
-  // D -> G
-  blockD->linkSucc(blockG.get());
-
-  // E -> D, F
-  blockE->linkSucc(blockD.get(), true);
-  blockE->linkSucc(blockF.get(), false);
-
-  // F -> B, H
-  blockF->linkSucc(blockB.get(), true);
-  blockF->linkSucc(blockH.get(), false);
-
-  // G -> C, I
-  blockG->linkSucc(blockC.get(), true);
-  blockG->linkSucc(blockI.get(), false);
-
-  // H -> G, I
-  blockH->linkSucc(blockG.get(), true);
-  blockH->linkSucc(blockI.get(), false);
-
-  region.addStartBasicBlock(std::move(blockA));
-  region.addBasicBlock(std::move(blockB));
-  region.addBasicBlock(std::move(blockC));
-  region.addBasicBlock(std::move(blockD));
-  region.addBasicBlock(std::move(blockE));
-  region.addBasicBlock(std::move(blockF));
-  region.addBasicBlock(std::move(blockG));
-  region.addBasicBlock(std::move(blockH));
-  region.addFinalBasicBlock(std::move(blockI));
+  auto bb0 = std::make_unique<BasicBlock>(0);
+  auto bb0Ptr = bb0.get();
+  region.addStartBasicBlock(std::move(bb0));
 
   region.collectDomInfo();
+  region.addBasicBlock(std::make_unique<BasicBlock>(1));
 
-  EXPECT_EQ(region.getIDomByID(0)->getID(), 0); // idom(A) = A
-  EXPECT_EQ(region.getIDomByID(1)->getID(), 0); // idom(B) = A
-  EXPECT_EQ(region.getIDomByID(2)->getID(), 1); // idom(C) = B
-  EXPECT_EQ(region.getIDomByID(3)->getID(), 1); // idom(D) = B
-  EXPECT_EQ(region.getIDomByID(4)->getID(), 1); // idom(E) = B
-  EXPECT_EQ(region.getIDomByID(5)->getID(), 4); // idom(F) = E
-  EXPECT_EQ(region.getIDomByID(6)->getID(), 1); // idom(G) = B
-  EXPECT_EQ(region.getIDomByID(7)->getID(), 5); // idom(H) = F
-  EXPECT_EQ(region.getIDomByID(8)->getID(), 1); // idom(I) = B
+  try {
+    auto& domInfo = region.getDomInfo();
+    [[maybe_unused]] auto idom = domInfo.getIDom(bb0Ptr);
+  } catch (const IrisException& exc) {
+    std::string str = exc.what();
+    EXPECT_TRUE(!str.compare("Dom info is expired!"));
+    return;
+  }
+  FAIL();
+}
+
+TEST(DOM_INFO, EXFAIL_GET_IDOM_BY_ID_EXPIRED_DOM_INFO) {
+  Region region("foo");
+
+  auto bb0 = std::make_unique<BasicBlock>(0);
+  region.addStartBasicBlock(std::move(bb0));
+
+  region.collectDomInfo();
+  region.addBasicBlock(std::make_unique<BasicBlock>(1));
+
+  try {
+    auto& domInfo = region.getDomInfo();
+    [[maybe_unused]] auto idom = domInfo.getIDomByID(0, region);
+  } catch (const IrisException& exc) {
+    std::string str = exc.what();
+    EXPECT_TRUE(!str.compare("Dom info is expired!"));
+    return;
+  }
+  FAIL();
+}
+
+TEST(DOM_INFO, EXFAIL_GET_DOM_BLOCKS_EXPIRED_DOM_INFO) {
+  Region region("foo");
+
+  auto bb0 = std::make_unique<BasicBlock>(0);
+  auto bb0Ptr = bb0.get();
+  region.addStartBasicBlock(std::move(bb0));
+
+  region.collectDomInfo();
+  region.addBasicBlock(std::make_unique<BasicBlock>(1));
+
+  try {
+    auto& domInfo = region.getDomInfo();
+    [[maybe_unused]] auto bbs = domInfo.getDominatedBlocks(bb0Ptr);
+  } catch (const IrisException& exc) {
+    std::string str = exc.what();
+    EXPECT_TRUE(!str.compare("Dom info is expired!"));
+    return;
+  }
+  FAIL();
+}
+
+TEST(DOM_INFO, EXFAIL_GET_DOM_BLOCKS_BY_IDEXPIRED_DOM_INFO) {
+  Region region("foo");
+
+  auto bb0 = std::make_unique<BasicBlock>(0);
+  region.addStartBasicBlock(std::move(bb0));
+
+  region.collectDomInfo();
+  region.addBasicBlock(std::make_unique<BasicBlock>(1));
+
+  try {
+    auto& domInfo = region.getDomInfo();
+    [[maybe_unused]] auto bbs = domInfo.getDominatedBlocksByID(0, region);
+  } catch (const IrisException& exc) {
+    std::string str = exc.what();
+    EXPECT_TRUE(!str.compare("Dom info is expired!"));
+    return;
+  }
+  FAIL();
+}
+
+TEST(DOM_INFO, EXFAIL_GET_DOM_CHAIN_EXPIRED_DOM_INFO) {
+  Region region("foo");
+
+  auto bb0 = std::make_unique<BasicBlock>(0);
+  auto bb0Ptr = bb0.get();
+  region.addStartBasicBlock(std::move(bb0));
+
+  region.collectDomInfo();
+  region.addBasicBlock(std::make_unique<BasicBlock>(1));
+
+  try {
+    auto& domInfo = region.getDomInfo();
+    [[maybe_unused]] auto chain = domInfo.getDominatorsChain(bb0Ptr);
+  } catch (const IrisException& exc) {
+    std::string str = exc.what();
+    EXPECT_TRUE(!str.compare("Dom info is expired!"));
+    return;
+  }
+  FAIL();
+}
+
+TEST(DOM_INFO, EXFAIL_GET_DOM_CHAIN_BY_ID_EXPIRED_DOM_INFO) {
+  Region region("foo");
+
+  auto bb0 = std::make_unique<BasicBlock>(0);
+  region.addStartBasicBlock(std::move(bb0));
+
+  region.collectDomInfo();
+  region.addBasicBlock(std::make_unique<BasicBlock>(1));
+
+  try {
+    auto& domInfo = region.getDomInfo();
+    [[maybe_unused]] auto chain = domInfo.getDominatorsChainByID(0, region);
+  } catch (const IrisException& exc) {
+    std::string str = exc.what();
+    EXPECT_TRUE(!str.compare("Dom info is expired!"));
+    return;
+  }
+  FAIL();
 }

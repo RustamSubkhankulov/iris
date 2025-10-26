@@ -6,11 +6,10 @@
 #include <memory>
 #include <ostream>
 #include <string_view>
-#include <unordered_map>
-#include <unordered_set>
 
 #include <exception.hpp>
 #include <graph/basic_block.hpp>
+#include <graph/doms.hpp>
 
 namespace iris {
 
@@ -112,31 +111,38 @@ public:
 
   //--- Dominators information ---
 
-  std::vector<BasicBlock*> getDFS() const;
-  std::vector<BasicBlock*> getRPO() const;
-
-  void collectDomInfo();
-  bool isDomInfoExpired() {
-    return m_domInfo.isExpired;
+  bool isDomInfoExpired() noexcept {
+    return m_domInfo.isExpired();
   }
 
-  BasicBlock* getIDom(const BasicBlock* basicBlock) const;
-  BasicBlock* getIDomByID(bb_id_t id) const;
+  void collectDomInfo() {
+    if (!m_domInfo.isExpired()) {
+      return;
+    }
+    m_domInfo.analyze(*this);
+  }
 
-  std::vector<BasicBlock*>
-  getDominatedBlocks(const BasicBlock* basicBlock) const;
+  const doms::DomInfo& getDomInfo() const {
+    return m_domInfo;
+  }
 
-  std::vector<BasicBlock*> getDominatedBlocksByID(bb_id_t id) const;
+  std::vector<const BasicBlock*> getDFS() const {
+    return doms::DomInfo::getDFS(*this);
+  }
 
-  std::vector<BasicBlock*>
-  getDominatorsChain(const BasicBlock* basicBlock) const;
-
-  std::vector<BasicBlock*> getDominatorsChainByID(bb_id_t id) const;
+  std::vector<const BasicBlock*> getRPO() const {
+    return doms::DomInfo::getRPO(*this);
+  }
 
   //--- Misc ---
 
   void dump(std::ostream& os);
   bool verify(std::string& msg) const;
+
+private:
+  void expireDomInfo() noexcept {
+    m_domInfo.expire();
+  }
 
 private:
   std::string m_name;
@@ -147,37 +153,7 @@ private:
   detail::IDProvider<bb_id_t> m_bbIDProvider;
   detail::IDProvider<op_id_t> m_opIDProvider;
 
-  struct domInfo {
-    // BB -> its IDOM
-    std::unordered_map<BasicBlock*, BasicBlock*> idom;
-
-    // BB -> BBs that are dominated by it
-    std::unordered_map<BasicBlock*, std::vector<BasicBlock*>> dominated;
-
-    // By default dominators info is expired
-    // (it must be prepared before querying)
-    bool isExpired = true;
-
-  } m_domInfo;
-
-  void expireDomInfo() {
-    m_domInfo.isExpired = true;
-  }
-
-  void runDFSFrom(BasicBlock* basicBlock,
-                  std::unordered_set<BasicBlock*>& visited,
-                  std::vector<BasicBlock*>& order) const;
-
-  void runRPOFrom(BasicBlock* basicBlock,
-                  std::unordered_set<BasicBlock*>& visited,
-                  std::vector<BasicBlock*>& order) const;
-
-  BasicBlock*
-  getLCAImmDominator(BasicBlock* b1, BasicBlock* b2,
-                     const std::unordered_map<BasicBlock*, BasicBlock*>& idom,
-                     const std::vector<BasicBlock*>& order) const;
-
-  void buildDominatedLists();
+  doms::DomInfo m_domInfo;
 };
 
 } // namespace iris

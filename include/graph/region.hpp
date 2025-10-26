@@ -111,14 +111,11 @@ public:
 
   //--- Dominators information ---
 
-  bool isDomInfoExpired() noexcept {
+  bool isDomInfoExpired() const noexcept {
     return m_domInfo.isExpired();
   }
 
   void collectDomInfo() {
-    if (!m_domInfo.isExpired()) {
-      return;
-    }
     m_domInfo.analyze(*this);
   }
 

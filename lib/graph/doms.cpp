@@ -74,15 +74,14 @@ std::vector<const BasicBlock*> DomInfo::getRPO(const Region& region) {
 }
 
 void DomInfo::analyze(const Region& region) {
-  auto startBB = region.getStartBasicBlock();
+  if (m_isExpired == false) {
+    return;
+  }
 
+  auto startBB = region.getStartBasicBlock();
   if (startBB == nullptr) {
     throw IrisException(
       "Cannot collect dom info with no start basic block specified!");
-  }
-
-  if (m_isExpired == false) {
-    return;
   }
 
   m_idom.clear();

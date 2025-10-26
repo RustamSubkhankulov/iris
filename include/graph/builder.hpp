@@ -1,5 +1,5 @@
-#ifndef INCLUDE_BUILDER
-#define INCLUDE_BUILDER
+#ifndef INCLUDE_GRAPH_BUILDER_HPP
+#define INCLUDE_GRAPH_BUILDER_HPP
 
 #include <memory>
 
@@ -172,4 +172,4 @@ private:
 
 } // namespace iris
 
-#endif // INCLUDE_BUILDER
+#endif // INCLUDE_GRAPH_BUILDER_HPP

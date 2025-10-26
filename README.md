@@ -71,12 +71,18 @@ Operations common properties:
 - Optional list of **inputs**. Some operations can have variadic number of inputs (_ctrlflow::call_), other have fixed number of inputs (_arith::add_);
 - List of **users**, who use this operation's result as their input/inputs;
 
+#### Dominators analysis
+
 ``iris::Region`` class provide API for working with basic block's dominators:
 - ``collectDomInfo()`` - collect dominators information from the graph;
 - ``getDFS()`` and ``getRPO()`` - obtain corresponding traversal orders;
 - ``getIdom()`` and ``getIdomByID()`` - get immediate dominator
 - ``getDominatedBlocks()`` and ``getDominatedBlocksByID()`` - get blocks, for which given one is immediate dominator;
 - ``getDominatorsChain()`` and ``getDominatorsChainByID()`` - get chain of immediate dominators from the given block to the starting block.
+
+#### Loop analysis
+
+To be done.
 
 #### Building examples
 

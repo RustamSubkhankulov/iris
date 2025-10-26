@@ -9,7 +9,9 @@
 
 #include <exception.hpp>
 #include <graph/basic_block.hpp>
+
 #include <graph/doms.hpp>
+#include <graph/loops.hpp>
 
 namespace iris {
 
@@ -42,7 +44,7 @@ public:
     assert(!!basicBlock);
     basicBlock->setParentRegion(this);
     m_BasicBlocks.push_back(std::move(basicBlock));
-    expireDomInfo();
+    expireDomAndLoopInfo();
   }
 
   void addStartBasicBlock(std::unique_ptr<BasicBlock> basicBlock);
@@ -131,14 +133,29 @@ public:
     return doms::DomInfo::getRPO(*this);
   }
 
+  //--- Loops information ---
+
+  bool isLoopInfoExpired() const noexcept {
+    return m_loopInfo.isExpired();
+  }
+
+  void collectLoopInfo() {
+    m_loopInfo.analyze(*this);
+  }
+
+  const loops::LoopInfo& getLoopInfo() const {
+    return m_loopInfo;
+  }
+
   //--- Misc ---
 
   void dump(std::ostream& os);
   bool verify(std::string& msg) const;
 
 private:
-  void expireDomInfo() noexcept {
+  void expireDomAndLoopInfo() noexcept {
     m_domInfo.expire();
+    m_loopInfo.expire();
   }
 
 private:
@@ -151,6 +168,7 @@ private:
   detail::IDProvider<op_id_t> m_opIDProvider;
 
   doms::DomInfo m_domInfo;
+  loops::LoopInfo m_loopInfo;
 };
 
 } // namespace iris

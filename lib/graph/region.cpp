@@ -98,7 +98,7 @@ bool Region::removeBasicBlockByID(bb_id_t id) {
       }
 
       m_BasicBlocks.erase(bbIter);
-      expireDomInfo();
+      expireDomAndLoopInfo();
       return true;
     }
   }
@@ -127,7 +127,7 @@ bool Region::replaceBasicBlockWithByID(
       m_BasicBlocks.erase(bbIter);
       m_BasicBlocks.push_back(std::move(newBasicBlockPtr));
 
-      expireDomInfo();
+      expireDomAndLoopInfo();
       return true;
     }
   }

@@ -127,4 +127,6 @@ Tests include:
     - Region ``iris::Region``;
     - IR-builder ``iris::IRBuilder``;
     - Dominator analysis helper class ``iris::doms::DomInfo``;
+    - Loop analysis helper class ``iris::doms::LoopInfo``;
 - Dominator analysis tests (``tests/doms.cpp``);
+- Loop analysis tests (``tests/loops.cpp``);

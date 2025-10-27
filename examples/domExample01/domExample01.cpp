@@ -4,12 +4,12 @@ int main() {
   using namespace iris;
 
   /*
-    A → B → C → D
-        ↓
-        F → E → D
-        ↓
-        G → D
-    */
+  A → B → C → D
+      ↓
+      F → E → D
+      ↓
+      G → D
+  */
   Region region("foo");
 
   auto blockA = std::make_unique<BasicBlock>(0);

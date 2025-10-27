@@ -187,11 +187,16 @@ DomInfo::getDominatorsChain(const BasicBlock* basicBlock) const {
   }
 
   std::vector<const BasicBlock*> domChain;
-  auto curBasicBlock = getIDom(basicBlock);
+  auto curBasicBlock = basicBlock;
 
   while (curBasicBlock) {
     domChain.push_back(curBasicBlock);
-    curBasicBlock = getIDom(curBasicBlock);
+
+    auto idom = getIDom(curBasicBlock);
+    if (idom == curBasicBlock) {
+      break;
+    }
+    curBasicBlock = idom;
   }
 
   return domChain;

@@ -22,7 +22,7 @@ public:
     return m_header;
   }
 
-  const std::vector<const BasicBlock*>& getLatches() const noexcept {
+  const std::unordered_set<const BasicBlock*>& getLatches() const noexcept {
     return m_latches;
   }
 
@@ -41,8 +41,12 @@ public:
     return m_parent;
   }
 
-  bool contains(const BasicBlock* bb) const {
+  bool blocksContain(const BasicBlock* bb) const {
     return m_blocks.contains(bb);
+  }
+
+  bool latchesContain(const BasicBlock* bb) const {
+    return m_latches.contains(bb);
   }
 
   unsigned getDepth() const noexcept {
@@ -78,19 +82,23 @@ private:
   }
 
   void addLatch(const BasicBlock* latch) {
-    m_latches.push_back(latch);
+    m_latches.insert(latch);
   }
 
   void dropNestedLoops() {
     m_nestedLoops.clear();
   }
 
-  void setReducibility(bool isReducible) {
-    m_isReducible = isReducible;
-  }
-
   void addExitEdge(const BasicBlock* src, const BasicBlock* dst) {
     m_exits.emplace_back(src, dst);
+  }
+
+  void setDepth(unsigned depth) {
+    m_depth = depth;
+  }
+
+  void setReducibility(bool isReducible) {
+    m_isReducible = isReducible;
   }
 
 private:
@@ -98,7 +106,7 @@ private:
   const BasicBlock* m_header = nullptr;
 
   // One canonical latch (last processed tail)
-  std::vector<const BasicBlock*> m_latches;
+  std::unordered_set<const BasicBlock*> m_latches;
 
   // Loop's basic blocks
   std::unordered_set<const BasicBlock*> m_blocks;
@@ -144,6 +152,11 @@ public:
   void dump(std::ostream& os) const;
 
 private:
+  void setLoopDepth();
+
+  void collectRootLoopBasicBlocks(const std::vector<const BasicBlock*>& postOrder,
+                                  const std::unordered_map<const BasicBlock*, Loop*>& blockToLoop);
+
   static void collectBackEdges(
     const BasicBlock* bb, std::unordered_set<const BasicBlock*>& gray,
     std::unordered_set<const BasicBlock*>& black, std::vector<Edge>& backEdges,
@@ -154,6 +167,8 @@ private:
   static void
   loopSearch(const BasicBlock* latch, Loop* loop,
              std::unordered_map<const BasicBlock*, Loop*>& blockToLoop);
+
+  static void collectExitEdgesFrom(const BasicBlock* bb, Loop* loop);
 
 private:
   // By default loop info is expired

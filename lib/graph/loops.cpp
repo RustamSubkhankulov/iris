@@ -10,11 +10,6 @@
 namespace iris {
 namespace loops {
 
-void Loop::dump(std::ostream& os, unsigned indent) const {
-  (void)os;
-  (void)indent;
-}
-
 void LoopInfo::analyze(const Region& region) {
   if (region.isDomInfoExpired()) {
     throw IrisException("LoopInfo::analyze() requires DomInfo unexpired!");
@@ -50,6 +45,9 @@ void LoopInfo::analyze(const Region& region) {
   std::transform(loops.begin(), loops.end(), std::back_inserter(m_loops),
                  [](auto& kv) { return std::move(kv.second); });
 
+  // Basic block -> loop
+  std::unordered_map<const BasicBlock*, Loop*> blockToLoop;
+
   // Header -> latch map
   std::unordered_map<const BasicBlock*, std::vector<const BasicBlock*>>
     headerToLatches;
@@ -62,9 +60,6 @@ void LoopInfo::analyze(const Region& region) {
   for (const auto& loop : m_loops) {
     headerToLoop.insert(std::make_pair(loop->getHeader(), loop.get()));
   }
-
-  // Basic block -> loop
-  std::unordered_map<const BasicBlock*, Loop*> blockToLoop;
 
   auto postOrder = region.getPO();
 
@@ -96,41 +91,68 @@ void LoopInfo::analyze(const Region& region) {
   for (auto& loop : m_loops) {
     // Collect exiting and exit blocks
     for (auto* bb : loop->getBlocks()) {
-      for (auto* succ : {bb->getSucc(true), bb->getSucc(false)}) {
-        if (succ == nullptr) {
-          continue;
-        }
-        if (!loop->contains(succ)) {
-          loop->addExitEdge(bb, succ);
-        }
-      }
+      collectExitEdgesFrom(bb, loop.get());
     }
 
+    for (auto* bb : loop->getLatches()) {
+      collectExitEdgesFrom(bb, loop.get());
+    }
+
+    collectExitEdgesFrom(loop->getHeader(), loop.get());
+
     // Collect top-level loops
-    if (loop->getParent() == nullptr) {
+    if (loop->m_parent == nullptr) {
       m_rootLoop.addNestedLoop(loop.get());
     }
   }
 
-  // Add remaining block to root loop
-  for (auto* bb : postOrder) {
-    if (!blockToLoop.contains((bb))) {
-      m_rootLoop.populate(bb);
-      blockToLoop.insert(std::make_pair(bb, &m_rootLoop));
+  // Add header and latches to block2loop map,
+  // so they are not added to root loop
+  for (auto& loop : m_loops) {
+    blockToLoop.insert(std::make_pair(loop->getHeader(), loop.get()));
+    for (auto* latch : loop->getLatches()) {
+      blockToLoop.insert(std::make_pair(latch, loop.get()));
     }
   }
 
+  // Add remaining block to root loop
+  collectRootLoopBasicBlocks(postOrder, blockToLoop);
+
   // Set loops depth recursively
+  setLoopDepth();
+
+  m_isExpired = false;
+}
+
+void LoopInfo::collectRootLoopBasicBlocks(const std::vector<const BasicBlock*>& postOrder,
+                                          const std::unordered_map<const BasicBlock*, Loop*>& blockToLoop) {
+  for (auto* bb : postOrder) {
+    if (!blockToLoop.contains((bb))) {
+      m_rootLoop.populate(bb);
+    }
+  }
+}
+
+void LoopInfo::setLoopDepth() {
   std::function<void(unsigned, Loop*)> setDepth = [&](unsigned depth,
                                                       Loop* loop) {
-    loop->m_depth = depth;
+    loop->setDepth(depth);
     for (auto* nested : loop->getNestedLoops()) {
       setDepth(depth + 1U, nested);
     }
   };
   setDepth(0, &m_rootLoop);
+}
 
-  m_isExpired = false;
+void LoopInfo::collectExitEdgesFrom(const BasicBlock* bb, Loop* loop) {
+  for (auto* succ : {bb->getSucc(true), bb->getSucc(false)}) {
+    if (succ == nullptr) {
+      continue;
+    }
+    if (!loop->blocksContain(succ) && !loop->latchesContain(succ) && succ != loop->getHeader()) {
+      loop->addExitEdge(bb, succ);
+    }
+  }
 }
 
 void LoopInfo::loopSearch(
@@ -219,8 +241,59 @@ void LoopInfo::collectBackEdges(
 }
 
 void LoopInfo::dump(std::ostream& os) const {
-  os << "Loop Tree:" << std::endl;
-  m_rootLoop.dump(os, 2U);
+  if (m_isExpired) {
+    os << "[LoopInfo expired]" << std::endl;
+    return;
+  }
+
+  os << "========== Loop Tree ==========" << std::endl;
+  m_rootLoop.dump(os, 0);
+  os << "================================" << std::endl;
+}
+
+void Loop::dump(std::ostream& os, unsigned indent) const {
+  std::string pad(indent, ' ');
+  if (isRoot()) {
+    os << pad << "[Root Loop]" << std::endl;
+  } else {
+    os << pad << "Loop Header: " << m_header->getID() << std::endl;
+  }
+
+  os << pad << "  Depth: " << m_depth << " | Reducible: " << std::boolalpha
+     << m_isReducible << std::endl;
+
+  // Latches
+  if (!m_latches.empty()) {
+    os << pad << "  Latches: ";
+    for (auto* latch : m_latches) {
+      os << latch->getID() << " ";
+    }
+    os << std::endl;
+  }
+
+  // Blocks
+  os << pad << "  Blocks (" << m_blocks.size() << "): ";
+  for (auto* bb : m_blocks) {
+    os << bb->getID() << " ";
+  }
+  os << std::endl;
+
+  // Exit edges
+  if (!m_exits.empty()) {
+    os << pad << "  Exits:" << std::endl;
+    for (const auto& e : m_exits) {
+      os << pad << "    " << e.src()->getID() << " -> " << e.dst()->getID()
+         << std::endl;
+    }
+  }
+
+  // Nested loops
+  if (!m_nestedLoops.empty()) {
+    os << pad << "  Nested Loops:" << std::endl;
+    for (auto* nested : m_nestedLoops) {
+      nested->dump(os, indent + 2);
+    }
+  }
 }
 
 } // namespace loops

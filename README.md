@@ -151,5 +151,5 @@ Tests include:
     - Region ``iris::Region``;
     - IR-builder ``iris::IRBuilder``;
     - Dominator analysis helper class ``iris::doms::DomInfo``;
-    - Loop analysis helper class ``iris::doms::LoopInfo``.
+    - Loop analysis helper class ``iris::doms::LoopInfo`` (TODO).
 

@@ -103,7 +103,7 @@ Class ``iris::loops::Loop`` provides methods to query:
 _Root_ loop is a special pseudo-loop, which:
 - Has no parent loop, header, latches or exiting edges;
 - Has depth 0;
-- Contains all basic. blocks, which are are not contained in any other loop in the region.
+- Contains all basic blocks, which are are not contained in any other loop in the region.
 
 #### Building examples
 
@@ -142,6 +142,8 @@ ctest
 ```
 
 Tests include:
+- **Dominator analysis** tests (``tests/doms.cpp``);
+- **Loop analysis** tests (``tests/loops.cpp``).
 - Separate test suites for each dialect and its operations' verifiers and construction pre-conditions (``tests/dialects/``);
 - Tests of verifiers (ex-fails) and API tests for:
     - Generic operation ``iris::Operation``;
@@ -150,5 +152,4 @@ Tests include:
     - IR-builder ``iris::IRBuilder``;
     - Dominator analysis helper class ``iris::doms::DomInfo``;
     - Loop analysis helper class ``iris::doms::LoopInfo``.
-- Dominator analysis tests (``tests/doms.cpp``);
-- Loop analysis tests (``tests/loops.cpp``).
+

@@ -184,6 +184,7 @@ cmake --build build --target <target_name>
 List of available targets:
 - ``iris`` - IR-support static library;
 - ``factorial`` - example of IR usage - building IR for a programm calculating factorial manually via ``iris::IRBuilder``;
+- ``domExample01`` - ``domExample03`` - examples of running Dom analysis and building IDom tree.
 - ``loopExample01`` - ``loopExample06`` - examples of running Loop analysis and building Loop tree.
 
 Static library output files are located in ``build/lib/``, and executables - in ``build/bin``.

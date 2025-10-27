@@ -69,20 +69,41 @@ Operations common properties:
 - **SSA-value's ID**, which is unique across whole region;
 - **Return data type**, which is ``DataType::NONE`` if operation does not produce any result;
 - Optional list of **inputs**. Some operations can have variadic number of inputs (_ctrlflow::call_), other have fixed number of inputs (_arith::add_);
-- List of **users**, who use this operation's result as their input/inputs;
+- List of **users**, who use this operation's result as their input/inputs.
 
 #### Dominators analysis
 
-``iris::Region`` class provide API for working with basic block's dominators:
+``iris::Region`` class provides API:
 - ``collectDomInfo()`` - collect dominators information from the graph;
-- ``getDFS()`` and ``getRPO()`` - obtain corresponding traversal orders;
+- ``getDFS()`` and ``getRPO()`` - obtain corresponding traversal orders.
+
+``iris::doms::DomInfo`` helper-class provides API:
 - ``getIdom()`` and ``getIdomByID()`` - get immediate dominator
 - ``getDominatedBlocks()`` and ``getDominatedBlocksByID()`` - get blocks, for which given one is immediate dominator;
 - ``getDominatorsChain()`` and ``getDominatorsChainByID()`` - get chain of immediate dominators from the given block to the starting block.
 
 #### Loop analysis
 
-To be done.
+``iris::Region`` class provides API:
+- ``collectLoopInfo()`` - collect loops information from the graph.
+
+``iris::loops::LoopInfo`` helper-class provides API:
+- ``getRootLoop()`` - get root pseudo-loop, which is parent to top-level loops;
+- ``getTopLevelLoops()`` - get top-level loops.
+
+Class ``iris::loops::Loop`` provides methods to query:
+- **Header** basic block;
+- List of **latches**;
+- **Reducibility** flag;
+- **Exiting edges** and **blocks** contained inside for reducible loops;
+- List of **nested** loops;
+- Loop's **depth**;
+- **Parent** loop (_outer_).
+
+_Root_ loop is a special pseudo-loop, which:
+- Has no parent loop, header, latches or exiting edges;
+- Has depth 0;
+- Contains all basic. blocks, which are are not contained in any other loop in the region.
 
 #### Building examples
 
@@ -102,8 +123,9 @@ cmake --build build --target <target_name>
 ```
 
 List of available targets:
-- ``iris`` - IR-support static library
-- ``factorial`` - example of IR usage - building IR for a programm calculating factorial manually via ``iris::IRBuilder``
+- ``iris`` - IR-support static library;
+- ``factorial`` - example of IR usage - building IR for a programm calculating factorial manually via ``iris::IRBuilder``;
+- ``loopExample01`` - ``loopExample06`` - examples of running Loop analysis and building Loop tree.
 
 Static library output files are located in ``build/lib/``, and executables - in ``build/bin``.
 
@@ -127,6 +149,6 @@ Tests include:
     - Region ``iris::Region``;
     - IR-builder ``iris::IRBuilder``;
     - Dominator analysis helper class ``iris::doms::DomInfo``;
-    - Loop analysis helper class ``iris::doms::LoopInfo``;
+    - Loop analysis helper class ``iris::doms::LoopInfo``.
 - Dominator analysis tests (``tests/doms.cpp``);
-- Loop analysis tests (``tests/loops.cpp``);
+- Loop analysis tests (``tests/loops.cpp``).

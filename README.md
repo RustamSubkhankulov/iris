@@ -82,6 +82,29 @@ Operations common properties:
 - ``getDominatedBlocks()`` and ``getDominatedBlocksByID()`` - get blocks, for which given one is immediate dominator;
 - ``getDominatorsChain()`` and ``getDominatorsChainByID()`` - get chain of immediate dominators from the given block to the starting block.
 
+Example graph:
+```text
+A → B → C → D
+      ↓
+      F → E → D
+      ↓
+      G → D
+```
+
+Example output:
+```text
+========== Dom Tree ===========
+[Dominator Tree]
+  BB#0
+    BB#1
+      BB#3
+      BB#5
+        BB#4
+        BB#6
+      BB#2
+================================
+```
+
 #### Loop analysis
 
 ``iris::Region`` class provides API:
@@ -104,6 +127,42 @@ _Root_ loop is a special pseudo-loop, which:
 - Has no parent loop, header, latches or exiting edges;
 - Has depth 0;
 - Contains all basic blocks, which are are not contained in any other loop in the region.
+
+Example graph:
+```text
+A → B → C → D → E → F → G → I → K
+    ↓       ↓       ↓   ↓
+    J → C   C       E   H → B
+```
+
+Example output:
+```text
+========== Loop Tree ==========
+[Root Loop]
+  Depth: 0 | Reducible: true
+  Blocks (3): 8 0 10
+  Nested Loops:
+  Loop Header: 1
+    Depth: 1 | Reducible: true
+    Latches: 7
+    Blocks (2): 9 6
+    Exits:
+      6 -> 8
+    Nested Loops:
+    Loop Header: 4
+      Depth: 2 | Reducible: true
+      Latches: 5
+      Blocks (0):
+      Exits:
+        5 -> 6
+    Loop Header: 2
+      Depth: 2 | Reducible: true
+      Latches: 3
+      Blocks (0):
+      Exits:
+        3 -> 4
+================================
+```
 
 #### Building examples
 

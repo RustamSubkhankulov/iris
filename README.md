@@ -3,7 +3,7 @@ Intermediate Representation Internal Structure - SSA-like IR developed as an edu
 
 <img src="images/logo.png" alt="logo" width="250">
 
-#### Overview
+### Overview
 
 IRIS is an example of IR that includes simple operations, separated into different _dialects_ - _arith_, _builtin_ and _ctrlflow_.
 
@@ -24,7 +24,7 @@ Dialect _ctrlflow_:
 - _RETURN_ - return from the routine operation;
 - _PHI_ - phi-function.
 
-#### IRIS structure & examples
+### IRIS structure & examples
 
 Here's an example of IRIS IR for a programm that calculates factorial of a number:
 ```text
@@ -71,7 +71,7 @@ Operations common properties:
 - Optional list of **inputs**. Some operations can have variadic number of inputs (_ctrlflow::call_), other have fixed number of inputs (_arith::add_);
 - List of **users**, who use this operation's result as their input/inputs.
 
-#### Dominators analysis
+### Dominators analysis
 
 ``iris::Region`` class provides API:
 - ``collectDomInfo()`` - collect dominators information from the graph;
@@ -105,7 +105,7 @@ Example output:
 ================================
 ```
 
-#### Loop analysis
+### Loop analysis
 
 ``iris::Region`` class provides API:
 - ``collectLoopInfo()`` - collect loops information from the graph.
@@ -164,7 +164,7 @@ Example output:
 ================================
 ```
 
-#### Building examples
+### Building examples
 
 Requirements:
 - _CMake_ >= 3.21
@@ -189,7 +189,7 @@ List of available targets:
 
 Static library output files are located in ``build/lib/``, and executables - in ``build/bin``.
 
-#### Testing
+### Testing
 
 Project includes tests, impemented using **GTest**.
 

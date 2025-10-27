@@ -138,6 +138,8 @@ void LoopInfo::loopSearch(
   std::unordered_map<const BasicBlock*, Loop*>& blockToLoop) {
 
   std::unordered_set<const BasicBlock*> green;
+
+  green.insert(loop->getHeader());
   green.insert(latch);
 
   std::stack<const BasicBlock*> st;

@@ -22,7 +22,6 @@ TEST(LOOPS, EXAMPLE_01) {
   auto blockCPtr = blockC.get();
   auto blockDPtr = blockD.get();
   auto blockEPtr = blockE.get();
-  
 
   // A -> B
   blockA->linkSucc(blockB.get());
@@ -50,7 +49,7 @@ TEST(LOOPS, EXAMPLE_01) {
   //---
 
   const auto& root = loopInfo.getRootLoop();
-  
+
   EXPECT_EQ(root.getHeader(), nullptr);
   EXPECT_EQ(root.getDepth(), 0);
 
@@ -146,7 +145,7 @@ TEST(LOOPS, EXAMPLE_02) {
 
   EXPECT_EQ(root.getHeader(), nullptr);
   EXPECT_EQ(root.getDepth(), 0);
-  
+
   EXPECT_TRUE(root.isReducible());
   EXPECT_TRUE(root.isRoot());
 
@@ -253,7 +252,7 @@ TEST(LOOPS, EXAMPLE_03) {
 
   EXPECT_EQ(root.getHeader(), nullptr);
   EXPECT_EQ(root.getDepth(), 0);
-  
+
   EXPECT_TRUE(root.isReducible());
   EXPECT_TRUE(root.isRoot());
 
@@ -370,7 +369,7 @@ TEST(LOOPS, EXAMPLE_04) {
 
   EXPECT_EQ(root.getHeader(), nullptr);
   EXPECT_EQ(root.getDepth(), 0);
-  
+
   EXPECT_TRUE(root.isReducible());
   EXPECT_TRUE(root.isRoot());
 
@@ -474,7 +473,7 @@ TEST(LOOPS, EXAMPLE_05) {
 
   EXPECT_EQ(root.getHeader(), nullptr);
   EXPECT_EQ(root.getDepth(), 0);
-  
+
   EXPECT_TRUE(root.isReducible());
   EXPECT_TRUE(root.isRoot());
 
@@ -505,7 +504,6 @@ TEST(LOOPS, EXAMPLE_05) {
   EXPECT_TRUE(loop->getBlocks().contains(blockGPtr));
   EXPECT_TRUE(loop->getBlocks().contains(blockJPtr));
 
-
   EXPECT_EQ(loop->getExits().size(), 1);
   EXPECT_EQ(loop->getExits().front().src()->getID(), 6);
   EXPECT_EQ(loop->getExits().front().dst()->getID(), 8);
@@ -515,7 +513,7 @@ TEST(LOOPS, EXAMPLE_05) {
   //---
 
   const auto& nested = loop->getNestedLoops();
-  auto res = std::find_if(nested.begin(), nested.end(), [=](auto* loop){
+  auto res = std::find_if(nested.begin(), nested.end(), [=](auto* loop) {
     return (loop->getHeader() == blockCPtr);
   });
 
@@ -541,7 +539,7 @@ TEST(LOOPS, EXAMPLE_05) {
 
   //---
 
-  res = std::find_if(nested.begin(), nested.end(), [=](auto* loop){
+  res = std::find_if(nested.begin(), nested.end(), [=](auto* loop) {
     return (loop->getHeader() == blockEPtr);
   });
 
@@ -646,7 +644,7 @@ TEST(LOOPS, EXAMPLE_06) {
 
   EXPECT_EQ(root.getHeader(), nullptr);
   EXPECT_EQ(root.getDepth(), 0);
-  
+
   EXPECT_TRUE(root.isReducible());
   EXPECT_TRUE(root.isRoot());
 
@@ -664,7 +662,7 @@ TEST(LOOPS, EXAMPLE_06) {
   //---
 
   const auto& nested = root.getNestedLoops();
-  auto res = std::find_if(nested.begin(), nested.end(), [=](auto* loop){
+  auto res = std::find_if(nested.begin(), nested.end(), [=](auto* loop) {
     return (loop->getHeader() == blockBPtr);
   });
 
@@ -683,13 +681,12 @@ TEST(LOOPS, EXAMPLE_06) {
   EXPECT_EQ(loop->getBlocks().size(), 1);
   EXPECT_TRUE(loop->getBlocks().contains(blockEPtr));
 
-
   EXPECT_EQ(loop->getExits().size(), 3);
   EXPECT_EQ(loop->getNestedLoops().size(), 0);
 
   //---
 
-  res = std::find_if(nested.begin(), nested.end(), [=](auto* loop){
+  res = std::find_if(nested.begin(), nested.end(), [=](auto* loop) {
     return (loop->getHeader() == blockCPtr);
   });
 

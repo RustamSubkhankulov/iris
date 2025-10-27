@@ -3,7 +3,7 @@
 #include <iris.hpp>
 using namespace iris;
 
-TEST(DOMS, EXAMPLE_1) {
+TEST(DOMS, EXAMPLE_01) {
   /*
   A → B → C → D
       ↓
@@ -61,7 +61,7 @@ TEST(DOMS, EXAMPLE_1) {
   EXPECT_EQ(domInfo.getIDomByID(6, region)->getID(), 5); // idom(G) = F
 }
 
-TEST(DOMS, EXAMPLE_2) {
+TEST(DOMS, EXAMPLE_02) {
   /*
   A → B → C → D → E → F → G → I → K
       ↓       ↓       ↓   ↓
@@ -143,7 +143,7 @@ TEST(DOMS, EXAMPLE_2) {
   EXPECT_EQ(domInfo.getIDomByID(10, region)->getID(), 8); // idom(K) = I
 }
 
-TEST(DOMS, EXAMPLE_3) {
+TEST(DOMS, EXAMPLE_03) {
   /*
   A → B → C → D → G → I
       ↓           ↓

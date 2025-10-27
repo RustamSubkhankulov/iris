@@ -239,5 +239,54 @@ void DomInfo::buildDominatedLists() {
   }
 }
 
+void DomInfo::dumpDomTreeRec(
+  std::ostream& os, const BasicBlock* bb,
+  const std::unordered_map<const BasicBlock*, std::vector<const BasicBlock*>>&
+    dominated,
+  unsigned indent) {
+  std::string pad(indent, ' ');
+  os << pad << "BB#" << bb->getID() << std::endl;
+
+  auto it = dominated.find(bb);
+  if (it == dominated.end()) {
+    return;
+  }
+
+  for (auto* child : it->second) {
+    dumpDomTreeRec(os, child, dominated, indent + 2);
+  }
+}
+
+void DomInfo::dump(std::ostream& os, unsigned indent) const {
+  std::string pad(indent, ' ');
+  os << pad << "[Dominator Tree]" << std::endl;
+
+  const BasicBlock* root = nullptr;
+  for (const auto& [bb, idom] : m_idom) {
+    if (bb == idom) {
+      root = bb;
+      break;
+    }
+  }
+
+  if (root == nullptr) {
+    os << pad << "  (No root dominator found)" << std::endl;
+    return;
+  }
+
+  dumpDomTreeRec(os, root, m_dominated, indent + 2);
+}
+
+void DomInfo::dump(std::ostream& os) const {
+  if (m_isExpired) {
+    os << "[DomInfo expired]" << std::endl;
+    return;
+  }
+
+  os << "========== Dom Tree ===========" << std::endl;
+  dump(os, 0U);
+  os << "================================" << std::endl;
+}
+
 } // namespace doms
 } // namespace iris

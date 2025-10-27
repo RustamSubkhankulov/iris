@@ -38,9 +38,12 @@ public:
   void expire() noexcept {
     m_isExpired = true;
   }
+
   bool isExpired() const noexcept {
     return m_isExpired;
   }
+
+  void dump(std::ostream& os) const;
 
 private:
   void static runDFSFrom(const BasicBlock* basicBlock,
@@ -57,6 +60,14 @@ private:
     const std::vector<const BasicBlock*>& order) const;
 
   void buildDominatedLists();
+
+  void dump(std::ostream& os, unsigned indent) const;
+
+  static void dumpDomTreeRec(
+    std::ostream& os, const BasicBlock* bb,
+    const std::unordered_map<const BasicBlock*, std::vector<const BasicBlock*>>&
+      dominated,
+    unsigned indent);
 
 private:
   // BB -> its IDOM

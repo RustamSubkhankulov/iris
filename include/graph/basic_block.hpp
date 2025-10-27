@@ -186,21 +186,21 @@ private:
 
 class Edge {
 public:
-  Edge(BasicBlock* src, BasicBlock* dst)
+  Edge(const BasicBlock* src, const BasicBlock* dst)
     : m_src(src)
     , m_dst(dst) {}
 
-  BasicBlock* src() const noexcept {
+  const BasicBlock* src() const noexcept {
     return m_src;
   }
 
-  BasicBlock* dst() const noexcept {
+  const BasicBlock* dst() const noexcept {
     return m_dst;
   }
 
 private:
-  BasicBlock* m_src;
-  BasicBlock* m_dst;
+  const BasicBlock* m_src;
+  const BasicBlock* m_dst;
 };
 
 } // namespace iris

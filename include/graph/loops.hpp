@@ -2,7 +2,9 @@
 #define INCLUDE_GRAPH_LOOPS_HPP
 
 #include <unordered_map>
+#include <unordered_set>
 
+#include <exception.hpp>
 #include <graph/basic_block.hpp>
 
 namespace iris {
@@ -11,7 +13,7 @@ class Region;
 
 namespace loops {
 
-class Loop {
+class Loop final {
 public:
   explicit Loop(const BasicBlock* header)
     : m_header(header) {}
@@ -19,21 +21,19 @@ public:
   const BasicBlock* getHeader() const noexcept {
     return m_header;
   }
-  const BasicBlock* getLatch() const noexcept {
-    return m_latch;
-  }
-  const BasicBlock* getPreheader() const noexcept {
-    return m_preheader;
+
+  const std::vector<const BasicBlock*>& getLatches() const noexcept {
+    return m_latches;
   }
 
-  const std::vector<const BasicBlock*>& getBlocks() const noexcept {
+  const std::unordered_set<const BasicBlock*>& getBlocks() const noexcept {
     return m_blocks;
   }
   const std::vector<Edge>& getExits() const noexcept {
     return m_exits;
   }
 
-  const std::vector<std::unique_ptr<Loop>>& getNestedLoops() const noexcept {
+  const std::vector<Loop*>& getNestedLoops() const noexcept {
     return m_nestedLoops;
   }
 
@@ -41,17 +41,9 @@ public:
     return m_parent;
   }
 
-  void setParent(Loop* parent) {
-    m_parent = parent;
-    if (m_parent) {
-      m_depth = m_parent->m_depth + 1U;
-    }
+  bool contains(const BasicBlock* bb) const {
+    return m_blocks.contains(bb);
   }
-
-  void populate(BasicBlock* bb);
-  void addNestedLoop(std::unique_ptr<Loop> nestedLoop);
-
-  bool contains(const BasicBlock* bb) const;
 
   unsigned getDepth() const noexcept {
     return m_depth;
@@ -60,30 +52,62 @@ public:
   bool isReducible() const noexcept {
     return m_isReducible;
   }
+
   bool isRoot() const noexcept {
     return (m_header == nullptr);
   }
 
   void dump(std::ostream& os, unsigned indent = 0) const;
 
+  friend class LoopInfo;
+
+private:
+  void populate(const BasicBlock* bb) {
+    // Check for uniqueness
+    if (!m_blocks.contains(bb)) {
+      m_blocks.insert(bb);
+    }
+  }
+
+  void addNestedLoop(Loop* nestedLoop) {
+    if (!nestedLoop) {
+      throw IrisException("Empty nested loop!");
+    }
+    nestedLoop->m_parent = this;
+    m_nestedLoops.push_back(nestedLoop);
+  }
+
+  void addLatch(const BasicBlock* latch) {
+    m_latches.push_back(latch);
+  }
+
+  void dropNestedLoops() {
+    m_nestedLoops.clear();
+  }
+
+  void setReducibility(bool isReducible) {
+    m_isReducible = isReducible;
+  }
+
+  void addExitEdge(const BasicBlock* src, const BasicBlock* dst) {
+    m_exits.emplace_back(src, dst);
+  }
+
 private:
   // Header bb pointer, equals nullptr for root loop
   const BasicBlock* m_header = nullptr;
 
-  // Present for reducible loops
-  const BasicBlock* m_preheader = nullptr;
-
   // One canonical latch (last processed tail)
-  const BasicBlock* m_latch = nullptr;
+  std::vector<const BasicBlock*> m_latches;
 
   // Loop's basic blocks
-  std::vector<const BasicBlock*> m_blocks;
+  std::unordered_set<const BasicBlock*> m_blocks;
 
   // Exiting edges
   std::vector<Edge> m_exits;
 
   // Nested loops
-  std::vector<std::unique_ptr<Loop>> m_nestedLoops;
+  std::vector<Loop*> m_nestedLoops;
 
   // Parend loop, equals nullptr for root loop
   Loop* m_parent = nullptr;
@@ -95,28 +119,41 @@ private:
   unsigned m_depth = 0;
 };
 
-class LoopInfo {
+class LoopInfo final {
 public:
   void analyze(const Region& region);
 
   // Root loop
-  const Loop* getRootLoop() const noexcept {
-    return m_rootLoop.get();
+  const Loop& getRootLoop() const noexcept {
+    return m_rootLoop;
   }
 
-  // Loops imm following the root loop in the hierarchy
-  const std::vector<std::unique_ptr<Loop>>& getTopLevelLoops() const noexcept {
-    return m_rootLoop->getNestedLoops();
+  // Loops immediate following the root loop in the hierarchy
+  const std::vector<Loop*>& getTopLevelLoops() const {
+    return m_rootLoop.getNestedLoops();
   }
 
   void expire() noexcept {
     m_isExpired = true;
   }
+
   bool isExpired() const noexcept {
     return m_isExpired;
   }
 
-  void dump(std::ostream& os);
+  void dump(std::ostream& os) const;
+
+private:
+  static void collectBackEdges(
+    const BasicBlock* bb, std::unordered_set<const BasicBlock*>& gray,
+    std::unordered_set<const BasicBlock*>& black, std::vector<Edge>& backEdges,
+    std::unordered_map<const BasicBlock*, std::unique_ptr<Loop>>& loops,
+    const std::unordered_map<const BasicBlock*, std::vector<const BasicBlock*>>&
+      idomChainMap);
+
+  static void
+  loopSearch(const BasicBlock* latch, Loop* loop,
+             std::unordered_map<const BasicBlock*, Loop*>& blockToLoop);
 
 private:
   // By default loop info is expired
@@ -124,7 +161,10 @@ private:
   bool m_isExpired = true;
 
   // Root loop
-  std::unique_ptr<Loop> m_rootLoop;
+  Loop m_rootLoop{nullptr};
+
+  // Other loops
+  std::vector<std::unique_ptr<Loop>> m_loops;
 };
 
 } // namespace loops

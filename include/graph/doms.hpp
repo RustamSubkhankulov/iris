@@ -12,12 +12,13 @@ class Region;
 
 namespace doms {
 
-class DomInfo {
+class DomInfo final {
 public:
   void analyze(const Region& region);
 
   static std::vector<const BasicBlock*> getDFS(const Region& region);
   static std::vector<const BasicBlock*> getRPO(const Region& region);
+  static std::vector<const BasicBlock*> getPO(const Region& region);
 
   const BasicBlock* getIDom(const BasicBlock* basicBlock) const;
   const BasicBlock* getIDomByID(bb_id_t id, const Region& region) const;
@@ -46,9 +47,9 @@ private:
                          std::unordered_set<const BasicBlock*>& visited,
                          std::vector<const BasicBlock*>& order);
 
-  void static runRPOFrom(const BasicBlock* basicBlock,
-                         std::unordered_set<const BasicBlock*>& visited,
-                         std::vector<const BasicBlock*>& order);
+  void static runPOFrom(const BasicBlock* basicBlock,
+                        std::unordered_set<const BasicBlock*>& visited,
+                        std::vector<const BasicBlock*>& order);
 
   const BasicBlock* getLCAImmDominator(
     const BasicBlock* b1, const BasicBlock* b2,

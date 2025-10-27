@@ -129,6 +129,10 @@ public:
     return doms::DomInfo::getDFS(*this);
   }
 
+  std::vector<const BasicBlock*> getPO() const {
+    return doms::DomInfo::getPO(*this);
+  }
+
   std::vector<const BasicBlock*> getRPO() const {
     return doms::DomInfo::getRPO(*this);
   }

@@ -37,9 +37,9 @@ std::vector<const BasicBlock*> DomInfo::getDFS(const Region& region) {
   return order;
 }
 
-void DomInfo::runRPOFrom(const BasicBlock* basicBlock,
-                         std::unordered_set<const BasicBlock*>& visited,
-                         std::vector<const BasicBlock*>& order) {
+void DomInfo::runPOFrom(const BasicBlock* basicBlock,
+                        std::unordered_set<const BasicBlock*>& visited,
+                        std::vector<const BasicBlock*>& order) {
   if (visited.count(basicBlock)) {
     // This BB is already marked visited
     return;
@@ -48,17 +48,17 @@ void DomInfo::runRPOFrom(const BasicBlock* basicBlock,
   visited.insert(basicBlock);
 
   if (auto* succT = basicBlock->getSucc(true)) {
-    runRPOFrom(succT, visited, order);
+    runPOFrom(succT, visited, order);
   }
 
   if (auto* succF = basicBlock->getSucc(false)) {
-    runRPOFrom(succF, visited, order);
+    runPOFrom(succF, visited, order);
   }
 
   order.push_back(basicBlock);
 }
 
-std::vector<const BasicBlock*> DomInfo::getRPO(const Region& region) {
+std::vector<const BasicBlock*> DomInfo::getPO(const Region& region) {
   auto startBB = region.getStartBasicBlock();
   if (startBB == nullptr) {
     throw IrisException("Cannot run RPO with no start basic block specified!");
@@ -67,7 +67,12 @@ std::vector<const BasicBlock*> DomInfo::getRPO(const Region& region) {
   std::unordered_set<const BasicBlock*> visited;
   std::vector<const BasicBlock*> order;
 
-  runRPOFrom(startBB, visited, order);
+  runPOFrom(startBB, visited, order);
+  return order;
+}
+
+std::vector<const BasicBlock*> DomInfo::getRPO(const Region& region) {
+  auto order = getPO(region);
   std::reverse(order.begin(), order.end());
 
   return order;
@@ -182,7 +187,7 @@ DomInfo::getDominatorsChain(const BasicBlock* basicBlock) const {
   }
 
   std::vector<const BasicBlock*> domChain;
-  auto curBasicBlock = basicBlock;
+  auto curBasicBlock = getIDom(basicBlock);
 
   while (curBasicBlock) {
     domChain.push_back(curBasicBlock);

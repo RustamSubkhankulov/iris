@@ -49,6 +49,10 @@ public:
     return m_latches.contains(bb);
   }
 
+  bool contains(const BasicBlock* bb) const {
+    return m_blocks.contains(bb) || m_latches.contains(bb) || bb == m_header;
+  }
+
   unsigned getDepth() const noexcept {
     return m_depth;
   }
@@ -100,6 +104,10 @@ private:
   void setReducibility(bool isReducible) {
     m_isReducible = isReducible;
   }
+
+  std::unordered_set<const BasicBlock*> getContainedBlockRecursive();
+
+  void collectExitEdges();
 
 private:
   // Header bb pointer, equals nullptr for root loop
@@ -154,8 +162,9 @@ public:
 private:
   void setLoopDepth();
 
-  void collectRootLoopBasicBlocks(const std::vector<const BasicBlock*>& postOrder,
-                                  const std::unordered_map<const BasicBlock*, Loop*>& blockToLoop);
+  void collectRootLoopBasicBlocks(
+    const std::vector<const BasicBlock*>& postOrder,
+    const std::unordered_map<const BasicBlock*, Loop*>& blockToLoop);
 
   static void collectBackEdges(
     const BasicBlock* bb, std::unordered_set<const BasicBlock*>& gray,
@@ -167,8 +176,6 @@ private:
   static void
   loopSearch(const BasicBlock* latch, Loop* loop,
              std::unordered_map<const BasicBlock*, Loop*>& blockToLoop);
-
-  static void collectExitEdgesFrom(const BasicBlock* bb, Loop* loop);
 
 private:
   // By default loop info is expired

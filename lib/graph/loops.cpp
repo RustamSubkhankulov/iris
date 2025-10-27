@@ -57,8 +57,20 @@ void LoopInfo::analyze(const Region& region) {
 
   // Header -> loop map
   std::unordered_map<const BasicBlock*, Loop*> headerToLoop;
+
   for (const auto& loop : m_loops) {
     headerToLoop.insert(std::make_pair(loop->getHeader(), loop.get()));
+
+    // Add header to block2loop map
+    blockToLoop.insert(std::make_pair(loop->getHeader(), loop.get()));
+
+    for (auto* latch : headerToLatches[loop->getHeader()]) {
+      // Add latch to loop
+      loop->addLatch(latch);
+
+      // Add latch to block2loop map
+      blockToLoop.insert(std::make_pair(latch, loop.get()));
+    }
   }
 
   auto postOrder = region.getPO();
@@ -73,16 +85,9 @@ void LoopInfo::analyze(const Region& region) {
     }
 
     auto* loop = res->second;
-
-    if (!loop->isReducible()) {
-      // For irreducible loops - append all source for every back edge
-      for (auto* latch : headerToLatches[bb]) {
-        loop->addLatch(latch);
-      }
-    } else {
+    if (loop->isReducible()) {
       // For reducible loops for all back edges run loop search
-      for (auto* latch : headerToLatches[bb]) {
-        loop->addLatch(latch);
+      for (auto* latch : loop->getLatches()) {
         loopSearch(latch, loop, blockToLoop);
       }
     }
@@ -90,28 +95,11 @@ void LoopInfo::analyze(const Region& region) {
 
   for (auto& loop : m_loops) {
     // Collect exiting and exit blocks
-    for (auto* bb : loop->getBlocks()) {
-      collectExitEdgesFrom(bb, loop.get());
-    }
-
-    for (auto* bb : loop->getLatches()) {
-      collectExitEdgesFrom(bb, loop.get());
-    }
-
-    collectExitEdgesFrom(loop->getHeader(), loop.get());
+    loop->collectExitEdges();
 
     // Collect top-level loops
     if (loop->m_parent == nullptr) {
       m_rootLoop.addNestedLoop(loop.get());
-    }
-  }
-
-  // Add header and latches to block2loop map,
-  // so they are not added to root loop
-  for (auto& loop : m_loops) {
-    blockToLoop.insert(std::make_pair(loop->getHeader(), loop.get()));
-    for (auto* latch : loop->getLatches()) {
-      blockToLoop.insert(std::make_pair(latch, loop.get()));
     }
   }
 
@@ -124,8 +112,9 @@ void LoopInfo::analyze(const Region& region) {
   m_isExpired = false;
 }
 
-void LoopInfo::collectRootLoopBasicBlocks(const std::vector<const BasicBlock*>& postOrder,
-                                          const std::unordered_map<const BasicBlock*, Loop*>& blockToLoop) {
+void LoopInfo::collectRootLoopBasicBlocks(
+  const std::vector<const BasicBlock*>& postOrder,
+  const std::unordered_map<const BasicBlock*, Loop*>& blockToLoop) {
   for (auto* bb : postOrder) {
     if (!blockToLoop.contains((bb))) {
       m_rootLoop.populate(bb);
@@ -144,25 +133,43 @@ void LoopInfo::setLoopDepth() {
   setDepth(0, &m_rootLoop);
 }
 
-void LoopInfo::collectExitEdgesFrom(const BasicBlock* bb, Loop* loop) {
-  for (auto* succ : {bb->getSucc(true), bb->getSucc(false)}) {
-    if (succ == nullptr) {
-      continue;
-    }
-    if (!loop->blocksContain(succ) && !loop->latchesContain(succ) && succ != loop->getHeader()) {
-      loop->addExitEdge(bb, succ);
-    }
+std::unordered_set<const BasicBlock*> Loop::getContainedBlockRecursive() {
+  std::unordered_set<const BasicBlock*> result;
+
+  result.insert(m_header);
+  result.insert(m_blocks.begin(), m_blocks.end());
+  result.insert(m_latches.begin(), m_latches.end());
+
+  for (auto* loop : m_nestedLoops) {
+    auto nestedRes = loop->getContainedBlockRecursive();
+    result.insert(nestedRes.begin(), nestedRes.end());
   }
+
+  return result;
+}
+
+void Loop::collectExitEdges() {
+  auto containedBlocks = getContainedBlockRecursive();
+
+  for (auto* bb : containedBlocks) {
+    for (auto* succ : {bb->getSucc(true), bb->getSucc(false)}) {
+      if (succ == nullptr) {
+        continue;
+      }
+
+      if (!containedBlocks.contains(succ)) {
+        addExitEdge(bb, succ);
+      }
+    } // for succ
+  } // for bb
 }
 
 void LoopInfo::loopSearch(
   const BasicBlock* latch, Loop* loop,
   std::unordered_map<const BasicBlock*, Loop*>& blockToLoop) {
-
   std::unordered_set<const BasicBlock*> green;
 
   green.insert(loop->getHeader());
-  green.insert(latch);
 
   std::stack<const BasicBlock*> st;
   for (auto* pred : latch->getPreds()) {
@@ -183,11 +190,11 @@ void LoopInfo::loopSearch(
         loop->populate(cur);
         blockToLoop.insert(std::make_pair(cur, loop));
       } else {
-        // if block is in the other loop (inner),
-        // link outer loop and inner loop
         auto* nestedLoop = res->second;
-        if (nestedLoop->getParent() == nullptr) {
-          loop->addNestedLoop(res->second);
+        if (nestedLoop != loop && nestedLoop->getParent() == nullptr) {
+          // if block is in the other loop (inner),
+          // link outer loop and inner loop
+          loop->addNestedLoop(nestedLoop);
         }
       }
 

@@ -95,7 +95,9 @@ void LoopInfo::analyze(const Region& region) {
 
   for (auto& loop : m_loops) {
     // Collect exiting and exit blocks
-    loop->collectExitEdges();
+    if (loop->isReducible()) {
+      loop->collectExitEdges();
+    }
 
     // Collect top-level loops
     if (loop->m_parent == nullptr) {
@@ -279,28 +281,30 @@ void Loop::dump(std::ostream& os, unsigned indent) const {
   }
 
   // Blocks
-  os << pad << "  Blocks (" << m_blocks.size() << "): ";
-  for (auto* bb : m_blocks) {
-    os << bb->getID() << " ";
-  }
-  os << std::endl;
-
-  // Exit edges
-  if (!m_exits.empty()) {
-    os << pad << "  Exits:" << std::endl;
-    for (const auto& e : m_exits) {
-      os << pad << "    " << e.src()->getID() << " -> " << e.dst()->getID()
-         << std::endl;
+  if (m_isReducible) {
+    os << pad << "  Blocks (" << m_blocks.size() << "): ";
+    for (auto* bb : m_blocks) {
+      os << bb->getID() << " ";
     }
-  }
+    os << std::endl;
 
-  // Nested loops
-  if (!m_nestedLoops.empty()) {
-    os << pad << "  Nested Loops:" << std::endl;
-    for (auto* nested : m_nestedLoops) {
-      nested->dump(os, indent + 2);
+    // Exit edges
+    if (!m_exits.empty()) {
+      os << pad << "  Exits:" << std::endl;
+      for (const auto& e : m_exits) {
+        os << pad << "    " << e.src()->getID() << " -> " << e.dst()->getID()
+           << std::endl;
+      }
     }
-  }
+
+    // Nested loops
+    if (!m_nestedLoops.empty()) {
+      os << pad << "  Nested Loops:" << std::endl;
+      for (auto* nested : m_nestedLoops) {
+        nested->dump(os, indent + 2);
+      }
+    }
+  } // if (m_isReducible)
 }
 
 } // namespace loops

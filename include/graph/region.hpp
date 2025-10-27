@@ -140,6 +140,9 @@ public:
   }
 
   void collectLoopInfo() {
+    if (m_domInfo.isExpired()) {
+      m_domInfo.analyze(*this);
+    }
     m_loopInfo.analyze(*this);
   }
 

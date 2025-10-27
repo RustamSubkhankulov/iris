@@ -184,6 +184,25 @@ private:
   void doReplaceOpWith(Operation* opPtr, Operation* nodePtr);
 };
 
+class Edge {
+public:
+  Edge(BasicBlock* src, BasicBlock* dst)
+    : m_src(src)
+    , m_dst(dst) {}
+
+  BasicBlock* src() const noexcept {
+    return m_src;
+  }
+
+  BasicBlock* dst() const noexcept {
+    return m_dst;
+  }
+
+private:
+  BasicBlock* m_src;
+  BasicBlock* m_dst;
+};
+
 } // namespace iris
 
 #endif // INCLUDE_GRAPH_BASIC_BLOCK_HPP

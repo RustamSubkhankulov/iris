@@ -1,3 +1,4 @@
+- Integrate EXPECT_THROW and EXPECT_NOTHROW, EXPECT_DOUBLE_EQ, ASSERT_EQ ... - rework gtests
 - add void type
 - loop info API tests
 - graph checker

@@ -73,6 +73,86 @@ TEST(ARITH, COMPARE_INVARIANTS) {
   EXPECT_EQ(op.getInputsNum(), 2u);
 }
 
+TEST(ARITH, AND_INVARIANTS) {
+  arith::AndOp op(nullptr, nullptr);
+
+  EXPECT_FALSE(op.isTerminator());
+  EXPECT_TRUE(op.isa(GlobalOpcodes::AND));
+
+  EXPECT_TRUE(op.hasInputs());
+  EXPECT_EQ(op.getInputsNum(), 2u);
+}
+
+TEST(ARITH, OR_INVARIANTS) {
+  arith::OrOp op(nullptr, nullptr);
+
+  EXPECT_FALSE(op.isTerminator());
+  EXPECT_TRUE(op.isa(GlobalOpcodes::OR));
+
+  EXPECT_TRUE(op.hasInputs());
+  EXPECT_EQ(op.getInputsNum(), 2u);
+}
+
+TEST(ARITH, XOR_INVARIANTS) {
+  arith::XorOp op(nullptr, nullptr);
+
+  EXPECT_FALSE(op.isTerminator());
+  EXPECT_TRUE(op.isa(GlobalOpcodes::XOR));
+
+  EXPECT_TRUE(op.hasInputs());
+  EXPECT_EQ(op.getInputsNum(), 2u);
+}
+
+TEST(ARITH, NOT_INVARIANTS) {
+  arith::NotOp op(nullptr);
+
+  EXPECT_FALSE(op.isTerminator());
+  EXPECT_TRUE(op.isa(GlobalOpcodes::NOT));
+
+  EXPECT_TRUE(op.hasInputs());
+  EXPECT_EQ(op.getInputsNum(), 1u);
+}
+
+TEST(ARITH, SAL_INVARIANTS) {
+  arith::SalOp op(nullptr, nullptr);
+
+  EXPECT_FALSE(op.isTerminator());
+  EXPECT_TRUE(op.isa(GlobalOpcodes::SAL));
+
+  EXPECT_TRUE(op.hasInputs());
+  EXPECT_EQ(op.getInputsNum(), 2u);
+}
+
+TEST(ARITH, SAR_INVARIANTS) {
+  arith::SarOp op(nullptr, nullptr);
+
+  EXPECT_FALSE(op.isTerminator());
+  EXPECT_TRUE(op.isa(GlobalOpcodes::SAR));
+
+  EXPECT_TRUE(op.hasInputs());
+  EXPECT_EQ(op.getInputsNum(), 2u);
+}
+
+TEST(ARITH, SHL_INVARIANTS) {
+  arith::ShlOp op(nullptr, nullptr);
+
+  EXPECT_FALSE(op.isTerminator());
+  EXPECT_TRUE(op.isa(GlobalOpcodes::SHL));
+
+  EXPECT_TRUE(op.hasInputs());
+  EXPECT_EQ(op.getInputsNum(), 2u);
+}
+
+TEST(ARITH, SHR_INVARIANTS) {
+  arith::ShrOp op(nullptr, nullptr);
+
+  EXPECT_FALSE(op.isTerminator());
+  EXPECT_TRUE(op.isa(GlobalOpcodes::SHR));
+
+  EXPECT_TRUE(op.hasInputs());
+  EXPECT_EQ(op.getInputsNum(), 2u);
+}
+
 TEST(ARITH, CONSTANT_BASIC) {
   arith::ConstantOp constOp(makeConstAttribute(1));
 
@@ -180,6 +260,133 @@ TEST(ARITH, COMPARE_BASIC) {
   EXPECT_TRUE(msg.empty());
 }
 
+TEST(ARITH, AND_BASIC) {
+  arith::ConstantOp constOp1(makeConstAttribute(1));
+  arith::ConstantOp constOp2(makeConstAttribute(2));
+
+  arith::AndOp andOp(&constOp1, &constOp2);
+
+  EXPECT_TRUE(andOp.hasResult());
+  EXPECT_EQ(andOp.getDataType(), DataType::SI32);
+
+  std::string msg;
+  bool vres = andOp.verify(msg);
+
+  EXPECT_TRUE(vres);
+  EXPECT_TRUE(msg.empty());
+}
+
+TEST(ARITH, OR_BASIC) {
+  arith::ConstantOp constOp1(makeConstAttribute(1));
+  arith::ConstantOp constOp2(makeConstAttribute(2));
+
+  arith::OrOp orOp(&constOp1, &constOp2);
+
+  EXPECT_TRUE(orOp.hasResult());
+  EXPECT_EQ(orOp.getDataType(), DataType::SI32);
+
+  std::string msg;
+  bool vres = orOp.verify(msg);
+
+  EXPECT_TRUE(vres);
+  EXPECT_TRUE(msg.empty());
+}
+
+TEST(ARITH, XOR_BASIC) {
+  arith::ConstantOp constOp1(makeConstAttribute(1));
+  arith::ConstantOp constOp2(makeConstAttribute(2));
+
+  arith::XorOp xorOp(&constOp1, &constOp2);
+
+  EXPECT_TRUE(xorOp.hasResult());
+  EXPECT_EQ(xorOp.getDataType(), DataType::SI32);
+
+  std::string msg;
+  bool vres = xorOp.verify(msg);
+
+  EXPECT_TRUE(vres);
+  EXPECT_TRUE(msg.empty());
+}
+
+TEST(ARITH, NOT_BASIC) {
+  arith::ConstantOp constOp(makeConstAttribute(1));
+
+  arith::NotOp notOp(&constOp);
+
+  EXPECT_TRUE(notOp.hasResult());
+  EXPECT_EQ(notOp.getDataType(), DataType::SI32);
+
+  std::string msg;
+  bool vres = notOp.verify(msg);
+
+  EXPECT_TRUE(vres);
+  EXPECT_TRUE(msg.empty());
+}
+
+TEST(ARITH, SAL_BASIC) {
+  arith::ConstantOp constOp1(makeConstAttribute(1));
+  arith::ConstantOp constOp2(makeConstAttribute(2));
+
+  arith::SalOp salOp(&constOp1, &constOp2);
+
+  EXPECT_TRUE(salOp.hasResult());
+  EXPECT_EQ(salOp.getDataType(), DataType::SI32);
+
+  std::string msg;
+  bool vres = salOp.verify(msg);
+
+  EXPECT_TRUE(vres);
+  EXPECT_TRUE(msg.empty());
+}
+
+TEST(ARITH, SAR_BASIC) {
+  arith::ConstantOp constOp1(makeConstAttribute(1));
+  arith::ConstantOp constOp2(makeConstAttribute(2));
+
+  arith::SarOp sarOp(&constOp1, &constOp2);
+
+  EXPECT_TRUE(sarOp.hasResult());
+  EXPECT_EQ(sarOp.getDataType(), DataType::SI32);
+
+  std::string msg;
+  bool vres = sarOp.verify(msg);
+
+  EXPECT_TRUE(vres);
+  EXPECT_TRUE(msg.empty());
+}
+
+TEST(ARITH, SHL_BASIC) {
+  arith::ConstantOp constOp1(makeConstAttribute(static_cast<uint32_t>(1)));
+  arith::ConstantOp constOp2(makeConstAttribute(static_cast<uint32_t>(2)));
+
+  arith::ShlOp shlOp(&constOp1, &constOp2);
+
+  EXPECT_TRUE(shlOp.hasResult());
+  EXPECT_EQ(shlOp.getDataType(), constOp1.getDataType());
+
+  std::string msg;
+  bool vres = shlOp.verify(msg);
+
+  EXPECT_TRUE(vres);
+  EXPECT_TRUE(msg.empty());
+}
+
+TEST(ARITH, SHR_BASIC) {
+  arith::ConstantOp constOp1(makeConstAttribute(static_cast<uint32_t>(1)));
+  arith::ConstantOp constOp2(makeConstAttribute(static_cast<uint32_t>(2)));
+
+  arith::ShrOp shrOp(&constOp1, &constOp2);
+
+  EXPECT_TRUE(shrOp.hasResult());
+  EXPECT_EQ(shrOp.getDataType(), constOp1.getDataType());
+
+  std::string msg;
+  bool vres = shrOp.verify(msg);
+
+  EXPECT_TRUE(vres);
+  EXPECT_TRUE(msg.empty());
+}
+
 TEST(ARITH, COMPARE_EXFAIL_UNEXPECTED_PRED) {
   try {
     arith::CompareOp cmpOp(nullptr, nullptr,
@@ -277,4 +484,107 @@ TEST(ARITH, DIV_EXFAIL_NON_HOMOGEN_INPUTS) {
 
   EXPECT_FALSE(vres);
   EXPECT_TRUE(msg.contains("inputs must have same data types"));
+}
+
+TEST(ARITH, AND_EXFAIL_NON_INTEGER_INPUTS) {
+  arith::ConstantOp cstF1(makeConstAttribute(1.));
+  arith::ConstantOp cstF2(makeConstAttribute(2.));
+
+  arith::AndOp op(&cstF1, &cstF2);
+
+  std::string msg;
+  bool vres = op.verify(msg);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("inputs must be integer types"));
+}
+
+TEST(ARITH, OR_EXFAIL_NON_INTEGER_INPUTS) {
+  arith::ConstantOp cstF1(makeConstAttribute(1.));
+  arith::ConstantOp cstF2(makeConstAttribute(2.));
+
+  arith::OrOp op(&cstF1, &cstF2);
+
+  std::string msg;
+  bool vres = op.verify(msg);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("inputs must be integer types"));
+}
+
+TEST(ARITH, XOR_EXFAIL_NON_INTEGER_INPUTS) {
+  arith::ConstantOp cstF1(makeConstAttribute(1.));
+  arith::ConstantOp cstF2(makeConstAttribute(2.));
+
+  arith::XorOp op(&cstF1, &cstF2);
+
+  std::string msg;
+  bool vres = op.verify(msg);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("inputs must be integer types"));
+}
+
+TEST(ARITH, NOT_EXFAIL_NON_INTEGER_INPUT) {
+  arith::ConstantOp cstF(makeConstAttribute(1.));
+
+  arith::NotOp op(&cstF);
+
+  std::string msg;
+  bool vres = op.verify(msg);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("input must be an integer type"));
+}
+
+TEST(ARITH, SAL_EXFAIL_UNSIGNED_INPUTS) {
+  arith::ConstantOp cstU1(makeConstAttribute(static_cast<uint32_t>(1)));
+  arith::ConstantOp cstU2(makeConstAttribute(static_cast<uint32_t>(2)));
+
+  arith::SalOp op(&cstU1, &cstU2);
+
+  std::string msg;
+  bool vres = op.verify(msg);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("inputs must be signed integer types"));
+}
+
+TEST(ARITH, SAR_EXFAIL_UNSIGNED_INPUTS) {
+  arith::ConstantOp cstU1(makeConstAttribute(static_cast<uint32_t>(1)));
+  arith::ConstantOp cstU2(makeConstAttribute(static_cast<uint32_t>(2)));
+
+  arith::SarOp op(&cstU1, &cstU2);
+
+  std::string msg;
+  bool vres = op.verify(msg);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("inputs must be signed integer types"));
+}
+
+TEST(ARITH, SHL_EXFAIL_SIGNED_INPUTS) {
+  arith::ConstantOp cstI1(makeConstAttribute(1));
+  arith::ConstantOp cstI2(makeConstAttribute(2));
+
+  arith::ShlOp op(&cstI1, &cstI2);
+
+  std::string msg;
+  bool vres = op.verify(msg);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("inputs must be unsigned integer types"));
+}
+
+TEST(ARITH, SHR_EXFAIL_SIGNED_INPUTS) {
+  arith::ConstantOp cstI1(makeConstAttribute(1));
+  arith::ConstantOp cstI2(makeConstAttribute(2));
+
+  arith::ShrOp op(&cstI1, &cstI2);
+
+  std::string msg;
+  bool vres = op.verify(msg);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("inputs must be unsigned integer types"));
 }

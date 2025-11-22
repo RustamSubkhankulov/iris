@@ -168,6 +168,204 @@ public:
   }
 };
 
+// Base class for binary bitwise operations (AND, OR, XOR, shifts)
+class BitwiseBinaryArithOp : public HomogenBinaryArithOp {
+public:
+  BitwiseBinaryArithOp(opcode_t opcode, Input inputX, Input inputY)
+    : HomogenBinaryArithOp(opcode, inputX, inputY) {}
+
+  bool verify(std::string& msg) const noexcept override {
+    if (!HomogenBinaryArithOp::verify(msg)) {
+      return false;
+    }
+
+    auto dataTy = getInputX().getDataType();
+    if (!isInteger(dataTy)) {
+      std::stringstream ss;
+      ss << "Operation " << getMnemonic() << ": inputs must be integer types.";
+      msg = ss.str();
+      return false;
+    }
+
+    return true;
+  }
+};
+
+class AndOp final : public BitwiseBinaryArithOp {
+public:
+  AndOp(Input inputX, Input inputY)
+    : BitwiseBinaryArithOp(GlobalOpcodes::AND, inputX, inputY) {}
+
+  std::string_view getMnemonic() const override {
+    return "and";
+  }
+};
+
+class OrOp final : public BitwiseBinaryArithOp {
+public:
+  OrOp(Input inputX, Input inputY)
+    : BitwiseBinaryArithOp(GlobalOpcodes::OR, inputX, inputY) {}
+
+  std::string_view getMnemonic() const override {
+    return "or";
+  }
+};
+
+class XorOp final : public BitwiseBinaryArithOp {
+public:
+  XorOp(Input inputX, Input inputY)
+    : BitwiseBinaryArithOp(GlobalOpcodes::XOR, inputX, inputY) {}
+
+  std::string_view getMnemonic() const override {
+    return "xor";
+  }
+};
+
+class SalOp final : public BitwiseBinaryArithOp {
+public:
+  SalOp(Input inputX, Input inputY)
+    : BitwiseBinaryArithOp(GlobalOpcodes::SAL, inputX, inputY) {}
+
+  std::string_view getMnemonic() const override {
+    return "sal";
+  }
+
+  bool verify(std::string& msg) const noexcept override {
+    if (!BitwiseBinaryArithOp::verify(msg)) {
+      return false;
+    }
+
+    auto dataTy = getInputX().getDataType();
+    if (!isSignedInteger(dataTy)) {
+      std::stringstream ss;
+      ss << "Operation " << getMnemonic()
+         << ": inputs must be signed integer types.";
+      msg = ss.str();
+      return false;
+    }
+
+    return true;
+  }
+};
+
+class SarOp final : public BitwiseBinaryArithOp {
+public:
+  SarOp(Input inputX, Input inputY)
+    : BitwiseBinaryArithOp(GlobalOpcodes::SAR, inputX, inputY) {}
+
+  std::string_view getMnemonic() const override {
+    return "sar";
+  }
+
+  bool verify(std::string& msg) const noexcept override {
+    if (!BitwiseBinaryArithOp::verify(msg)) {
+      return false;
+    }
+
+    auto dataTy = getInputX().getDataType();
+    if (!isSignedInteger(dataTy)) {
+      std::stringstream ss;
+      ss << "Operation " << getMnemonic()
+         << ": inputs must be signed integer types.";
+      msg = ss.str();
+      return false;
+    }
+
+    return true;
+  }
+};
+
+class ShlOp final : public BitwiseBinaryArithOp {
+public:
+  ShlOp(Input inputX, Input inputY)
+    : BitwiseBinaryArithOp(GlobalOpcodes::SHL, inputX, inputY) {}
+
+  std::string_view getMnemonic() const override {
+    return "shl";
+  }
+
+  bool verify(std::string& msg) const noexcept override {
+    if (!BitwiseBinaryArithOp::verify(msg)) {
+      return false;
+    }
+
+    auto dataTy = getInputX().getDataType();
+    if (!isUnsignedInteger(dataTy)) {
+      std::stringstream ss;
+      ss << "Operation " << getMnemonic()
+         << ": inputs must be unsigned integer types.";
+      msg = ss.str();
+      return false;
+    }
+
+    return true;
+  }
+};
+
+class ShrOp final : public BitwiseBinaryArithOp {
+public:
+  ShrOp(Input inputX, Input inputY)
+    : BitwiseBinaryArithOp(GlobalOpcodes::SHR, inputX, inputY) {}
+
+  std::string_view getMnemonic() const override {
+    return "shr";
+  }
+
+  bool verify(std::string& msg) const noexcept override {
+    if (!BitwiseBinaryArithOp::verify(msg)) {
+      return false;
+    }
+
+    auto dataTy = getInputX().getDataType();
+    if (!isUnsignedInteger(dataTy)) {
+      std::stringstream ss;
+      ss << "Operation " << getMnemonic()
+         << ": inputs must be unsigned integer types.";
+      msg = ss.str();
+      return false;
+    }
+
+    return true;
+  }
+};
+
+// Unary bitwise operations
+class UnaryBitwiseArithOp : public ArithOp {
+public:
+  explicit UnaryBitwiseArithOp(opcode_t opcode, Input input)
+    : ArithOp(opcode, input.getDataType(), {input}) {}
+
+  const Input& getInput() const {
+    return Operation::getInput(0);
+  }
+
+  bool verify(std::string& msg) const noexcept override {
+    if (!ArithOp::verify(msg)) {
+      return false;
+    }
+
+    auto dataTy = getInput().getDataType();
+    if (!isInteger(dataTy)) {
+      std::stringstream ss;
+      ss << "Operation " << getMnemonic() << ": input must be an integer type.";
+      msg = ss.str();
+      return false;
+    }
+
+    return true;
+  }
+};
+
+class NotOp final : public UnaryBitwiseArithOp {
+public:
+  explicit NotOp(Input input)
+    : UnaryBitwiseArithOp(GlobalOpcodes::NOT, input) {}
+
+  std::string_view getMnemonic() const override {
+    return "not";
+  }
+};
+
 class ConstantOp final : public ArithOp {
 public:
   explicit ConstantOp(std::unique_ptr<ConstAttribute> attr)

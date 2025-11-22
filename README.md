@@ -11,7 +11,9 @@ Dialect _arith_:
 - _ADD_, _SUB_, _MUL_, _DIV_ - basic arithmetical operations;
 - _CONST_ - operation generating a constant SSA value;
 - _CAST_ - operation, casting values between different data types;
-- _CMP_ - comparison operation, which takes predicate (``EQ`` (equal), ``NEQ`` (not-equal), ``A`` (above), ``B`` (below), ``AE`` (above or equal), ``BE`` (below or equal)).
+- _CMP_ - comparison operation, which takes predicate (``EQ`` (equal), ``NEQ`` (not-equal), ``A`` (above), ``B`` (below), ``AE`` (above or equal), ``BE`` (below or equal));
+- _AND_, _OR_, _XOR_, _NOT_ - bitwise operations;
+- _SHL_, _SHR_, _SAL_, _SAR_ - bit-shifts
 
 Dialect _builtin_:
 - _PARAM_ - operation representing function's parameter;
@@ -204,8 +206,8 @@ ctest
 Tests include:
 - **Dominator analysis** tests (``tests/doms.cpp``);
 - **Loop analysis** tests (``tests/loops.cpp``).
-- Separate test suites for each dialect and its operations' verifiers and construction pre-conditions (``tests/dialects/``);
-- Tests of verifiers (ex-fails) and API tests for:
+- Separate test suites for each **dialect** and its **operations'** verifiers and construction pre-conditions (``tests/dialects/``);
+- Tests of **verifiers** (ex-fails) and **API** tests for:
     - Generic operation ``iris::Operation``;
     - Basic block ``iris::BasicBlock``;
     - Region ``iris::Region``;

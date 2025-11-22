@@ -6,7 +6,7 @@ using namespace iris;
 TEST(REGION, DEFAULT) {
   Region region("foo");
 
-  EXPECT_EQ(region.getBasicBlocks().size(), 0);
+  EXPECT_EQ(region.getBasicBlocks().size(), 0u);
 
   EXPECT_FALSE(region.hasStartBasicBlock());
   EXPECT_FALSE(region.hasFinalBasicBlock());
@@ -19,7 +19,7 @@ TEST(REGION, DEFAULT) {
 
 TEST(REGION, NAMING) {
   Region region("foo");
-  EXPECT_EQ(region.getName(), "foo");
+  ASSERT_EQ(region.getName(), "foo");
 }
 
 TEST(REGION, EXFAIL_INVALID_NAME) {
@@ -27,7 +27,7 @@ TEST(REGION, EXFAIL_INVALID_NAME) {
     Region region("");
   } catch (const IrisException& exc) {
     std::string str = exc.what();
-    EXPECT_TRUE(!str.compare("Region is assigned with an empty name!"));
+    EXPECT_EQ(str, "Region is assigned with an empty name!");
     return;
   }
   FAIL();
@@ -57,10 +57,10 @@ TEST(REGION, ADD_BASIC_BLOCK) {
 
   region.addBasicBlock(std::move(bb1));
 
-  EXPECT_TRUE(bb1Ptr->hasParentRegion());
-  EXPECT_EQ(bb1Ptr->getParentRegion(), &region);
+  ASSERT_TRUE(bb1Ptr->hasParentRegion());
+  ASSERT_EQ(bb1Ptr->getParentRegion(), &region);
 
-  EXPECT_EQ(region.getBasicBlocks().size(), 1);
+  ASSERT_EQ(region.getBasicBlocks().size(), 1u);
   EXPECT_EQ(region.getBasicBlocks().front().get(), bb1Ptr);
 
   EXPECT_FALSE(region.hasStartBasicBlock());
@@ -71,10 +71,10 @@ TEST(REGION, ADD_BASIC_BLOCK) {
 
   region.addBasicBlock(std::move(bb2));
 
-  EXPECT_TRUE(bb2Ptr->hasParentRegion());
-  EXPECT_EQ(bb2Ptr->getParentRegion(), &region);
+  ASSERT_TRUE(bb2Ptr->hasParentRegion());
+  ASSERT_EQ(bb2Ptr->getParentRegion(), &region);
 
-  EXPECT_EQ(region.getBasicBlocks().size(), 2);
+  ASSERT_EQ(region.getBasicBlocks().size(), 2u);
   EXPECT_EQ(region.getBasicBlocks().front().get(), bb1Ptr);
   EXPECT_EQ(region.getBasicBlocks().back().get(), bb2Ptr);
 
@@ -90,10 +90,10 @@ TEST(REGION, ADD_START_BB) {
 
   region.addStartBasicBlock(std::move(bb1));
 
-  EXPECT_TRUE(bb1Ptr->hasParentRegion());
-  EXPECT_EQ(bb1Ptr->getParentRegion(), &region);
+  ASSERT_TRUE(bb1Ptr->hasParentRegion());
+  ASSERT_EQ(bb1Ptr->getParentRegion(), &region);
 
-  EXPECT_EQ(region.getBasicBlocks().size(), 1);
+  ASSERT_EQ(region.getBasicBlocks().size(), 1u);
   EXPECT_EQ(region.getBasicBlocks().front().get(), bb1Ptr);
 
   EXPECT_TRUE(region.hasStartBasicBlock());
@@ -107,10 +107,10 @@ TEST(REGION, ADD_START_BB) {
 
   region.addStartBasicBlock(std::move(bb2));
 
-  EXPECT_TRUE(bb2Ptr->hasParentRegion());
-  EXPECT_EQ(bb2Ptr->getParentRegion(), &region);
+  ASSERT_TRUE(bb2Ptr->hasParentRegion());
+  ASSERT_EQ(bb2Ptr->getParentRegion(), &region);
 
-  EXPECT_EQ(region.getBasicBlocks().size(), 2);
+  ASSERT_EQ(region.getBasicBlocks().size(), 2u);
   EXPECT_EQ(region.getBasicBlocks().front().get(), bb1Ptr);
   EXPECT_EQ(region.getBasicBlocks().back().get(), bb2Ptr);
 
@@ -129,10 +129,10 @@ TEST(REGION, ADD_FINAL_BB) {
 
   region.addFinalBasicBlock(std::move(bb1));
 
-  EXPECT_TRUE(bb1Ptr->hasParentRegion());
-  EXPECT_EQ(bb1Ptr->getParentRegion(), &region);
+  ASSERT_TRUE(bb1Ptr->hasParentRegion());
+  ASSERT_EQ(bb1Ptr->getParentRegion(), &region);
 
-  EXPECT_EQ(region.getBasicBlocks().size(), 1);
+  ASSERT_EQ(region.getBasicBlocks().size(), 1u);
   EXPECT_EQ(region.getBasicBlocks().front().get(), bb1Ptr);
 
   EXPECT_FALSE(region.hasStartBasicBlock());
@@ -146,10 +146,10 @@ TEST(REGION, ADD_FINAL_BB) {
 
   region.addFinalBasicBlock(std::move(bb2));
 
-  EXPECT_TRUE(bb2Ptr->hasParentRegion());
-  EXPECT_EQ(bb2Ptr->getParentRegion(), &region);
+  ASSERT_TRUE(bb2Ptr->hasParentRegion());
+  ASSERT_EQ(bb2Ptr->getParentRegion(), &region);
 
-  EXPECT_EQ(region.getBasicBlocks().size(), 2);
+  ASSERT_EQ(region.getBasicBlocks().size(), 2u);
   EXPECT_EQ(region.getBasicBlocks().front().get(), bb1Ptr);
   EXPECT_EQ(region.getBasicBlocks().back().get(), bb2Ptr);
 
@@ -169,7 +169,7 @@ TEST(REGION, SET_START_BB) {
   region.addBasicBlock(std::move(bb1));
   auto res = region.setStartBasicBlock(bb1Ptr);
 
-  EXPECT_TRUE(res);
+  ASSERT_TRUE(res);
   EXPECT_TRUE(region.hasStartBasicBlock());
   EXPECT_EQ(region.getStartBasicBlock(), bb1Ptr);
 }
@@ -183,7 +183,7 @@ TEST(REGION, SET_START_BB_BY_ID) {
   region.addBasicBlock(std::move(bb1));
   auto res = region.setStartBasicBlockByID(0);
 
-  EXPECT_TRUE(res);
+  ASSERT_TRUE(res);
   EXPECT_TRUE(region.hasStartBasicBlock());
   EXPECT_EQ(region.getStartBasicBlock(), bb1Ptr);
 }
@@ -194,7 +194,7 @@ TEST(REGION, EXFAIL_SET_START_BB_NOT_PRESENT) {
   BasicBlock bb;
   auto res = region.setStartBasicBlock(&bb);
 
-  EXPECT_FALSE(res);
+  ASSERT_FALSE(res);
   EXPECT_FALSE(region.hasStartBasicBlock());
   EXPECT_EQ(region.getStartBasicBlock(), nullptr);
 }
@@ -204,7 +204,7 @@ TEST(REGION, EXFAIL_SET_START_BB_BY_ID_NOT_PRESENT) {
 
   auto res = region.setStartBasicBlockByID(0);
 
-  EXPECT_FALSE(res);
+  ASSERT_FALSE(res);
   EXPECT_FALSE(region.hasStartBasicBlock());
   EXPECT_EQ(region.getStartBasicBlock(), nullptr);
 }
@@ -218,7 +218,7 @@ TEST(REGION, SET_FINAL_BB) {
   region.addBasicBlock(std::move(bb1));
   auto res = region.setFinalBasicBlock(bb1Ptr);
 
-  EXPECT_TRUE(res);
+  ASSERT_TRUE(res);
   EXPECT_TRUE(region.hasFinalBasicBlock());
   EXPECT_EQ(region.getFinalBasicBlock(), bb1Ptr);
 }
@@ -232,7 +232,7 @@ TEST(REGION, SET_FINAL_BB_BY_ID) {
   region.addBasicBlock(std::move(bb1));
   auto res = region.setFinalBasicBlockByID(0);
 
-  EXPECT_TRUE(res);
+  ASSERT_TRUE(res);
   EXPECT_TRUE(region.hasFinalBasicBlock());
   EXPECT_EQ(region.getFinalBasicBlock(), bb1Ptr);
 }
@@ -243,7 +243,7 @@ TEST(REGION, EXFAIL_SET_FINAL_BB_NOT_PRESENT) {
   BasicBlock bb;
   auto res = region.setFinalBasicBlock(&bb);
 
-  EXPECT_FALSE(res);
+  ASSERT_FALSE(res);
   EXPECT_FALSE(region.hasFinalBasicBlock());
   EXPECT_EQ(region.getFinalBasicBlock(), nullptr);
 }
@@ -253,7 +253,7 @@ TEST(REGION, EXFAIL_SET_FINAL_BB_BY_ID_NOT_PRESENT) {
 
   auto res = region.setFinalBasicBlockByID(0);
 
-  EXPECT_FALSE(res);
+  ASSERT_FALSE(res);
   EXPECT_FALSE(region.hasFinalBasicBlock());
   EXPECT_EQ(region.getFinalBasicBlock(), nullptr);
 }
@@ -302,8 +302,8 @@ TEST(REGION, REMOVE_BB) {
   region.addBasicBlock(std::move(bb1));
   auto res = region.removeBasicBlock(bb1Ptr);
 
-  EXPECT_TRUE(res);
-  EXPECT_EQ(region.getBasicBlocks().size(), 0);
+  ASSERT_TRUE(res);
+  EXPECT_EQ(region.getBasicBlocks().size(), 0u);
 }
 
 TEST(REGION, EXFAIL_REMOVE_BB_NOT_PRESENT) {
@@ -312,8 +312,8 @@ TEST(REGION, EXFAIL_REMOVE_BB_NOT_PRESENT) {
   BasicBlock bb;
   auto res = region.removeBasicBlock(&bb);
 
-  EXPECT_FALSE(res);
-  EXPECT_EQ(region.getBasicBlocks().size(), 0);
+  ASSERT_FALSE(res);
+  EXPECT_EQ(region.getBasicBlocks().size(), 0u);
 }
 
 TEST(REGION, REMOVE_START_BB) {
@@ -324,13 +324,13 @@ TEST(REGION, REMOVE_START_BB) {
 
   region.addStartBasicBlock(std::move(bb1));
 
-  EXPECT_TRUE(region.hasStartBasicBlock());
-  EXPECT_EQ(region.getStartBasicBlock(), bb1Ptr);
+  ASSERT_TRUE(region.hasStartBasicBlock());
+  ASSERT_EQ(region.getStartBasicBlock(), bb1Ptr);
 
   auto res = region.removeBasicBlock(bb1Ptr);
 
-  EXPECT_TRUE(res);
-  EXPECT_EQ(region.getBasicBlocks().size(), 0);
+  ASSERT_TRUE(res);
+  EXPECT_EQ(region.getBasicBlocks().size(), 0u);
   EXPECT_FALSE(region.hasStartBasicBlock());
   EXPECT_EQ(region.getStartBasicBlock(), nullptr);
 }
@@ -343,13 +343,13 @@ TEST(REGION, REMOVE_FINAL_BB) {
 
   region.addFinalBasicBlock(std::move(bb1));
 
-  EXPECT_TRUE(region.hasFinalBasicBlock());
-  EXPECT_EQ(region.getFinalBasicBlock(), bb1Ptr);
+  ASSERT_TRUE(region.hasFinalBasicBlock());
+  ASSERT_EQ(region.getFinalBasicBlock(), bb1Ptr);
 
   auto res = region.removeBasicBlock(bb1Ptr);
 
-  EXPECT_TRUE(res);
-  EXPECT_EQ(region.getBasicBlocks().size(), 0);
+  ASSERT_TRUE(res);
+  EXPECT_EQ(region.getBasicBlocks().size(), 0u);
   EXPECT_FALSE(region.hasFinalBasicBlock());
   EXPECT_EQ(region.getFinalBasicBlock(), nullptr);
 }
@@ -362,8 +362,8 @@ TEST(REGION, REMOVE_BB_BY_ID) {
   region.addBasicBlock(std::move(bb1));
   auto res = region.removeBasicBlockByID(0);
 
-  EXPECT_TRUE(res);
-  EXPECT_EQ(region.getBasicBlocks().size(), 0);
+  ASSERT_TRUE(res);
+  EXPECT_EQ(region.getBasicBlocks().size(), 0u);
 }
 
 TEST(REGION, EXFAIL_REMOVE_BB_BY_ID_NOT_PRESENT) {
@@ -371,8 +371,8 @@ TEST(REGION, EXFAIL_REMOVE_BB_BY_ID_NOT_PRESENT) {
 
   auto res = region.removeBasicBlockByID(0);
 
-  EXPECT_FALSE(res);
-  EXPECT_EQ(region.getBasicBlocks().size(), 0);
+  ASSERT_FALSE(res);
+  EXPECT_EQ(region.getBasicBlocks().size(), 0u);
 }
 
 TEST(REGION, REMOVE_START_BB_BY_ID) {
@@ -383,13 +383,13 @@ TEST(REGION, REMOVE_START_BB_BY_ID) {
 
   region.addStartBasicBlock(std::move(bb1));
 
-  EXPECT_TRUE(region.hasStartBasicBlock());
-  EXPECT_EQ(region.getStartBasicBlock(), bb1Ptr);
+  ASSERT_TRUE(region.hasStartBasicBlock());
+  ASSERT_EQ(region.getStartBasicBlock(), bb1Ptr);
 
   auto res = region.removeBasicBlockByID(0);
 
-  EXPECT_TRUE(res);
-  EXPECT_EQ(region.getBasicBlocks().size(), 0);
+  ASSERT_TRUE(res);
+  EXPECT_EQ(region.getBasicBlocks().size(), 0u);
   EXPECT_FALSE(region.hasStartBasicBlock());
   EXPECT_EQ(region.getStartBasicBlock(), nullptr);
 }
@@ -402,13 +402,13 @@ TEST(REGION, REMOVE_FINAL_BB_BY_ID) {
 
   region.addFinalBasicBlock(std::move(bb1));
 
-  EXPECT_TRUE(region.hasFinalBasicBlock());
-  EXPECT_EQ(region.getFinalBasicBlock(), bb1Ptr);
+  ASSERT_TRUE(region.hasFinalBasicBlock());
+  ASSERT_EQ(region.getFinalBasicBlock(), bb1Ptr);
 
   auto res = region.removeBasicBlockByID(0);
 
-  EXPECT_TRUE(res);
-  EXPECT_EQ(region.getBasicBlocks().size(), 0);
+  ASSERT_TRUE(res);
+  EXPECT_EQ(region.getBasicBlocks().size(), 0u);
   EXPECT_FALSE(region.hasFinalBasicBlock());
   EXPECT_EQ(region.getFinalBasicBlock(), nullptr);
 }
@@ -442,7 +442,7 @@ TEST(REGION, REPLACE_BB) {
 
   auto res = region.replaceBasicBlockWith(bb2Ptr, std::move(newBB));
 
-  EXPECT_TRUE(res);
+  ASSERT_TRUE(res);
 
   EXPECT_TRUE(region.isBasicBlockPresent(bb1Ptr));
   EXPECT_TRUE(region.isBasicBlockPresent(bb3Ptr));
@@ -454,12 +454,13 @@ TEST(REGION, REPLACE_BB) {
   EXPECT_EQ(bb1Ptr->getSucc(true), newBBPtr);
   EXPECT_EQ(bb1Ptr->getSucc(false), nullptr);
 
-  EXPECT_EQ(newBBPtr->getPreds().size(), 1);
+  ASSERT_EQ(newBBPtr->getPreds().size(), 1u);
   EXPECT_EQ(newBBPtr->getPreds().front(), bb1Ptr);
 
   EXPECT_EQ(newBBPtr->getSucc(true), bb3Ptr);
   EXPECT_EQ(newBBPtr->getSucc(false), bb4Ptr);
 
+  ASSERT_GE(bb3Ptr->getPreds().size(), 1u);
   EXPECT_EQ(bb3Ptr->getPreds().front(), newBBPtr);
   EXPECT_EQ(bb4Ptr->getPreds().front(), newBBPtr);
 }
@@ -470,7 +471,7 @@ TEST(REGION, EXFAIL_REPLACE_BB_NOT_PRESENT) {
   BasicBlock bb;
   auto res = region.replaceBasicBlockWith(&bb, std::make_unique<BasicBlock>(0));
 
-  EXPECT_FALSE(res);
+  ASSERT_FALSE(res);
 }
 
 TEST(REGION, REPLACE_START_BB) {
@@ -485,7 +486,7 @@ TEST(REGION, REPLACE_START_BB) {
   auto newBBPtr = newBB.get();
 
   auto res = region.replaceBasicBlockWith(bbPtr, std::move(newBB));
-  EXPECT_TRUE(res);
+  ASSERT_TRUE(res);
 
   EXPECT_TRUE(region.hasStartBasicBlock());
   EXPECT_EQ(region.getStartBasicBlock(), newBBPtr);
@@ -503,7 +504,7 @@ TEST(REGION, REPLACE_FINAL_BB) {
   auto newBBPtr = newBB.get();
 
   auto res = region.replaceBasicBlockWith(bbPtr, std::move(newBB));
-  EXPECT_TRUE(res);
+  ASSERT_TRUE(res);
 
   EXPECT_TRUE(region.hasFinalBasicBlock());
   EXPECT_EQ(region.getFinalBasicBlock(), newBBPtr);
@@ -538,7 +539,7 @@ TEST(REGION, REPLACE_BB_BY_ID) {
 
   auto res = region.replaceBasicBlockWithByID(1, std::move(newBB));
 
-  EXPECT_TRUE(res);
+  ASSERT_TRUE(res);
 
   EXPECT_TRUE(region.isBasicBlockPresent(bb1Ptr));
   EXPECT_TRUE(region.isBasicBlockPresent(bb3Ptr));
@@ -550,12 +551,13 @@ TEST(REGION, REPLACE_BB_BY_ID) {
   EXPECT_EQ(bb1Ptr->getSucc(true), newBBPtr);
   EXPECT_EQ(bb1Ptr->getSucc(false), nullptr);
 
-  EXPECT_EQ(newBBPtr->getPreds().size(), 1);
+  ASSERT_EQ(newBBPtr->getPreds().size(), 1u);
   EXPECT_EQ(newBBPtr->getPreds().front(), bb1Ptr);
 
   EXPECT_EQ(newBBPtr->getSucc(true), bb3Ptr);
   EXPECT_EQ(newBBPtr->getSucc(false), bb4Ptr);
 
+  ASSERT_GE(bb3Ptr->getPreds().size(), 1u);
   EXPECT_EQ(bb3Ptr->getPreds().front(), newBBPtr);
   EXPECT_EQ(bb4Ptr->getPreds().front(), newBBPtr);
 }
@@ -565,7 +567,7 @@ TEST(REGION, EXFAIL_REPLACE_BB_BY_ID_NOT_PRESENT) {
 
   auto res =
     region.replaceBasicBlockWithByID(0, std::make_unique<BasicBlock>(0));
-  EXPECT_FALSE(res);
+  ASSERT_FALSE(res);
 }
 
 TEST(REGION, REPLACE_START_BB_BY_ID) {
@@ -578,7 +580,7 @@ TEST(REGION, REPLACE_START_BB_BY_ID) {
   auto newBBPtr = newBB.get();
 
   auto res = region.replaceBasicBlockWithByID(0, std::move(newBB));
-  EXPECT_TRUE(res);
+  ASSERT_TRUE(res);
 
   EXPECT_TRUE(region.hasStartBasicBlock());
   EXPECT_EQ(region.getStartBasicBlock(), newBBPtr);
@@ -594,7 +596,7 @@ TEST(REGION, REPLACE_FINAL_BB_BY_ID) {
   auto newBBPtr = newBB.get();
 
   auto res = region.replaceBasicBlockWithByID(0, std::move(newBB));
-  EXPECT_TRUE(res);
+  ASSERT_TRUE(res);
 
   EXPECT_TRUE(region.hasFinalBasicBlock());
   EXPECT_EQ(region.getFinalBasicBlock(), newBBPtr);
@@ -620,8 +622,8 @@ TEST(REGION, EXFAIL_COLLECT_DOM_INFO_NO_START_BB) {
     region.collectDomInfo();
   } catch (const IrisException& exc) {
     std::string str = exc.what();
-    EXPECT_TRUE(!str.compare(
-      "Cannot collect dom info with no start basic block specified!"));
+    ASSERT_EQ(str,
+              "Cannot collect dom info with no start basic block specified!");
     return;
   }
   FAIL();
@@ -634,8 +636,7 @@ TEST(REGION, EXFAIL_GET_DFS_NO_START_BB) {
     [[maybe_unused]] auto dfs = region.getDFS();
   } catch (const IrisException& exc) {
     std::string str = exc.what();
-    EXPECT_TRUE(
-      !str.compare("Cannot run DFS with no start basic block specified!"));
+    ASSERT_EQ(str, "Cannot run DFS with no start basic block specified!");
     return;
   }
   FAIL();
@@ -648,8 +649,7 @@ TEST(REGION, EXFAIL_GET_RPO_NO_START_BB) {
     [[maybe_unused]] auto rpo = region.getRPO();
   } catch (const IrisException& exc) {
     std::string str = exc.what();
-    EXPECT_TRUE(
-      !str.compare("Cannot run RPO with no start basic block specified!"));
+    ASSERT_EQ(str, "Cannot run RPO with no start basic block specified!");
     return;
   }
   FAIL();

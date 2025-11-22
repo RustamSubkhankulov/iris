@@ -186,7 +186,7 @@ TEST(ARITH, COMPARE_EXFAIL_UNEXPECTED_PRED) {
                            static_cast<arith::CompareOp::Pred>(255U));
   } catch (const IrisException& exc) {
     std::string msg = exc.what();
-    EXPECT_TRUE(!msg.compare("Unexpected predicate in CompareOp operation!"));
+    EXPECT_EQ(msg, "Unexpected predicate in CompareOp operation!");
     return;
   }
   FAIL();
@@ -201,7 +201,7 @@ TEST(ARITH, COMPARE_EXFAIL_NON_HOMOGEN_INPUTS1) {
   std::string msg;
   bool vres = cmp.verify(msg);
 
-  EXPECT_EQ(vres, false);
+  EXPECT_FALSE(vres);
   EXPECT_TRUE(msg.contains("inputs must have same data types"));
 }
 
@@ -212,7 +212,7 @@ TEST(ARITH, COMPARE_EXFAIL_EMPTY_INPUT_1) {
   std::string msg;
   bool vres = cmp.verify(msg);
 
-  EXPECT_EQ(vres, false);
+  EXPECT_FALSE(vres);
   EXPECT_TRUE(msg.contains("input #1 is empty!"));
 }
 
@@ -223,7 +223,7 @@ TEST(ARITH, COMPARE_EXFAIL_EMPTY_INPUT_2) {
   std::string msg;
   bool vres = cmp.verify(msg);
 
-  EXPECT_EQ(vres, false);
+  EXPECT_FALSE(vres);
   EXPECT_TRUE(msg.contains("input #0 is empty!"));
 }
 
@@ -236,7 +236,7 @@ TEST(ARITH, ADD_EXFAIL_NON_HOMOGEN_INPUTS) {
   std::string msg;
   bool vres = add.verify(msg);
 
-  EXPECT_EQ(vres, false);
+  EXPECT_FALSE(vres);
   EXPECT_TRUE(msg.contains("inputs must have same data types"));
 }
 
@@ -249,7 +249,7 @@ TEST(ARITH, SUB_EXFAIL_NON_HOMOGEN_INPUTS) {
   std::string msg;
   bool vres = sub.verify(msg);
 
-  EXPECT_EQ(vres, false);
+  EXPECT_FALSE(vres);
   EXPECT_TRUE(msg.contains("inputs must have same data types"));
 }
 
@@ -262,7 +262,7 @@ TEST(ARITH, MUL_EXFAIL_NON_HOMOGEN_INPUTS) {
   std::string msg;
   bool vres = mul.verify(msg);
 
-  EXPECT_EQ(vres, false);
+  EXPECT_FALSE(vres);
   EXPECT_TRUE(msg.contains("inputs must have same data types"));
 }
 
@@ -275,6 +275,6 @@ TEST(ARITH, DIV_EXFAIL_NON_HOMOGEN_INPUTS) {
   std::string msg;
   bool vres = div.verify(msg);
 
-  EXPECT_EQ(vres, false);
+  EXPECT_FALSE(vres);
   EXPECT_TRUE(msg.contains("inputs must have same data types"));
 }

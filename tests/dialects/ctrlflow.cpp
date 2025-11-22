@@ -237,7 +237,7 @@ TEST(CTRLFLOW, JUMPC_EXFAIL_NON_BOOLEAN_INPUT) {
   std::string msg;
   bool vres = jumpc.verify(msg);
 
-  EXPECT_EQ(vres, false);
+  EXPECT_FALSE(vres);
   EXPECT_TRUE(msg.contains("Input's data type must be bool"));
 }
 
@@ -246,7 +246,7 @@ TEST(CTRLFLOW, CALL_EXPECTED_EXCEPTION_INVALID_FUNC_NAME) {
     ctrlflow::CallOp call("", DataType::NONE);
   } catch (const IrisException& exc) {
     std::string msg = exc.what();
-    EXPECT_TRUE(!msg.compare("Invalid function name!"));
+    ASSERT_EQ(msg, "Invalid function name!");
     return;
   }
   FAIL();
@@ -257,7 +257,7 @@ TEST(CTRLFLOW, PHI_EXPECTED_EXCEPTION_EMPTY_INPUTS) {
     ctrlflow::PhiOp phi(InputList{});
   } catch (const IrisException& exc) {
     std::string msg = exc.what();
-    EXPECT_TRUE(!msg.compare("Operation must have at least one input!"));
+    ASSERT_EQ(msg, "Operation must have at least one input!");
     return;
   }
   FAIL();
@@ -272,6 +272,6 @@ TEST(CTRLFLOW, PHI_EXFAIL_NON_HOMOGEN_INPUTS) {
   std::string msg;
   bool vres = phi.verify(msg);
 
-  EXPECT_EQ(vres, false);
+  EXPECT_FALSE(vres);
   EXPECT_TRUE(msg.contains("inputs must have same data types"));
 }

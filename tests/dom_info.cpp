@@ -6,7 +6,7 @@ using namespace iris;
 TEST(DOM_INFO, DEFAULT) {
   doms::DomInfo domInfo;
 
-  EXPECT_TRUE(domInfo.isExpired());
+  ASSERT_TRUE(domInfo.isExpired());
 }
 
 TEST(DOM_INFO, BASIC) {
@@ -16,7 +16,7 @@ TEST(DOM_INFO, BASIC) {
   region.addStartBasicBlock(std::make_unique<BasicBlock>(0));
 
   domInfo.analyze(region);
-  EXPECT_FALSE(domInfo.isExpired());
+  ASSERT_FALSE(domInfo.isExpired());
 }
 
 TEST(DOM_INFO, EXFAIL_GET_DFS_NO_START_BB) {
@@ -26,8 +26,8 @@ TEST(DOM_INFO, EXFAIL_GET_DFS_NO_START_BB) {
     [[maybe_unused]] auto dfs = doms::DomInfo::getDFS(region);
   } catch (const IrisException& exc) {
     std::string str = exc.what();
-    EXPECT_TRUE(
-      !str.compare("Cannot run DFS with no start basic block specified!"));
+    EXPECT_EQ(
+      std::string("Cannot run DFS with no start basic block specified!"), str);
     return;
   }
   FAIL();
@@ -40,8 +40,8 @@ TEST(DOM_INFO, EXFAIL_GET_RPO_NO_START_BB) {
     [[maybe_unused]] auto rpo = doms::DomInfo::getRPO(region);
   } catch (const IrisException& exc) {
     std::string str = exc.what();
-    EXPECT_TRUE(
-      !str.compare("Cannot run RPO with no start basic block specified!"));
+    EXPECT_EQ(
+      std::string("Cannot run RPO with no start basic block specified!"), str);
     return;
   }
   FAIL();
@@ -62,7 +62,7 @@ TEST(DOM_INFO, EXFAIL_GET_IDOM_EXPIRED_DOM_INFO) {
     [[maybe_unused]] auto idom = domInfo.getIDom(bb0Ptr);
   } catch (const IrisException& exc) {
     std::string str = exc.what();
-    EXPECT_TRUE(!str.compare("Dom info is expired!"));
+    EXPECT_EQ(std::string("Dom info is expired!"), str);
     return;
   }
   FAIL();
@@ -82,7 +82,7 @@ TEST(DOM_INFO, EXFAIL_GET_IDOM_BY_ID_EXPIRED_DOM_INFO) {
     [[maybe_unused]] auto idom = domInfo.getIDomByID(0, region);
   } catch (const IrisException& exc) {
     std::string str = exc.what();
-    EXPECT_TRUE(!str.compare("Dom info is expired!"));
+    EXPECT_EQ(std::string("Dom info is expired!"), str);
     return;
   }
   FAIL();
@@ -103,7 +103,7 @@ TEST(DOM_INFO, EXFAIL_GET_DOM_BLOCKS_EXPIRED_DOM_INFO) {
     [[maybe_unused]] auto bbs = domInfo.getDominatedBlocks(bb0Ptr);
   } catch (const IrisException& exc) {
     std::string str = exc.what();
-    EXPECT_TRUE(!str.compare("Dom info is expired!"));
+    EXPECT_EQ(std::string("Dom info is expired!"), str);
     return;
   }
   FAIL();
@@ -123,7 +123,7 @@ TEST(DOM_INFO, EXFAIL_GET_DOM_BLOCKS_BY_IDEXPIRED_DOM_INFO) {
     [[maybe_unused]] auto bbs = domInfo.getDominatedBlocksByID(0, region);
   } catch (const IrisException& exc) {
     std::string str = exc.what();
-    EXPECT_TRUE(!str.compare("Dom info is expired!"));
+    EXPECT_EQ(std::string("Dom info is expired!"), str);
     return;
   }
   FAIL();
@@ -144,7 +144,7 @@ TEST(DOM_INFO, EXFAIL_GET_DOM_CHAIN_EXPIRED_DOM_INFO) {
     [[maybe_unused]] auto chain = domInfo.getDominatorsChain(bb0Ptr);
   } catch (const IrisException& exc) {
     std::string str = exc.what();
-    EXPECT_TRUE(!str.compare("Dom info is expired!"));
+    EXPECT_EQ(std::string("Dom info is expired!"), str);
     return;
   }
   FAIL();
@@ -164,7 +164,7 @@ TEST(DOM_INFO, EXFAIL_GET_DOM_CHAIN_BY_ID_EXPIRED_DOM_INFO) {
     [[maybe_unused]] auto chain = domInfo.getDominatorsChainByID(0, region);
   } catch (const IrisException& exc) {
     std::string str = exc.what();
-    EXPECT_TRUE(!str.compare("Dom info is expired!"));
+    EXPECT_EQ(std::string("Dom info is expired!"), str);
     return;
   }
   FAIL();

@@ -7,7 +7,7 @@ TEST(BUILTIN, PARAM_INVARIANTS) {
   builtin::ParamOp op(DataType::SI32);
 
   EXPECT_FALSE(op.hasInputs());
-  EXPECT_EQ(op.getInputsNum(), 0);
+  EXPECT_EQ(op.getInputsNum(), 0u);
 
   EXPECT_FALSE(op.isTerminator());
   EXPECT_TRUE(op.isa(GlobalOpcodes::PARAM));
@@ -30,7 +30,7 @@ TEST(BUILTIN, COPY_INVARIANTS) {
   builtin::CopyOp op(nullptr);
 
   EXPECT_TRUE(op.hasInputs());
-  EXPECT_EQ(op.getInputsNum(), 1);
+  EXPECT_EQ(op.getInputsNum(), 1u);
 
   EXPECT_FALSE(op.isTerminator());
   EXPECT_TRUE(op.isa(GlobalOpcodes::COPY));

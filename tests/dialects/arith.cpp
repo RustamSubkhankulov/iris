@@ -10,7 +10,7 @@ TEST(ARITH, CONSTANT_INVARIANTS) {
   EXPECT_TRUE(op.isa(GlobalOpcodes::CONSTANT));
 
   EXPECT_FALSE(op.hasInputs());
-  EXPECT_EQ(op.getInputsNum(), 0);
+  EXPECT_EQ(op.getInputsNum(), 0u);
 }
 
 TEST(ARITH, ADD_INVARIANTS) {
@@ -20,7 +20,7 @@ TEST(ARITH, ADD_INVARIANTS) {
   EXPECT_TRUE(op.isa(GlobalOpcodes::ADD));
 
   EXPECT_TRUE(op.hasInputs());
-  EXPECT_EQ(op.getInputsNum(), 2);
+  EXPECT_EQ(op.getInputsNum(), 2u);
 }
 
 TEST(ARITH, SUB_INVARIANTS) {
@@ -30,7 +30,7 @@ TEST(ARITH, SUB_INVARIANTS) {
   EXPECT_TRUE(op.isa(GlobalOpcodes::SUB));
 
   EXPECT_TRUE(op.hasInputs());
-  EXPECT_EQ(op.getInputsNum(), 2);
+  EXPECT_EQ(op.getInputsNum(), 2u);
 }
 
 TEST(ARITH, MUL_INVARIANTS) {
@@ -40,7 +40,7 @@ TEST(ARITH, MUL_INVARIANTS) {
   EXPECT_TRUE(op.isa(GlobalOpcodes::MUL));
 
   EXPECT_TRUE(op.hasInputs());
-  EXPECT_EQ(op.getInputsNum(), 2);
+  EXPECT_EQ(op.getInputsNum(), 2u);
 }
 
 TEST(ARITH, DIV_INVARIANTS) {
@@ -50,7 +50,7 @@ TEST(ARITH, DIV_INVARIANTS) {
   EXPECT_TRUE(op.isa(GlobalOpcodes::DIV));
 
   EXPECT_TRUE(op.hasInputs());
-  EXPECT_EQ(op.getInputsNum(), 2);
+  EXPECT_EQ(op.getInputsNum(), 2u);
 }
 
 TEST(ARITH, CAST_INVARIANTS) {
@@ -60,7 +60,7 @@ TEST(ARITH, CAST_INVARIANTS) {
   EXPECT_TRUE(op.isa(GlobalOpcodes::CAST));
 
   EXPECT_TRUE(op.hasInputs());
-  EXPECT_EQ(op.getInputsNum(), 1);
+  EXPECT_EQ(op.getInputsNum(), 1u);
 }
 
 TEST(ARITH, COMPARE_INVARIANTS) {
@@ -70,7 +70,7 @@ TEST(ARITH, COMPARE_INVARIANTS) {
   EXPECT_TRUE(op.isa(GlobalOpcodes::COMPARE));
 
   EXPECT_TRUE(op.hasInputs());
-  EXPECT_EQ(op.getInputsNum(), 2);
+  EXPECT_EQ(op.getInputsNum(), 2u);
 }
 
 TEST(ARITH, CONSTANT_BASIC) {

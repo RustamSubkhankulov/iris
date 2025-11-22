@@ -48,7 +48,8 @@ TEST(BASIC_BLOCK, CONNECTION_TRUE) {
 
   bb1.linkSucc(&bb2);
 
-  EXPECT_EQ(bb2.getPredsNum(), 1);
+  ASSERT_EQ(bb2.getPredsNum(), 1);
+  ASSERT_FALSE(bb2.getPreds().empty());
   EXPECT_EQ(bb2.getPreds().front(), &bb1);
 
   EXPECT_TRUE(bb1.hasSucc(true));
@@ -76,7 +77,8 @@ TEST(BASIC_BLOCK, REPLACE) {
 
   EXPECT_EQ(bb.getPredsNum(), 0);
 
-  EXPECT_EQ(newBB.getPredsNum(), 1);
+  ASSERT_EQ(newBB.getPredsNum(), 1);
+  ASSERT_FALSE(newBB.getPreds().empty());
   EXPECT_EQ(newBB.getPreds().front(), &bbPred);
 
   EXPECT_FALSE(bb.hasSucc(true));
@@ -91,8 +93,10 @@ TEST(BASIC_BLOCK, REPLACE) {
   EXPECT_EQ(newBB.getSucc(true), &bbSuccT);
   EXPECT_EQ(newBB.getSucc(false), &bbSuccF);
 
-  EXPECT_EQ(bbSuccT.getPredsNum(), 1);
-  EXPECT_EQ(bbSuccF.getPredsNum(), 1);
+  ASSERT_EQ(bbSuccT.getPredsNum(), 1);
+  ASSERT_FALSE(bbSuccT.getPreds().empty());
+  ASSERT_EQ(bbSuccF.getPredsNum(), 1);
+  ASSERT_FALSE(bbSuccF.getPreds().empty());
 
   EXPECT_EQ(bbSuccT.getPreds().front(), &newBB);
   EXPECT_EQ(bbSuccF.getPreds().front(), &newBB);
@@ -125,7 +129,8 @@ TEST(BASIC_BLOCK, UNLINK) {
 }
 
 TEST(BASIC_BLOCK, DELETION) {
-  auto bb0 = new BasicBlock(0);
+  auto* bb0 = new BasicBlock(0);
+  ASSERT_NE(bb0, nullptr);
 
   BasicBlock bbP1(1);
   BasicBlock bbP2(2);
@@ -139,10 +144,10 @@ TEST(BASIC_BLOCK, DELETION) {
   bb0->linkSucc(&scT, true);
   bb0->linkSucc(&scF, false);
 
-  EXPECT_EQ(scT.getPredsNum(), 1);
-  EXPECT_EQ(scF.getPredsNum(), 1);
-  EXPECT_TRUE(bbP1.hasSucc());
-  EXPECT_TRUE(bbP2.hasSucc());
+  ASSERT_EQ(scT.getPredsNum(), 1);
+  ASSERT_EQ(scF.getPredsNum(), 1);
+  ASSERT_TRUE(bbP1.hasSucc());
+  ASSERT_TRUE(bbP2.hasSucc());
 
   bb0->unlink();
   delete bb0;
@@ -161,10 +166,12 @@ TEST(BASIC_BLOCK, CONNECTION_TRUE_AND_FALSE) {
   bb1.linkSucc(&bbT, true);
   bb1.linkSucc(&bbF, false);
 
-  EXPECT_EQ(bbT.getPredsNum(), 1);
+  ASSERT_EQ(bbT.getPredsNum(), 1);
+  ASSERT_FALSE(bbT.getPreds().empty());
   EXPECT_EQ(bbT.getPreds().front(), &bb1);
 
-  EXPECT_EQ(bbF.getPredsNum(), 1);
+  ASSERT_EQ(bbF.getPredsNum(), 1);
+  ASSERT_FALSE(bbF.getPreds().empty());
   EXPECT_EQ(bbF.getPreds().front(), &bb1);
 
   EXPECT_TRUE(bb1.hasSucc(true));
@@ -182,7 +189,7 @@ TEST(BASIC_BLOCK, PHI_OPS_INSERT_BACK) {
 
   bb.insertPhiOpBack(std::move(phi1));
 
-  EXPECT_EQ(bb.getPhiOps().size(), 1);
+  ASSERT_EQ(bb.getPhiOps().size(), 1);
   EXPECT_EQ(&bb.getPhiOps().back(), phi1Ptr);
   EXPECT_EQ(bb.getPhiOps().back().getParentBasicBlock(), &bb);
 
@@ -191,7 +198,7 @@ TEST(BASIC_BLOCK, PHI_OPS_INSERT_BACK) {
 
   bb.insertPhiOpBack(std::move(phi2));
 
-  EXPECT_EQ(bb.getPhiOps().size(), 2);
+  ASSERT_EQ(bb.getPhiOps().size(), 2);
   EXPECT_EQ(&bb.getPhiOps().front(), phi1Ptr);
   EXPECT_EQ(&bb.getPhiOps().back(), phi2Ptr);
   EXPECT_EQ(bb.getPhiOps().back().getParentBasicBlock(), &bb);
@@ -213,14 +220,14 @@ TEST(BASIC_BLOCK, PHI_OPS_ERASE_FRONT) {
   bb.insertPhiOpBack(std::move(phi2));
   bb.insertPhiOpBack(std::move(phi3));
 
-  EXPECT_EQ(bb.getPhiOps().size(), 3);
+  ASSERT_EQ(bb.getPhiOps().size(), 3);
   EXPECT_EQ(bb.getPhiOps().begin().get(), phi1Ptr);
   EXPECT_EQ(std::next(bb.getPhiOps().begin(), 1).get(), phi2Ptr);
   EXPECT_EQ(std::next(bb.getPhiOps().begin(), 2).get(), phi3Ptr);
 
   bb.erasePhiOp(bb.getPhiOps().begin());
 
-  EXPECT_EQ(bb.getPhiOps().size(), 2);
+  ASSERT_EQ(bb.getPhiOps().size(), 2);
   EXPECT_EQ(bb.getPhiOps().begin().get(), phi2Ptr);
   EXPECT_EQ(std::next(bb.getPhiOps().begin(), 1).get(), phi3Ptr);
 }
@@ -241,14 +248,14 @@ TEST(BASIC_BLOCK, PHI_OPS_ERASE_MID) {
   bb.insertPhiOpBack(std::move(phi2));
   bb.insertPhiOpBack(std::move(phi3));
 
-  EXPECT_EQ(bb.getPhiOps().size(), 3);
+  ASSERT_EQ(bb.getPhiOps().size(), 3);
   EXPECT_EQ(bb.getPhiOps().begin().get(), phi1Ptr);
   EXPECT_EQ(std::next(bb.getPhiOps().begin(), 1).get(), phi2Ptr);
   EXPECT_EQ(std::next(bb.getPhiOps().begin(), 2).get(), phi3Ptr);
 
   bb.erasePhiOp(std::next(bb.getPhiOps().begin()));
 
-  EXPECT_EQ(bb.getPhiOps().size(), 2);
+  ASSERT_EQ(bb.getPhiOps().size(), 2);
   EXPECT_EQ(bb.getPhiOps().begin().get(), phi1Ptr);
   EXPECT_EQ(std::next(bb.getPhiOps().begin(), 1).get(), phi3Ptr);
 }
@@ -269,14 +276,14 @@ TEST(BASIC_BLOCK, PHI_OPS_ERASE_BACK) {
   bb.insertPhiOpBack(std::move(phi2));
   bb.insertPhiOpBack(std::move(phi3));
 
-  EXPECT_EQ(bb.getPhiOps().size(), 3);
+  ASSERT_EQ(bb.getPhiOps().size(), 3);
   EXPECT_EQ(bb.getPhiOps().begin().get(), phi1Ptr);
   EXPECT_EQ(std::next(bb.getPhiOps().begin(), 1).get(), phi2Ptr);
   EXPECT_EQ(std::next(bb.getPhiOps().begin(), 2).get(), phi3Ptr);
 
   bb.erasePhiOp(std::next(bb.getPhiOps().begin(), 2));
 
-  EXPECT_EQ(bb.getPhiOps().size(), 2);
+  ASSERT_EQ(bb.getPhiOps().size(), 2);
   EXPECT_EQ(bb.getPhiOps().begin().get(), phi1Ptr);
   EXPECT_EQ(std::next(bb.getPhiOps().begin(), 1).get(), phi2Ptr);
 }
@@ -289,7 +296,7 @@ TEST(BASIC_BLOCK, PHI_OP_ERASE_LAST) {
 
   bb.insertPhiOpBack(std::move(phi));
 
-  EXPECT_EQ(bb.getPhiOps().size(), 1);
+  ASSERT_EQ(bb.getPhiOps().size(), 1);
   EXPECT_EQ(bb.getPhiOps().begin().get(), phiPtr);
 
   bb.erasePhiOp(bb.getPhiOps().begin());
@@ -334,6 +341,7 @@ TEST(BASIC_BLOCK, PHI_OPS_REPLACE) {
   EXPECT_FALSE(copy.getInputAt(0).isEmpty());
   EXPECT_EQ(copy.getInputAt(0).getDefiningOp(), newPhiPtr);
 
+  ASSERT_EQ(bb.getPhiOps().size(), 3);
   EXPECT_EQ(bb.getPhiOps().begin().get(), phi1Ptr);
   EXPECT_EQ(std::next(bb.getPhiOps().begin()).get(), newPhiPtr);
   EXPECT_EQ(std::next(bb.getPhiOps().begin(), 2).get(), phi3Ptr);
@@ -347,7 +355,7 @@ TEST(BASIC_BLOCK, OPS_INSERT_BACK) {
 
   bb.insertOpBack(std::move(op1));
 
-  EXPECT_EQ(bb.getOps().size(), 1);
+  ASSERT_EQ(bb.getOps().size(), 1);
   EXPECT_EQ(&bb.getOps().back(), op1ptr);
   EXPECT_EQ(bb.getOps().back().getParentBasicBlock(), &bb);
 
@@ -356,7 +364,7 @@ TEST(BASIC_BLOCK, OPS_INSERT_BACK) {
 
   bb.insertOpBack(std::move(op2));
 
-  EXPECT_EQ(bb.getOps().size(), 2);
+  ASSERT_EQ(bb.getOps().size(), 2);
   EXPECT_EQ(&bb.getOps().front(), op1ptr);
   EXPECT_EQ(&bb.getOps().back(), op2ptr);
   EXPECT_EQ(bb.getOps().back().getParentBasicBlock(), &bb);
@@ -370,7 +378,7 @@ TEST(BASIC_BLOCK, OPS_INSERT_FRONT) {
 
   bb.insertOpFront(std::move(op1));
 
-  EXPECT_EQ(bb.getOps().size(), 1);
+  ASSERT_EQ(bb.getOps().size(), 1);
   EXPECT_EQ(&bb.getOps().front(), op1ptr);
   EXPECT_EQ(bb.getOps().front().getParentBasicBlock(), &bb);
 
@@ -379,7 +387,7 @@ TEST(BASIC_BLOCK, OPS_INSERT_FRONT) {
 
   bb.insertOpFront(std::move(op2));
 
-  EXPECT_EQ(bb.getOps().size(), 2);
+  ASSERT_EQ(bb.getOps().size(), 2);
   EXPECT_EQ(&bb.getOps().back(), op1ptr);
   EXPECT_EQ(&bb.getOps().front(), op2ptr);
   EXPECT_EQ(bb.getOps().front().getParentBasicBlock(), &bb);
@@ -397,7 +405,7 @@ TEST(BASIC_BLOCK, OPS_INSERT_AFTER) {
   bb.insertOpBack(std::move(op1));
   bb.insertOpBack(std::move(op2));
 
-  EXPECT_EQ(bb.getOps().size(), 2);
+  ASSERT_EQ(bb.getOps().size(), 2);
   EXPECT_EQ(&bb.getOps().front(), op1ptr);
   EXPECT_EQ(&bb.getOps().back(), op2ptr);
 
@@ -406,7 +414,7 @@ TEST(BASIC_BLOCK, OPS_INSERT_AFTER) {
 
   bb.insertOpAfter(bb.getOps().begin(), std::move(op3));
 
-  EXPECT_EQ(bb.getOps().size(), 3);
+  ASSERT_EQ(bb.getOps().size(), 3);
   EXPECT_EQ(std::next(bb.getOps().begin(), 0).get(), op1ptr);
   EXPECT_EQ(std::next(bb.getOps().begin(), 1).get(), op3ptr);
   EXPECT_EQ(std::next(bb.getOps().begin(), 2).get(), op2ptr);
@@ -427,7 +435,7 @@ TEST(BASIC_BLOCK, OPS_INSERT_AFTER_LAST) {
   bb.insertOpBack(std::move(op1));
   bb.insertOpBack(std::move(op2));
 
-  EXPECT_EQ(bb.getOps().size(), 2);
+  ASSERT_EQ(bb.getOps().size(), 2);
   EXPECT_EQ(&bb.getOps().front(), op1ptr);
   EXPECT_EQ(&bb.getOps().back(), op2ptr);
 
@@ -436,7 +444,7 @@ TEST(BASIC_BLOCK, OPS_INSERT_AFTER_LAST) {
 
   bb.insertOpAfter(std::next(bb.getOps().begin()), std::move(op3));
 
-  EXPECT_EQ(bb.getOps().size(), 3);
+  ASSERT_EQ(bb.getOps().size(), 3);
   EXPECT_EQ(std::next(bb.getOps().begin(), 0).get(), op1ptr);
   EXPECT_EQ(std::next(bb.getOps().begin(), 1).get(), op2ptr);
   EXPECT_EQ(std::next(bb.getOps().begin(), 2).get(), op3ptr);
@@ -457,7 +465,7 @@ TEST(BASIC_BLOCK, OPS_INSERT_BEFORE) {
   bb.insertOpBack(std::move(op1));
   bb.insertOpBack(std::move(op2));
 
-  EXPECT_EQ(bb.getOps().size(), 2);
+  ASSERT_EQ(bb.getOps().size(), 2);
   EXPECT_EQ(&bb.getOps().front(), op1ptr);
   EXPECT_EQ(&bb.getOps().back(), op2ptr);
 
@@ -466,7 +474,7 @@ TEST(BASIC_BLOCK, OPS_INSERT_BEFORE) {
 
   bb.insertOpBefore(std::next(bb.getOps().begin()), std::move(op3));
 
-  EXPECT_EQ(bb.getOps().size(), 3);
+  ASSERT_EQ(bb.getOps().size(), 3);
   EXPECT_EQ(std::next(bb.getOps().begin(), 0).get(), op1ptr);
   EXPECT_EQ(std::next(bb.getOps().begin(), 1).get(), op3ptr);
   EXPECT_EQ(std::next(bb.getOps().begin(), 2).get(), op2ptr);
@@ -487,7 +495,7 @@ TEST(BASIC_BLOCK, OPS_INSERT_BEFORE_FIRST) {
   bb.insertOpBack(std::move(op1));
   bb.insertOpBack(std::move(op2));
 
-  EXPECT_EQ(bb.getOps().size(), 2);
+  ASSERT_EQ(bb.getOps().size(), 2);
   EXPECT_EQ(&bb.getOps().front(), op1ptr);
   EXPECT_EQ(&bb.getOps().back(), op2ptr);
 
@@ -496,7 +504,7 @@ TEST(BASIC_BLOCK, OPS_INSERT_BEFORE_FIRST) {
 
   bb.insertOpBefore(bb.getOps().begin(), std::move(op3));
 
-  EXPECT_EQ(bb.getOps().size(), 3);
+  ASSERT_EQ(bb.getOps().size(), 3);
   EXPECT_EQ(std::next(bb.getOps().begin(), 0).get(), op3ptr);
   EXPECT_EQ(std::next(bb.getOps().begin(), 1).get(), op1ptr);
   EXPECT_EQ(std::next(bb.getOps().begin(), 2).get(), op2ptr);
@@ -522,7 +530,7 @@ TEST(BASIC_BLOCK, OPS_ERASE_FRONT) {
 
   bb.eraseOp(bb.getOps().begin());
 
-  EXPECT_EQ(bb.getOps().size(), 2);
+  ASSERT_EQ(bb.getOps().size(), 2);
 
   EXPECT_EQ(std::next(bb.getOps().begin(), 0).get(), op2ptr);
   EXPECT_EQ(std::next(bb.getOps().begin(), 1).get(), op3ptr);
@@ -548,7 +556,7 @@ TEST(BASIC_BLOCK, OPS_ERASE_MID) {
 
   bb.eraseOp(std::next(bb.getOps().begin()));
 
-  EXPECT_EQ(bb.getOps().size(), 2);
+  ASSERT_EQ(bb.getOps().size(), 2);
 
   EXPECT_EQ(std::next(bb.getOps().begin(), 0).get(), op1ptr);
   EXPECT_EQ(std::next(bb.getOps().begin(), 1).get(), op3ptr);
@@ -574,7 +582,7 @@ TEST(BASIC_BLOCK, OPS_ERASE_BACK) {
 
   bb.eraseOp(std::next(bb.getOps().begin(), 2));
 
-  EXPECT_EQ(bb.getOps().size(), 2);
+  ASSERT_EQ(bb.getOps().size(), 2);
 
   EXPECT_EQ(std::next(bb.getOps().begin(), 0).get(), op1ptr);
   EXPECT_EQ(std::next(bb.getOps().begin(), 1).get(), op2ptr);
@@ -593,9 +601,9 @@ TEST(BASIC_BLOCK, OPS_REPLACE) {
   auto add = std::make_unique<arith::AddOp>(&param1, &param2);
   auto op3 = std::make_unique<arith::AddOp>(nullptr, nullptr);
 
-  auto op1ptr = op1.get();
-  auto addptr = add.get();
-  auto op3ptr = op3.get();
+  auto* op1ptr = op1.get();
+  auto* addptr = add.get();
+  auto* op3ptr = op3.get();
 
   builtin::CopyOp copy(addptr);
 
@@ -620,9 +628,10 @@ TEST(BASIC_BLOCK, OPS_REPLACE) {
   EXPECT_FALSE(copy.getInputAt(0).isEmpty());
   EXPECT_EQ(copy.getInputAt(0).getDefiningOp(), newAddPtr);
 
-  EXPECT_EQ(std::next(bb.getOps().begin(), 0), op1ptr);
-  EXPECT_EQ(std::next(bb.getOps().begin(), 1), newAddPtr);
-  EXPECT_EQ(std::next(bb.getOps().begin(), 2), op3ptr);
+  ASSERT_EQ(bb.getOps().size(), 3);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 0).get(), op1ptr);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 1).get(), newAddPtr);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 2).get(), op3ptr);
 }
 
 // TODO: to region tests
@@ -631,7 +640,8 @@ TEST(BASIC_BLOCK, EXFAIL_ORPHAN) {
   std::string msg;
   bool vres = bb.verify(msg);
 
-  EXPECT_FALSE(vres);
+  ASSERT_FALSE(vres);
+  ASSERT_FALSE(msg.empty());
   EXPECT_TRUE(msg.contains("has no parent region"));
 }
 
@@ -644,12 +654,16 @@ TEST(BASIC_BLOCK, EXFAIL_START_WITH_PREDECESSORS) {
   region.addBasicBlock(std::make_unique<BasicBlock>(2));
   auto* bb2 = region.getBasicBlockByID(2);
 
+  ASSERT_NE(bb1, nullptr);
+  ASSERT_NE(bb2, nullptr);
+
   bb1->linkSucc(bb2);
 
   std::string msg;
   bool vres = bb2->verify(msg, true);
 
-  EXPECT_FALSE(vres);
+  ASSERT_FALSE(vres);
+  ASSERT_FALSE(msg.empty());
   EXPECT_TRUE(msg.contains("is starting bb, but has predecessor"));
 }
 
@@ -662,12 +676,16 @@ TEST(BASIC_BLOCK, EXFAIL_FINAL_WITH_SUCCESSORS) {
   region.addBasicBlock(std::make_unique<BasicBlock>(2));
   auto* bb2 = region.getBasicBlockByID(2);
 
+  ASSERT_NE(bb1, nullptr);
+  ASSERT_NE(bb2, nullptr);
+
   bb1->linkSucc(bb2);
 
   std::string msg;
   bool vres = bb1->verify(msg, false, true);
 
-  EXPECT_FALSE(vres);
+  ASSERT_FALSE(vres);
+  ASSERT_FALSE(msg.empty());
   EXPECT_TRUE(msg.contains("is final bb, but has successors"));
 }
 
@@ -678,13 +696,16 @@ TEST(BASIC_BLOCK, EXFAIL_TRUE_SUCCESSOR_NOT_IN_REGION) {
   region.addBasicBlock(std::make_unique<BasicBlock>(1));
   auto* bb1 = region.getBasicBlockByID(1);
 
+  ASSERT_NE(bb1, nullptr);
+
   BasicBlock bb2(2);
   bb1->linkSucc(&bb2);
 
   std::string msg;
   bool vres = bb1->verify(msg, true);
 
-  EXPECT_FALSE(vres);
+  ASSERT_FALSE(vres);
+  ASSERT_FALSE(msg.empty());
   EXPECT_TRUE(msg.contains("true successor is not in the region"));
 }
 
@@ -695,13 +716,16 @@ TEST(BASIC_BLOCK, EXFAIL_FALSE_SUCCESSOR_NOT_IN_REGION) {
   region.addBasicBlock(std::make_unique<BasicBlock>(1));
   auto* bb1 = region.getBasicBlockByID(1);
 
+  ASSERT_NE(bb1, nullptr);
+
   BasicBlock bb2(2);
   bb1->linkSucc(&bb2, false);
 
   std::string msg;
   bool vres = bb1->verify(msg, true);
 
-  EXPECT_FALSE(vres);
+  ASSERT_FALSE(vres);
+  ASSERT_FALSE(msg.empty());
   EXPECT_TRUE(msg.contains("false successor is not in the region"));
 }
 
@@ -713,12 +737,16 @@ TEST(BASIC_BLOCK, EXFAIL_FALSE_BUT_NO_TRUE_SUCCESSORS) {
   region.addBasicBlock(std::make_unique<BasicBlock>(2));
   auto* bb2 = region.getBasicBlockByID(2);
 
+  ASSERT_NE(bb1, nullptr);
+  ASSERT_NE(bb2, nullptr);
+
   bb1->linkSucc(bb2, false);
 
   std::string msg;
   bool vres = bb1->verify(msg, true);
 
-  EXPECT_FALSE(vres);
+  ASSERT_FALSE(vres);
+  ASSERT_FALSE(msg.empty());
   EXPECT_TRUE(msg.contains(
     "has false successor specified, but true successor is missing"));
 }
@@ -730,10 +758,13 @@ TEST(BASIC_BLOCK, EXFAIL_NOT_FINAL_HAS_NO_SUCCESSORS) {
   region.addBasicBlock(std::make_unique<BasicBlock>(1));
   auto* bb1 = region.getBasicBlockByID(1);
 
+  ASSERT_NE(bb1, nullptr);
+
   std::string msg;
   bool vres = bb1->verify(msg, true);
 
-  EXPECT_FALSE(vres);
+  ASSERT_FALSE(vres);
+  ASSERT_FALSE(msg.empty());
   EXPECT_TRUE(msg.contains("is not final, but has no successors"));
 }
 
@@ -745,12 +776,16 @@ TEST(BASIC_BLOCK, EXFAIL_EMPTY_BB) {
   region.addBasicBlock(std::make_unique<BasicBlock>(2));
   auto* bb2 = region.getBasicBlockByID(2);
 
+  ASSERT_NE(bb1, nullptr);
+  ASSERT_NE(bb2, nullptr);
+
   bb1->linkSucc(bb2);
 
   std::string msg;
   bool vres = bb1->verify(msg, true);
 
-  EXPECT_FALSE(vres);
+  ASSERT_FALSE(vres);
+  ASSERT_FALSE(msg.empty());
   EXPECT_TRUE(msg.contains("is empty"));
 }
 
@@ -761,13 +796,16 @@ TEST(BASIC_BLOCK, EXFAIL_FINAL_HAS_NO_RETURN) {
   region.addBasicBlock(std::make_unique<BasicBlock>(1));
   auto* bb1 = region.getBasicBlockByID(1);
 
+  ASSERT_NE(bb1, nullptr);
+
   bb1->insertOpBack(std::make_unique<ctrlflow::JumpOp>());
 
   std::string msg;
   bool vres = bb1->verify(msg, true, true);
 
-  EXPECT_FALSE(vres);
-  EXPECT_TRUE(msg.contains("last operation is not an \'ctrlflow.return\'"));
+  ASSERT_FALSE(vres);
+  ASSERT_FALSE(msg.empty());
+  EXPECT_TRUE(msg.contains("last operation is not an 'ctrlflow.return'"));
 }
 
 // TODO: to region tests
@@ -779,6 +817,9 @@ TEST(BASIC_BLOCK, EXFAIL_TWO_SUCC_IDENTICAL) {
   region.addBasicBlock(std::make_unique<BasicBlock>(2));
   auto* bb2 = region.getBasicBlockByID(2);
 
+  ASSERT_NE(bb1, nullptr);
+  ASSERT_NE(bb2, nullptr);
+
   bb1->linkSucc(bb2, true);
   bb1->linkSucc(bb2, false);
   bb1->insertOpBack(std::make_unique<ctrlflow::JumpOp>());
@@ -786,7 +827,8 @@ TEST(BASIC_BLOCK, EXFAIL_TWO_SUCC_IDENTICAL) {
   std::string msg;
   bool vres = bb1->verify(msg, true);
 
-  EXPECT_FALSE(vres);
+  ASSERT_FALSE(vres);
+  ASSERT_FALSE(msg.empty());
   EXPECT_TRUE(msg.contains("has two identical successors"));
 }
 
@@ -800,6 +842,10 @@ TEST(BASIC_BLOCK, EXFAIL_TWO_SUCC_NO_JUMPC) {
   region.addBasicBlock(std::make_unique<BasicBlock>(3));
   auto* bb3 = region.getBasicBlockByID(3);
 
+  ASSERT_NE(bb1, nullptr);
+  ASSERT_NE(bb2, nullptr);
+  ASSERT_NE(bb3, nullptr);
+
   bb1->linkSucc(bb2, true);
   bb1->linkSucc(bb3, false);
   bb1->insertOpBack(std::make_unique<ctrlflow::JumpOp>());
@@ -807,7 +853,8 @@ TEST(BASIC_BLOCK, EXFAIL_TWO_SUCC_NO_JUMPC) {
   std::string msg;
   bool vres = bb1->verify(msg, true);
 
-  EXPECT_FALSE(vres);
+  ASSERT_FALSE(vres);
+  ASSERT_FALSE(msg.empty());
   EXPECT_TRUE(msg.contains(
     "has two successors, but conditional jump at the end is missing"));
 }
@@ -820,6 +867,9 @@ TEST(BASIC_BLOCK, EXFAIL_ONE_SUCC_WITH_JUMPC) {
   region.addBasicBlock(std::make_unique<BasicBlock>(2));
   auto* bb2 = region.getBasicBlockByID(2);
 
+  ASSERT_NE(bb1, nullptr);
+  ASSERT_NE(bb2, nullptr);
+
   bb1->linkSucc(bb2);
 
   auto val = std::make_unique<arith::ConstantOp>(makeConstAttribute(true));
@@ -831,7 +881,8 @@ TEST(BASIC_BLOCK, EXFAIL_ONE_SUCC_WITH_JUMPC) {
   std::string msg;
   bool vres = bb1->verify(msg, true);
 
-  EXPECT_FALSE(vres);
+  ASSERT_FALSE(vres);
+  ASSERT_FALSE(msg.empty());
   EXPECT_TRUE(
     msg.contains("has single successor, but has conditional jump at the end"));
 }
@@ -841,6 +892,8 @@ TEST(BASIC_BLOCK, EXFAIL_TERMINATOR_INSIDE) {
 
   region.addBasicBlock(std::make_unique<BasicBlock>(1));
   auto* bb1 = region.getBasicBlockByID(1);
+
+  ASSERT_NE(bb1, nullptr);
 
   auto vl1 = std::make_unique<arith::ConstantOp>(makeConstAttribute(true));
   auto jmp = std::make_unique<ctrlflow::JumpcOp>(vl1.get());
@@ -853,7 +906,8 @@ TEST(BASIC_BLOCK, EXFAIL_TERMINATOR_INSIDE) {
   std::string msg;
   bool vres = bb1->verify(msg, true, true);
 
-  EXPECT_FALSE(vres);
+  ASSERT_FALSE(vres);
+  ASSERT_FALSE(msg.empty());
   EXPECT_TRUE(
     msg.contains("terminator operation is not the last one in the block"));
 }
@@ -864,12 +918,15 @@ TEST(BASIC_BLOCK, EXFAIL_PHI_OP_NOT_IN_ITS_LIST) {
   region.addBasicBlock(std::make_unique<BasicBlock>(1));
   auto* bb1 = region.getBasicBlockByID(1);
 
+  ASSERT_NE(bb1, nullptr);
+
   bb1->insertOpBack(std::make_unique<ctrlflow::PhiOp>(nullptr, nullptr));
   bb1->insertOpBack(std::make_unique<ctrlflow::ReturnOp>());
 
   std::string msg;
   bool vres = bb1->verify(msg, true, true);
 
-  EXPECT_FALSE(vres);
+  ASSERT_FALSE(vres);
+  ASSERT_FALSE(msg.empty());
   EXPECT_TRUE(msg.contains("phi operation is not in the phi ops list"));
 }

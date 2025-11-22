@@ -6,5 +6,5 @@ using namespace iris;
 TEST(LOOP_INFO, DEFAULT) {
   loops::LoopInfo loopInfo;
 
-  EXPECT_TRUE(loopInfo.isExpired());
+  ASSERT_TRUE(loopInfo.isExpired());
 }

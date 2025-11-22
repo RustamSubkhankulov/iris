@@ -118,6 +118,10 @@ public:
     return m_PhiOps;
   }
 
+  OpList& getPhiOps() & {
+    return m_PhiOps;
+  }
+
   void insertPhiOpBack(std::unique_ptr<ctrlflow::PhiOp> op);
 
   void erasePhiOp(op_iterator pos);
@@ -130,6 +134,10 @@ public:
   //--- Regular ops ---
 
   const OpList& getOps() const& {
+    return m_RegOps;
+  }
+
+  OpList& getOps() & {
     return m_RegOps;
   }
 

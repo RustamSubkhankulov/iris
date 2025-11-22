@@ -9,7 +9,7 @@ TEST(BUILDER, DEFAULT) {
   EXPECT_FALSE(builder.isRegionBuilding());
   EXPECT_FALSE(builder.isBasicBlockBuilding());
 
-  EXPECT_EQ(builder.getCurBasicBlockID(), -1);
+  EXPECT_EQ(-1, builder.getCurBasicBlockID());
 }
 
 TEST(BUILDER, EXFAIL_GET_NO_REGION) {
@@ -81,7 +81,7 @@ TEST(BUILDER, START_NEW_REGION) {
   IRBuilder builder;
 
   builder.startNewRegion("foo");
-  EXPECT_TRUE(builder.isRegionBuilding());
+  ASSERT_TRUE(builder.isRegionBuilding());
   EXPECT_FALSE(builder.isBasicBlockBuilding());
 
   const auto& reg = builder.getCurRegion();
@@ -99,6 +99,7 @@ TEST(BUILDER, EXFAIL_GET_NO_BB) {
     EXPECT_TRUE(!str.compare("No basic block is building!"));
     return;
   }
+  FAIL();
 }
 
 TEST(BUILDER, EXFAIL_DROP_NO_BB) {
@@ -112,6 +113,7 @@ TEST(BUILDER, EXFAIL_DROP_NO_BB) {
     EXPECT_TRUE(!str.compare("No basic block is building!"));
     return;
   }
+  FAIL();
 }
 
 TEST(BUILDER, EXFAIL_FINALIZE_NO_BB) {
@@ -125,6 +127,7 @@ TEST(BUILDER, EXFAIL_FINALIZE_NO_BB) {
     EXPECT_TRUE(!str.compare("No basic block is building!"));
     return;
   }
+  FAIL();
 }
 
 TEST(BUILDER, OBTAIN_REGION) {
@@ -144,8 +147,8 @@ TEST(BUILDER, OBTAIN_BB_ID) {
 
   auto id = builder.obtainIdForBasicBlock();
 
-  EXPECT_EQ(builder.obtainIdForBasicBlock(), id + 1);
-  EXPECT_EQ(builder.obtainIdForBasicBlock(), id + 2);
+  EXPECT_EQ(id + 1, builder.obtainIdForBasicBlock());
+  EXPECT_EQ(id + 2, builder.obtainIdForBasicBlock());
 }
 
 TEST(BUILDER, START_NEW_BB) {
@@ -153,10 +156,10 @@ TEST(BUILDER, START_NEW_BB) {
   builder.startNewRegion("foo");
   builder.startNewBasicBlock();
 
-  EXPECT_TRUE(builder.isBasicBlockBuilding());
+  ASSERT_TRUE(builder.isBasicBlockBuilding());
 
   const auto& bb = builder.getCurBasicBlock();
-  EXPECT_EQ(builder.getCurBasicBlockID(), bb.getID());
+  EXPECT_EQ(bb.getID(), builder.getCurBasicBlockID());
 }
 
 TEST(BUILDER, SETTING_BB_ID) {
@@ -167,8 +170,8 @@ TEST(BUILDER, SETTING_BB_ID) {
   builder.startNewBasicBlock(id);
 
   const auto& bb = builder.getCurBasicBlock();
-  EXPECT_EQ(bb.getID(), id);
-  EXPECT_EQ(builder.getCurBasicBlockID(), id);
+  EXPECT_EQ(id, bb.getID());
+  EXPECT_EQ(id, builder.getCurBasicBlockID());
 }
 
 TEST(BUILDER, DROP_BB) {
@@ -192,8 +195,8 @@ TEST(BUILDER, FINALIZE_BB) {
   auto& result = builder.finalizeCurBasicBlock();
 
   EXPECT_EQ(&bb, &result);
-  EXPECT_EQ(reg.getBasicBlocks().size(), 1);
-  EXPECT_EQ(reg.getBasicBlocks().front().get(), &bb);
+  EXPECT_EQ(1u, reg.getBasicBlocks().size());
+  EXPECT_EQ(&bb, reg.getBasicBlocks().front().get());
 
   EXPECT_FALSE(builder.isBasicBlockBuilding());
 }
@@ -212,12 +215,12 @@ TEST(BUILDER, ADDING_OPS) {
 
   auto& bb = builder.getCurBasicBlock();
 
-  EXPECT_EQ(bb.getPhiOps().size(), 2);
-  EXPECT_EQ(std::next(bb.getPhiOps().begin(), 0).get(), phiOp1);
-  EXPECT_EQ(std::next(bb.getPhiOps().begin(), 1).get(), phiOp2);
+  ASSERT_EQ(2u, bb.getPhiOps().size());
+  EXPECT_EQ(phiOp1, std::next(bb.getPhiOps().begin(), 0).get());
+  EXPECT_EQ(phiOp2, std::next(bb.getPhiOps().begin(), 1).get());
 
-  EXPECT_EQ(bb.getOps().size(), 3);
-  EXPECT_EQ(std::next(bb.getOps().begin(), 0).get(), op1);
-  EXPECT_EQ(std::next(bb.getOps().begin(), 1).get(), op2);
-  EXPECT_EQ(std::next(bb.getOps().begin(), 2).get(), op3);
+  ASSERT_EQ(3u, bb.getOps().size());
+  EXPECT_EQ(op1, std::next(bb.getOps().begin(), 0).get());
+  EXPECT_EQ(op2, std::next(bb.getOps().begin(), 1).get());
+  EXPECT_EQ(op3, std::next(bb.getOps().begin(), 2).get());
 }

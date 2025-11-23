@@ -134,7 +134,15 @@ public:
     return m_inputs[index];
   }
 
+  Input& getInput(std::size_t index) noexcept {
+    return m_inputs[index];
+  }
+
   const Input& getInputAt(std::size_t index) const {
+    return m_inputs.at(index);
+  }
+
+  Input& getInputAt(std::size_t index) {
     return m_inputs.at(index);
   }
 

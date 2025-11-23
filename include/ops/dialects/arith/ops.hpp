@@ -58,6 +58,13 @@ public:
     return getInput(1);
   }
 
+  Input& getInputX() {
+    return getInput(0);
+  }
+  Input& getInputY() {
+    return getInput(1);
+  }
+
 private:
   bool verifyInputsDTySame(std::string& msg) const {
     auto inputXDTy = getInputX().getDataType();
@@ -357,6 +364,10 @@ public:
     return Operation::getInput(0);
   }
 
+  Input& getInput() {
+    return Operation::getInput(0);
+  }
+
   bool verify(std::string& msg) const noexcept override {
     if (!ArithOp::verify(msg)) {
       return false;
@@ -423,6 +434,10 @@ public:
   }
 
   const Input& getInput() const {
+    return Operation::getInput(0);
+  }
+
+  Input& getInput() {
     return Operation::getInput(0);
   }
 };

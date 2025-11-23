@@ -19,16 +19,16 @@ void Operation::replaceAllUsesOf(Operation& other) noexcept {
     return;
   }
 
-  // Clear current uses
-  clearAllUses();
-
   // Replace 'other' operation with this operation in every user's input
-  m_users = std::move(other.m_users);
-  for (auto& user : m_users) {
+  for (auto& user : other.m_users) {
     auto* userOp = user.getUserOp();
     auto& input = userOp->m_inputs.at(user.getInputIndex());
     input.setDefiningOp(this);
   }
+
+  std::copy(other.m_users.begin(), other.m_users.end(),
+            std::back_inserter(m_users));
+  other.m_users.clear();
 }
 
 void Operation::replaceAllUsesWith(Operation& that) noexcept {

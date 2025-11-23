@@ -53,6 +53,10 @@ public:
   const Input& getInput() const {
     return Operation::getInput(0);
   }
+
+  Input& getInput() {
+    return Operation::getInput(0);
+  }
 };
 
 } // namespace builtin

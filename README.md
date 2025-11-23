@@ -13,7 +13,7 @@ Dialect _arith_:
 - _CAST_ - operation, casting values between different data types;
 - _CMP_ - comparison operation, which takes predicate (``EQ`` (equal), ``NEQ`` (not-equal), ``A`` (above), ``B`` (below), ``AE`` (above or equal), ``BE`` (below or equal));
 - _AND_, _OR_, _XOR_, _NOT_ - bitwise operations;
-- _SHL_, _SHR_, _SAL_, _SAR_ - bit-shifts
+- _SHL_, _SHR_, _SAL_, _SAR_ - arithmetical and logical bit-shifts
 
 Dialect _builtin_:
 - _PARAM_ - operation representing function's parameter;
@@ -166,6 +166,94 @@ Example output:
 ================================
 ```
 
+### IR Optimizations
+
+IRIS provides a pass-based optimization framework: every optimization is a subclass of `iris::opt::Pass`, and a `iris::opt::PassManager` owns a pipeline of passes and runs them sequentially on a `iris::Region`. An example of an optimization pipeline:
+
+```cpp
+#include <iris.hpp>
+
+void optimize(iris::Region& region) {
+  iris::opt::PassManager pm;
+  pm.addPass(std::make_unique<iris::opt::common::DCEPass>());
+  pm.addPass(std::make_unique<iris::opt::arith::ArithConstFoldPass>());
+  pm.addPass(std::make_unique<iris::opt::arith::ArithPeepHolePass>());
+  pm.run(region);
+}
+```
+
+Available passes:
+- ``common::DCEPass`` – removes dead, side-effect-free, non-terminator operations with results that are never used (parameters are kept).
+- ``arith::ArithConstFoldPass`` – folds arithmetic, bitwise and comparison operations whose operands are compile-time constants into a single `arith.const`.
+- ``arith::ArithPeepHolePass`` – applies local algebraic/bitwise simplifications on small instruction patterns (peepholes) for `arith` operations.
+
+### Constant folding patterns (`ArithConstFoldPass`)
+
+- Addition: `add(c1, c2) -> const(c1 + c2)` for integer and floating-point types.
+- Subtraction: `sub(c1, c2) -> const(c1 - c2)` for integer and floating-point types.
+- Multiplication: `mul(c1, c2) -> const(c1 * c2)` for integer and floating-point types.
+- Division:
+  - Integer: `div(c1, c2) -> const(c1 / c2)` for signed/unsigned integers when `c2 != 0` (no folding on division by zero).
+  - Floating-point: `div(c1, c2) -> const(c1 / c2)` using normal IEEE semantics.
+- Bitwise AND: `and(c1, c2) -> const(c1 & c2)` for integer types.
+- Bitwise OR: `or(c1, c2) -> const(c1 | c2)` for integer types.
+- Bitwise XOR: `xor(c1, c2) -> const(c1 ^ c2)` for integer types.
+- Shifts:
+  - Signed left:  `sal(c, s) -> const(c << s)` for signed integers.
+  - Signed right: `sar(c, s) -> const(c >> s)` for signed integers.
+  - Unsigned left: `shl(c, s) -> const(c << s)` for unsigned integers.
+  - Unsigned right:`shr(c, s) -> const(c >> s)` for unsigned integers.
+- Bitwise NOT: `not(c) -> const(~c)` for signed and unsigned integers.
+- Comparisons (result is a boolean constant) for integer, floating-point and boolean operands:
+  - `cmp.eq(c1, c2)  -> const(c1 == c2)`
+  - `cmp.neq(c1, c2) -> const(c1 != c2)`
+  - `cmp.a(c1, c2)   -> const(c1 >  c2)`
+  - `cmp.b(c1, c2)   -> const(c1 <  c2)`
+  - `cmp.ae(c1, c2)  -> const(c1 >= c2)`
+  - `cmp.be(c1, c2)  -> const(c1 <= c2)`
+
+### Peephole patterns (`ArithPeepHolePass`):
+
+- ``add``:
+  - ``add(x, 0)` -> ``x``
+  - ``add(0, x)` -> ``x``
+- ``sub``:
+  - ``sub(x, 0)`` -> ``x``
+  - ``sub(x, x)`` -> ``0``
+- ``mul``:
+  - ``mul(x, 1)`` -> ``x``
+  - ``mul(1, x)`` -> ``x``
+  - ``mul(x, 0)`` -> ``0``
+  - ``mul(0, x)`` -> ``0``
+- ``div``:
+  - ``div(x, 1)` -> ``x``
+- ``and``:
+  - ``and(x, 0)`` -> ``0``
+  - ``and(0, x)`` -> ``0``
+  - ``and(x, 11..1)`` -> ``x``
+  - ``and(11..1, x)`` -> ``x``
+  - ``and(x, x)`` -> ``x``
+- ``or``:
+  - ``or(x, 0)`` -> ``x``
+  - ``or(0, x)`` -> ``x``
+  - ``or(x, 11..1)`` -> ``11..1``
+  - ``or(11..1, x)`` -> ``11..1``
+  - ``or(x, x)`` -> ``x``
+- ``xor``:
+  - ``xor(x, 0)`` -> ``x``
+  - ``xor(0, x)`` -> ``x``
+  - ``xor(x, x)`` -> ``0``
+  - ``xor(x, 11..1)`` -> ``~x``
+  - ``xor(11..1, x)`` -> ``~x``
+- Shifts (arithmetical `sal`/`sar`, logical `shl`/`shr`):
+  - ``sal(x, 0)`` -> ``x``, ``sal(0, x)`` -> ``0``
+  - ``shl(x, 0)`` -> ``x``, ``shl(0, x)`` -> ``0``
+  - ``sar(x, 0)`` -> ``x``, ``sar(0, x)`` -> ``0``
+  - ``shr(x, 0)`` -> ``x``, ``shr(0, x)`` -> ``0``
+- Double negation:
+  - ``not(not(x))`` -> ``x``
+
+
 ### Building examples
 
 Requirements:
@@ -188,7 +276,9 @@ List of available targets:
 - ``factorial`` - example of IR usage - building IR for a programm calculating factorial manually via ``iris::IRBuilder``;
 - ``domExample01`` - ``domExample03`` - examples of running Dom analysis and building IDom tree;
 - ``loopExample01`` - ``loopExample06`` - examples of running Loop analysis and building Loop tree;
-- ``dceBasic`` - basic example of running optimization passes (DCE in this example) on the IR.
+- ``DCE`` - example of optimizing IR with use of DCE pass;
+- ``ConstFold`` - example of optimizing IR with use of Constant Folding pass;
+- ``PeepHole`` - example of optimizing IR with use of PeepHole Optimizations pass;
 
 Static library output files are located in ``build/lib/``, and executables - in ``build/bin``.
 

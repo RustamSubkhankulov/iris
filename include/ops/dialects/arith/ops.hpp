@@ -380,6 +380,10 @@ public:
     return "const";
   }
 
+  const ConstAttribute& getAttr() const {
+    return *m_attr;
+  }
+
 protected:
   void printID(std::ostream& os) const override {
     os << "c" << m_ID;

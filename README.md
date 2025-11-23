@@ -215,8 +215,8 @@ Available passes:
 ### Peephole patterns (`ArithPeepHolePass`):
 
 - ``add``:
-  - ``add(x, 0)` -> ``x``
-  - ``add(0, x)` -> ``x``
+  - ``add(x, 0)`` -> ``x``
+  - ``add(0, x)`` -> ``x``
 - ``sub``:
   - ``sub(x, 0)`` -> ``x``
   - ``sub(x, x)`` -> ``0``
@@ -226,7 +226,7 @@ Available passes:
   - ``mul(x, 0)`` -> ``0``
   - ``mul(0, x)`` -> ``0``
 - ``div``:
-  - ``div(x, 1)` -> ``x``
+  - ``div(x, 1)`` -> ``x``
 - ``and``:
   - ``and(x, 0)`` -> ``0``
   - ``and(0, x)`` -> ``0``

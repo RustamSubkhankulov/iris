@@ -7,6 +7,6 @@
 #include <ops/dialects/builtin/ops.hpp>
 #include <ops/dialects/ctrlflow/ops.hpp>
 
-#include <opt/lib/common/dce.hpp>
+#include <opt/lib/passes.h>
 
 #endif // INCLUDE_IRIS_HPP

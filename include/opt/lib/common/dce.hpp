@@ -7,11 +7,6 @@ namespace iris {
 namespace opt {
 namespace common {
 
-class DCEPattern final : public Pattern {
-public:
-  bool matchAndRewrite(Operation& op, PatternRewriter& rewriter) const override;
-};
-
 class DCEPass final : public PatternPass {
 public:
   DCEPass();

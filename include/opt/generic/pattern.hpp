@@ -1,5 +1,5 @@
-#ifndef INCLUDE_OPT_PATTERN_HPP
-#define INCLUDE_OPT_PATTERN_HPP
+#ifndef INCLUDE_OPT_GENERIC_PATTERN_HPP
+#define INCLUDE_OPT_GENERIC_PATTERN_HPP
 
 #include <graph/region.hpp>
 #include <ops/generic/operation.hpp>
@@ -68,4 +68,4 @@ protected:
 } // namespace opt
 } // namespace iris
 
-#endif // INCLUDE_OPT_PATTERN_HPP
+#endif // INCLUDE_OPT_GENERIC_PATTERN_HPP

@@ -7,4 +7,6 @@
 #include <ops/dialects/builtin/ops.hpp>
 #include <ops/dialects/ctrlflow/ops.hpp>
 
+#include <opt/lib/common/dce.hpp>
+
 #endif // INCLUDE_IRIS_HPP

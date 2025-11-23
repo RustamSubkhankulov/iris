@@ -1,5 +1,5 @@
-#ifndef INCLUDE_OPT_PASS_HPP
-#define INCLUDE_OPT_PASS_HPP
+#ifndef INCLUDE_OPT_GENERIC_PASS_HPP
+#define INCLUDE_OPT_GENERIC_PASS_HPP
 
 #include <memory>
 #include <vector>
@@ -43,4 +43,4 @@ private:
 } // namespace opt
 } // namespace iris
 
-#endif // INCLUDE_OPT_PASS_HPP
+#endif // INCLUDE_OPT_GENERIC_PASS_HPP

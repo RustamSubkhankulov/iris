@@ -186,8 +186,9 @@ cmake --build build --target <target_name>
 List of available targets:
 - ``iris`` - IR-support static library;
 - ``factorial`` - example of IR usage - building IR for a programm calculating factorial manually via ``iris::IRBuilder``;
-- ``domExample01`` - ``domExample03`` - examples of running Dom analysis and building IDom tree.
-- ``loopExample01`` - ``loopExample06`` - examples of running Loop analysis and building Loop tree.
+- ``domExample01`` - ``domExample03`` - examples of running Dom analysis and building IDom tree;
+- ``loopExample01`` - ``loopExample06`` - examples of running Loop analysis and building Loop tree;
+- ``dceBasic`` - basic example of running optimization passes (DCE in this example) on the IR.
 
 Static library output files are located in ``build/lib/``, and executables - in ``build/bin``.
 
@@ -208,6 +209,8 @@ Tests include:
 - **Loop analysis** tests (``tests/loops.cpp``).
 - Separate test suites for each **dialect** and its **operations'** verifiers and construction pre-conditions (``tests/dialects/``);
 - **Integration** tests (``tests/integration.cpp``);
+- **Optimization** **passes** & **patterns** tests (``tests/opt/``):
+    - Dead Code Elimination (``common/dce.cpp``).
 - Tests of **verifiers** (ex-fails) and **API** tests for:
     - Generic operation ``iris::Operation``;
     - Basic block ``iris::BasicBlock``;

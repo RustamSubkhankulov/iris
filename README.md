@@ -207,6 +207,7 @@ Tests include:
 - **Dominator analysis** tests (``tests/doms.cpp``);
 - **Loop analysis** tests (``tests/loops.cpp``).
 - Separate test suites for each **dialect** and its **operations'** verifiers and construction pre-conditions (``tests/dialects/``);
+- **Integration** tests (``tests/integration.cpp``);
 - Tests of **verifiers** (ex-fails) and **API** tests for:
     - Generic operation ``iris::Operation``;
     - Basic block ``iris::BasicBlock``;

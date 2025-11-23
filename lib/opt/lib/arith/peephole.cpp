@@ -294,8 +294,8 @@ public:
 // --- div patterns -----------------------------------------------------------
 
 // div(x, 1) -> x
-class DivOneRightPattern final
-  : public ArithBinaryPeepholePattern<DivOneRightPattern, iris::arith::DivOp> {
+class DivOneRhsPattern final
+  : public ArithBinaryPeepholePattern<DivOneRhsPattern, iris::arith::DivOp> {
 public:
   bool rewrite(iris::arith::DivOp& op, PatternRewriter& rewriter) const {
     auto* cR = getConstFromInput(op.getInputY());
@@ -634,7 +634,6 @@ public:
   }
 };
 
-
 // xor(x, 1..1) -> not(x)
 class XorAllOnesRhsToNotPattern final
   : public ArithBinaryPeepholePattern<XorAllOnesRhsToNotPattern,
@@ -935,7 +934,7 @@ ArithPeepHolePass::ArithPeepHolePass() {
   addPattern<MulZeroLhsPattern>();
 
   // div
-  addPattern<DivOneRightPattern>();
+  addPattern<DivOneRhsPattern>();
 
   // and
   addPattern<AndZeroRhsPattern>();
@@ -961,15 +960,15 @@ ArithPeepHolePass::ArithPeepHolePass() {
   // sal
   addPattern<SalZeroShiftPattern>();
   addPattern<SalZeroArgPattern>();
-  
+
   // sar
   addPattern<SarZeroShiftPattern>();
   addPattern<SarZeroArgPattern>();
-  
+
   // shl
   addPattern<ShlZeroShiftPattern>();
   addPattern<ShlZeroArgPattern>();
-  
+
   // shr
   addPattern<ShrZeroShiftPattern>();
   addPattern<ShrZeroArgPattern>();
@@ -977,7 +976,6 @@ ArithPeepHolePass::ArithPeepHolePass() {
   // not
   addPattern<NotDoubleNegationPattern>();
 }
-
 
 } // namespace arith
 } // namespace opt

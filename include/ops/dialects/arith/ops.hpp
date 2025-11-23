@@ -73,10 +73,7 @@ private:
   }
 };
 
-// Inputs does not have to be the same data type as operation's data type
-using HeterogenArithOp = BinaryArithOp;
-
-class CompareOp final : public HeterogenArithOp {
+class CompareOp final : public BinaryArithOp {
 public:
   enum class Pred : uint8_t {
     EQ,  // Equal
@@ -126,46 +123,63 @@ private:
 };
 
 // Operation's result datat type is the same as data type of the inputs
-class HomogenBinaryArithOp : public BinaryArithOp {
+class HomogenNumericBinaryArithOp : public BinaryArithOp {
 public:
-  HomogenBinaryArithOp(opcode_t opcode, Input inputX, Input inputY)
+  HomogenNumericBinaryArithOp(opcode_t opcode, Input inputX, Input inputY)
     : BinaryArithOp(opcode, inputX.getDataType(), inputX, inputY) {}
+
+  bool verify(std::string& msg) const noexcept override {
+    if (!BinaryArithOp::verify(msg)) {
+      return false;
+    }
+
+    auto dataTy = getInputX().getDataType();
+    if (isBool(dataTy)) {
+      std::stringstream ss;
+      ss << "Operation " << getMnemonic()
+         << ": inputs cannot have boolean type.";
+      msg = ss.str();
+      return false;
+    }
+
+    return true;
+  }
 };
 
-class AddOp final : public HomogenBinaryArithOp {
+class AddOp final : public HomogenNumericBinaryArithOp {
 public:
   AddOp(Input inputX, Input inputY)
-    : HomogenBinaryArithOp(GlobalOpcodes::ADD, inputX, inputY) {}
+    : HomogenNumericBinaryArithOp(GlobalOpcodes::ADD, inputX, inputY) {}
 
   std::string_view getMnemonic() const override {
     return "add";
   }
 };
 
-class SubOp final : public HomogenBinaryArithOp {
+class SubOp final : public HomogenNumericBinaryArithOp {
 public:
   SubOp(Input inputX, Input inputY)
-    : HomogenBinaryArithOp(GlobalOpcodes::SUB, inputX, inputY) {}
+    : HomogenNumericBinaryArithOp(GlobalOpcodes::SUB, inputX, inputY) {}
 
   std::string_view getMnemonic() const override {
     return "sub";
   }
 };
 
-class MulOp final : public HomogenBinaryArithOp {
+class MulOp final : public HomogenNumericBinaryArithOp {
 public:
   MulOp(Input inputX, Input inputY)
-    : HomogenBinaryArithOp(GlobalOpcodes::MUL, inputX, inputY) {}
+    : HomogenNumericBinaryArithOp(GlobalOpcodes::MUL, inputX, inputY) {}
 
   std::string_view getMnemonic() const override {
     return "mul";
   }
 };
 
-class DivOp final : public HomogenBinaryArithOp {
+class DivOp final : public HomogenNumericBinaryArithOp {
 public:
   DivOp(Input inputX, Input inputY)
-    : HomogenBinaryArithOp(GlobalOpcodes::DIV, inputX, inputY) {}
+    : HomogenNumericBinaryArithOp(GlobalOpcodes::DIV, inputX, inputY) {}
 
   std::string_view getMnemonic() const override {
     return "div";
@@ -173,13 +187,13 @@ public:
 };
 
 // Base class for binary bitwise operations (AND, OR, XOR, shifts)
-class BitwiseBinaryArithOp : public HomogenBinaryArithOp {
+class BitwiseBinaryArithOp : public HomogenNumericBinaryArithOp {
 public:
   BitwiseBinaryArithOp(opcode_t opcode, Input inputX, Input inputY)
-    : HomogenBinaryArithOp(opcode, inputX, inputY) {}
+    : HomogenNumericBinaryArithOp(opcode, inputX, inputY) {}
 
   bool verify(std::string& msg) const noexcept override {
-    if (!HomogenBinaryArithOp::verify(msg)) {
+    if (!HomogenNumericBinaryArithOp::verify(msg)) {
       return false;
     }
 

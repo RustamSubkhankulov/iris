@@ -462,6 +462,19 @@ TEST(ARITH, ADD_EXFAIL_NON_HOMOGEN_INPUTS) {
   EXPECT_TRUE(msg.contains("inputs must have same data types"));
 }
 
+TEST(ARITH, ADD_EXFAIL_BOOLEAN_INPUTS) {
+  arith::ConstantOp cstI(makeConstAttribute(true));
+  arith::ConstantOp cstF(makeConstAttribute(false));
+
+  arith::AddOp add(&cstI, &cstF);
+
+  std::string msg;
+  bool vres = add.verify(msg);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("inputs cannot have boolean type"));
+}
+
 TEST(ARITH, SUB_EXFAIL_NON_HOMOGEN_INPUTS) {
   arith::ConstantOp cstI(makeConstAttribute(1));
   arith::ConstantOp cstF(makeConstAttribute(1.));
@@ -473,6 +486,19 @@ TEST(ARITH, SUB_EXFAIL_NON_HOMOGEN_INPUTS) {
 
   EXPECT_FALSE(vres);
   EXPECT_TRUE(msg.contains("inputs must have same data types"));
+}
+
+TEST(ARITH, SUB_EXFAIL_BOOLEAN_INPUTS) {
+  arith::ConstantOp cstI(makeConstAttribute(true));
+  arith::ConstantOp cstF(makeConstAttribute(false));
+
+  arith::SubOp sub(&cstI, &cstF);
+
+  std::string msg;
+  bool vres = sub.verify(msg);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("inputs cannot have boolean type"));
 }
 
 TEST(ARITH, MUL_EXFAIL_NON_HOMOGEN_INPUTS) {
@@ -488,6 +514,19 @@ TEST(ARITH, MUL_EXFAIL_NON_HOMOGEN_INPUTS) {
   EXPECT_TRUE(msg.contains("inputs must have same data types"));
 }
 
+TEST(ARITH, MUL_EXFAIL_BOOLEAN_INPUTS) {
+  arith::ConstantOp cstI(makeConstAttribute(true));
+  arith::ConstantOp cstF(makeConstAttribute(false));
+
+  arith::MulOp mul(&cstI, &cstF);
+
+  std::string msg;
+  bool vres = mul.verify(msg);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("inputs cannot have boolean type"));
+}
+
 TEST(ARITH, DIV_EXFAIL_NON_HOMOGEN_INPUTS) {
   arith::ConstantOp cstI(makeConstAttribute(1));
   arith::ConstantOp cstF(makeConstAttribute(1.));
@@ -499,6 +538,32 @@ TEST(ARITH, DIV_EXFAIL_NON_HOMOGEN_INPUTS) {
 
   EXPECT_FALSE(vres);
   EXPECT_TRUE(msg.contains("inputs must have same data types"));
+}
+
+TEST(ARITH, DIV_EXFAIL_BOOLEAN_INPUTS) {
+  arith::ConstantOp cstI(makeConstAttribute(true));
+  arith::ConstantOp cstF(makeConstAttribute(false));
+
+  arith::DivOp div(&cstI, &cstF);
+
+  std::string msg;
+  bool vres = div.verify(msg);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("inputs cannot have boolean type"));
+}
+
+TEST(ARITH, AND_EXFAIL_BOOLEAN_INPUTS) {
+  arith::ConstantOp cstI(makeConstAttribute(true));
+  arith::ConstantOp cstF(makeConstAttribute(false));
+
+  arith::AndOp op(&cstI, &cstF);
+
+  std::string msg;
+  bool vres = op.verify(msg);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("inputs cannot have boolean type"));
 }
 
 TEST(ARITH, AND_EXFAIL_NON_INTEGER_INPUTS) {
@@ -514,6 +579,19 @@ TEST(ARITH, AND_EXFAIL_NON_INTEGER_INPUTS) {
   EXPECT_TRUE(msg.contains("inputs must be integer types"));
 }
 
+TEST(ARITH, OR_EXFAIL_BOOLEAN_INPUTS) {
+  arith::ConstantOp cstI(makeConstAttribute(true));
+  arith::ConstantOp cstF(makeConstAttribute(false));
+
+  arith::OrOp op(&cstI, &cstF);
+
+  std::string msg;
+  bool vres = op.verify(msg);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("inputs cannot have boolean type"));
+}
+
 TEST(ARITH, OR_EXFAIL_NON_INTEGER_INPUTS) {
   arith::ConstantOp cstF1(makeConstAttribute(1.));
   arith::ConstantOp cstF2(makeConstAttribute(2.));
@@ -525,6 +603,19 @@ TEST(ARITH, OR_EXFAIL_NON_INTEGER_INPUTS) {
 
   EXPECT_FALSE(vres);
   EXPECT_TRUE(msg.contains("inputs must be integer types"));
+}
+
+TEST(ARITH, XOR_EXFAIL_BOOLEAN_INPUTS) {
+  arith::ConstantOp cstI(makeConstAttribute(true));
+  arith::ConstantOp cstF(makeConstAttribute(false));
+
+  arith::XorOp op(&cstI, &cstF);
+
+  std::string msg;
+  bool vres = op.verify(msg);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("inputs cannot have boolean type"));
 }
 
 TEST(ARITH, XOR_EXFAIL_NON_INTEGER_INPUTS) {
@@ -552,6 +643,19 @@ TEST(ARITH, NOT_EXFAIL_NON_INTEGER_INPUT) {
   EXPECT_TRUE(msg.contains("input must be an integer type"));
 }
 
+TEST(ARITH, SAL_EXFAIL_BOOLEAN_INPUTS) {
+  arith::ConstantOp cstI(makeConstAttribute(true));
+  arith::ConstantOp cstF(makeConstAttribute(false));
+
+  arith::SalOp op(&cstI, &cstF);
+
+  std::string msg;
+  bool vres = op.verify(msg);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("inputs cannot have boolean type"));
+}
+
 TEST(ARITH, SAL_EXFAIL_UNSIGNED_INPUTS) {
   arith::ConstantOp cstU1(makeConstAttribute(static_cast<uint32_t>(1)));
   arith::ConstantOp cstU2(makeConstAttribute(static_cast<uint32_t>(2)));
@@ -563,6 +667,19 @@ TEST(ARITH, SAL_EXFAIL_UNSIGNED_INPUTS) {
 
   EXPECT_FALSE(vres);
   EXPECT_TRUE(msg.contains("inputs must be signed integer types"));
+}
+
+TEST(ARITH, SAR_EXFAIL_BOOLEAN_INPUTS) {
+  arith::ConstantOp cstI(makeConstAttribute(true));
+  arith::ConstantOp cstF(makeConstAttribute(false));
+
+  arith::SarOp op(&cstI, &cstF);
+
+  std::string msg;
+  bool vres = op.verify(msg);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("inputs cannot have boolean type"));
 }
 
 TEST(ARITH, SAR_EXFAIL_UNSIGNED_INPUTS) {
@@ -578,6 +695,19 @@ TEST(ARITH, SAR_EXFAIL_UNSIGNED_INPUTS) {
   EXPECT_TRUE(msg.contains("inputs must be signed integer types"));
 }
 
+TEST(ARITH, SHL_EXFAIL_BOOLEAN_INPUTS) {
+  arith::ConstantOp cstI(makeConstAttribute(true));
+  arith::ConstantOp cstF(makeConstAttribute(false));
+
+  arith::ShlOp op(&cstI, &cstF);
+
+  std::string msg;
+  bool vres = op.verify(msg);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("inputs cannot have boolean type"));
+}
+
 TEST(ARITH, SHL_EXFAIL_SIGNED_INPUTS) {
   arith::ConstantOp cstI1(makeConstAttribute(1));
   arith::ConstantOp cstI2(makeConstAttribute(2));
@@ -589,6 +719,19 @@ TEST(ARITH, SHL_EXFAIL_SIGNED_INPUTS) {
 
   EXPECT_FALSE(vres);
   EXPECT_TRUE(msg.contains("inputs must be unsigned integer types"));
+}
+
+TEST(ARITH, SHR_EXFAIL_BOOLEAN_INPUTS) {
+  arith::ConstantOp cstI(makeConstAttribute(true));
+  arith::ConstantOp cstF(makeConstAttribute(false));
+
+  arith::ShrOp op(&cstI, &cstF);
+
+  std::string msg;
+  bool vres = op.verify(msg);
+
+  EXPECT_FALSE(vres);
+  EXPECT_TRUE(msg.contains("inputs cannot have boolean type"));
 }
 
 TEST(ARITH, SHR_EXFAIL_SIGNED_INPUTS) {

@@ -8,7 +8,8 @@ namespace {
 
 class DCEPattern final : public Pattern {
 public:
-  bool matchAndRewrite(Operation& op, PatternRewriter& rewriter) const override {
+  bool matchAndRewrite(Operation& op,
+                       PatternRewriter& rewriter) const override {
     // We only remove side-effect-free, non-terminator operations that
     // produce a result and have no users.
     if (!op.hasResult() || op.hasUsers() || op.isTerminator() ||
@@ -27,7 +28,7 @@ public:
   }
 };
 
-} // anonymous
+} // namespace
 
 DCEPass::DCEPass() {
   m_patterns.push_back(std::make_unique<DCEPattern>());

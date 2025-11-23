@@ -1,10 +1,10 @@
 #ifndef INCLUDE_ATTRIBUTES_HPP
 #define INCLUDE_ATTRIBUTES_HPP
 
+#include <concepts>
 #include <cstdint>
 #include <memory>
 #include <ostream>
-#include <concepts>
 
 #include <data_types.hpp>
 
@@ -123,12 +123,14 @@ inline std::unique_ptr<ConstAttribute> makeConstAttribute(FloatTy auto value) {
     static_cast<FloatConstAttribute::StorageType>(value));
 }
 
-inline std::unique_ptr<ConstAttribute> makeConstAttribute(SIntegerTy auto value) {
+inline std::unique_ptr<ConstAttribute>
+makeConstAttribute(SIntegerTy auto value) {
   return std::make_unique<SIntegerConstAttribute>(
     static_cast<SIntegerConstAttribute::StorageType>(value));
 }
 
-inline std::unique_ptr<ConstAttribute> makeConstAttribute(UIntegerTy auto value) {
+inline std::unique_ptr<ConstAttribute>
+makeConstAttribute(UIntegerTy auto value) {
   return std::make_unique<UIntegerConstAttribute>(
     static_cast<UIntegerConstAttribute::StorageType>(value));
 }

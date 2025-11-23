@@ -210,7 +210,9 @@ Tests include:
 - Separate test suites for each **dialect** and its **operations'** verifiers and construction pre-conditions (``tests/dialects/``);
 - **Integration** tests (``tests/integration.cpp``);
 - **Optimization** **passes** & **patterns** tests (``tests/opt/``):
-    - Dead Code Elimination (``common/dce.cpp``).
+    - Dead Code Elimination (``common/dce.cpp``);
+    - Constant Folding for ``arith`` operations (``arith/constfold.cpp``);
+    - PeepHole Optimizations for ``arith`` operations (``arith/peephole.cpp``).
 - Tests of **verifiers** (ex-fails) and **API** tests for:
     - Generic operation ``iris::Operation``;
     - Basic block ``iris::BasicBlock``;

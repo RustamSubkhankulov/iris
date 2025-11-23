@@ -32,19 +32,19 @@ Here's an example of IRIS IR for a programm that calculates factorial of a numbe
 ```text
 factorial:
   ^bb0 <start> <to bb1> :
-      a0.ui32 builtin.param -> (v3,v5,v7)
-      c1.ui32 arith.const (1) -> (v5,v8p)
-      c2.ui32 arith.const (2) -> (v3)
+      a0.ui builtin.param -> (v3,v5,v7)
+      c1.ui arith.const (1) -> (v5,v8p)
+      c2.ui arith.const (2) -> (v3)
   ^bb1 <from bb0> <to T:bb2 / F:bb3> :
-      v3.b arith.cmp.b (a0 : ui32, c2 : ui32) -> (n4)
+      v3.b arith.cmp.b (a0 : ui, c2 : ui) -> (n4)
       n4 ctrlflow.jmpc (v3 : b)
   ^bb3 <from bb1> <to bb2> :
-      v5.ui32 arith.sub (a0 : ui32, c1 : ui32) -> (v6)
-      v6.ui32 ctrlflow.call @factorial (v5 : ui32) -> (v7)
-      v7.ui32 arith.mul (a0 : ui32, v6 : ui32) -> (v8p)
+      v5.ui arith.sub (a0 : ui, c1 : ui) -> (v6)
+      v6.ui ctrlflow.call @factorial (v5 : ui) -> (v7)
+      v7.ui arith.mul (a0 : ui, v6 : ui) -> (v8p)
   ^bb2 <from bb3 bb1> <final> :
-      v8p.ui32 ctrlflow.phi (c1 : ui32, v7 : ui32) -> (n9)
-      n9 ctrlflow.return (v8p : ui32)
+      v8p.ui ctrlflow.phi (c1 : ui, v7 : ui) -> (n9)
+      n9 ctrlflow.return (v8p : ui)
 ```
 
 Each **operation** is located in one of the **basic blocks**, and basic block is located in the **region**, which represent IR for a whole routine (function).

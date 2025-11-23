@@ -9,11 +9,11 @@ TEST(DCE, BASIC) {
 
   builder.startNewBasicBlock();
 
-  auto a0 = builder.createAndAddOp<builtin::ParamOp>(DataType::UI32);
-  auto a1 = builder.createAndAddOp<builtin::ParamOp>(DataType::UI32);
+  auto a0 = builder.createAndAddOp<builtin::ParamOp>(DataType::UINT);
+  auto a1 = builder.createAndAddOp<builtin::ParamOp>(DataType::UINT);
 
-  auto a2 = builder.createAndAddOp<builtin::ParamOp>(DataType::UI32);
-  auto a3 = builder.createAndAddOp<builtin::ParamOp>(DataType::UI32);
+  auto a2 = builder.createAndAddOp<builtin::ParamOp>(DataType::UINT);
+  auto a3 = builder.createAndAddOp<builtin::ParamOp>(DataType::UINT);
 
   auto v4 = builder.createAndAddOp<arith::MulOp>(a0, a1);
   /* v5 */ builder.createAndAddOp<arith::AddOp>(a2, a3);

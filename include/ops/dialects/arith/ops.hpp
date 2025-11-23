@@ -240,7 +240,7 @@ public:
     }
 
     auto dataTy = getInputX().getDataType();
-    if (!isSignedInteger(dataTy)) {
+    if (!isSInteger(dataTy)) {
       std::stringstream ss;
       ss << "Operation " << getMnemonic()
          << ": inputs must be signed integer types.";
@@ -267,7 +267,7 @@ public:
     }
 
     auto dataTy = getInputX().getDataType();
-    if (!isSignedInteger(dataTy)) {
+    if (!isSInteger(dataTy)) {
       std::stringstream ss;
       ss << "Operation " << getMnemonic()
          << ": inputs must be signed integer types.";
@@ -294,7 +294,7 @@ public:
     }
 
     auto dataTy = getInputX().getDataType();
-    if (!isUnsignedInteger(dataTy)) {
+    if (!isUInteger(dataTy)) {
       std::stringstream ss;
       ss << "Operation " << getMnemonic()
          << ": inputs must be unsigned integer types.";
@@ -321,7 +321,7 @@ public:
     }
 
     auto dataTy = getInputX().getDataType();
-    if (!isUnsignedInteger(dataTy)) {
+    if (!isUInteger(dataTy)) {
       std::stringstream ss;
       ss << "Operation " << getMnemonic()
          << ": inputs must be unsigned integer types.";

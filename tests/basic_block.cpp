@@ -307,8 +307,8 @@ TEST(BASIC_BLOCK, PHI_OP_ERASE_LAST) {
 TEST(BASIC_BLOCK, PHI_OPS_REPLACE) {
   BasicBlock bb;
 
-  builtin::ParamOp param1(DataType::F32);
-  builtin::ParamOp param2(DataType::F32);
+  builtin::ParamOp param1(DataType::FLOAT);
+  builtin::ParamOp param2(DataType::FLOAT);
 
   auto phi1 = std::make_unique<ctrlflow::PhiOp>(nullptr, nullptr);
   auto phi2 = std::make_unique<ctrlflow::PhiOp>(&param1, &param2);
@@ -324,8 +324,8 @@ TEST(BASIC_BLOCK, PHI_OPS_REPLACE) {
   bb.insertPhiOpBack(std::move(phi2));
   bb.insertPhiOpBack(std::move(phi3));
 
-  builtin::ParamOp newParam1(DataType::F32);
-  builtin::ParamOp newParam2(DataType::F32);
+  builtin::ParamOp newParam1(DataType::FLOAT);
+  builtin::ParamOp newParam2(DataType::FLOAT);
 
   auto newPhi = std::make_unique<ctrlflow::PhiOp>(&newParam1, &newParam2);
   auto* newPhiPtr = newPhi.get();
@@ -350,7 +350,7 @@ TEST(BASIC_BLOCK, PHI_OPS_REPLACE) {
 TEST(BASIC_BLOCK, OPS_INSERT_BACK) {
   BasicBlock bb;
 
-  auto op1 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op1 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op1ptr = op1.get();
 
   bb.insertOpBack(std::move(op1));
@@ -359,7 +359,7 @@ TEST(BASIC_BLOCK, OPS_INSERT_BACK) {
   EXPECT_EQ(&bb.getOps().back(), op1ptr);
   EXPECT_EQ(bb.getOps().back().getParentBasicBlock(), &bb);
 
-  auto op2 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op2 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op2ptr = op2.get();
 
   bb.insertOpBack(std::move(op2));
@@ -373,7 +373,7 @@ TEST(BASIC_BLOCK, OPS_INSERT_BACK) {
 TEST(BASIC_BLOCK, OPS_INSERT_FRONT) {
   BasicBlock bb;
 
-  auto op1 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op1 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op1ptr = op1.get();
 
   bb.insertOpFront(std::move(op1));
@@ -382,7 +382,7 @@ TEST(BASIC_BLOCK, OPS_INSERT_FRONT) {
   EXPECT_EQ(&bb.getOps().front(), op1ptr);
   EXPECT_EQ(bb.getOps().front().getParentBasicBlock(), &bb);
 
-  auto op2 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op2 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op2ptr = op2.get();
 
   bb.insertOpFront(std::move(op2));
@@ -396,10 +396,10 @@ TEST(BASIC_BLOCK, OPS_INSERT_FRONT) {
 TEST(BASIC_BLOCK, OPS_INSERT_AFTER) {
   BasicBlock bb;
 
-  auto op1 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op1 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op1ptr = op1.get();
 
-  auto op2 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op2 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op2ptr = op2.get();
 
   bb.insertOpBack(std::move(op1));
@@ -409,7 +409,7 @@ TEST(BASIC_BLOCK, OPS_INSERT_AFTER) {
   EXPECT_EQ(&bb.getOps().front(), op1ptr);
   EXPECT_EQ(&bb.getOps().back(), op2ptr);
 
-  auto op3 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op3 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op3ptr = op3.get();
 
   bb.insertOpAfter(bb.getOps().begin(), std::move(op3));
@@ -426,10 +426,10 @@ TEST(BASIC_BLOCK, OPS_INSERT_AFTER) {
 TEST(BASIC_BLOCK, OPS_INSERT_AFTER_LAST) {
   BasicBlock bb;
 
-  auto op1 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op1 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op1ptr = op1.get();
 
-  auto op2 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op2 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op2ptr = op2.get();
 
   bb.insertOpBack(std::move(op1));
@@ -439,7 +439,7 @@ TEST(BASIC_BLOCK, OPS_INSERT_AFTER_LAST) {
   EXPECT_EQ(&bb.getOps().front(), op1ptr);
   EXPECT_EQ(&bb.getOps().back(), op2ptr);
 
-  auto op3 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op3 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op3ptr = op3.get();
 
   bb.insertOpAfter(std::next(bb.getOps().begin()), std::move(op3));
@@ -456,10 +456,10 @@ TEST(BASIC_BLOCK, OPS_INSERT_AFTER_LAST) {
 TEST(BASIC_BLOCK, OPS_INSERT_BEFORE) {
   BasicBlock bb;
 
-  auto op1 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op1 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op1ptr = op1.get();
 
-  auto op2 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op2 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op2ptr = op2.get();
 
   bb.insertOpBack(std::move(op1));
@@ -469,7 +469,7 @@ TEST(BASIC_BLOCK, OPS_INSERT_BEFORE) {
   EXPECT_EQ(&bb.getOps().front(), op1ptr);
   EXPECT_EQ(&bb.getOps().back(), op2ptr);
 
-  auto op3 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op3 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op3ptr = op3.get();
 
   bb.insertOpBefore(std::next(bb.getOps().begin()), std::move(op3));
@@ -486,10 +486,10 @@ TEST(BASIC_BLOCK, OPS_INSERT_BEFORE) {
 TEST(BASIC_BLOCK, OPS_INSERT_BEFORE_FIRST) {
   BasicBlock bb;
 
-  auto op1 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op1 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op1ptr = op1.get();
 
-  auto op2 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op2 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op2ptr = op2.get();
 
   bb.insertOpBack(std::move(op1));
@@ -499,7 +499,7 @@ TEST(BASIC_BLOCK, OPS_INSERT_BEFORE_FIRST) {
   EXPECT_EQ(&bb.getOps().front(), op1ptr);
   EXPECT_EQ(&bb.getOps().back(), op2ptr);
 
-  auto op3 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op3 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op3ptr = op3.get();
 
   bb.insertOpBefore(bb.getOps().begin(), std::move(op3));
@@ -516,12 +516,12 @@ TEST(BASIC_BLOCK, OPS_INSERT_BEFORE_FIRST) {
 TEST(BASIC_BLOCK, OPS_ERASE_FRONT) {
   BasicBlock bb;
 
-  auto op1 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op1 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
 
-  auto op2 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op2 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op2ptr = op2.get();
 
-  auto op3 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op3 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op3ptr = op3.get();
 
   bb.insertOpBack(std::move(op1));
@@ -542,12 +542,12 @@ TEST(BASIC_BLOCK, OPS_ERASE_FRONT) {
 TEST(BASIC_BLOCK, OPS_ERASE_MID) {
   BasicBlock bb;
 
-  auto op1 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op1 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op1ptr = op1.get();
 
-  auto op2 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op2 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
 
-  auto op3 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op3 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op3ptr = op3.get();
 
   bb.insertOpBack(std::move(op1));
@@ -568,13 +568,13 @@ TEST(BASIC_BLOCK, OPS_ERASE_MID) {
 TEST(BASIC_BLOCK, OPS_ERASE_BACK) {
   BasicBlock bb;
 
-  auto op1 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op1 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op1ptr = op1.get();
 
-  auto op2 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op2 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op2ptr = op2.get();
 
-  auto op3 = std::make_unique<builtin::ParamOp>(DataType::F32);
+  auto op3 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
 
   bb.insertOpBack(std::move(op1));
   bb.insertOpBack(std::move(op2));
@@ -594,8 +594,8 @@ TEST(BASIC_BLOCK, OPS_ERASE_BACK) {
 TEST(BASIC_BLOCK, OPS_REPLACE) {
   BasicBlock bb;
 
-  builtin::ParamOp param1(DataType::F32);
-  builtin::ParamOp param2(DataType::F32);
+  builtin::ParamOp param1(DataType::FLOAT);
+  builtin::ParamOp param2(DataType::FLOAT);
 
   auto op1 = std::make_unique<arith::AddOp>(nullptr, nullptr);
   auto add = std::make_unique<arith::AddOp>(&param1, &param2);
@@ -611,8 +611,8 @@ TEST(BASIC_BLOCK, OPS_REPLACE) {
   bb.insertOpBack(std::move(add));
   bb.insertOpBack(std::move(op3));
 
-  builtin::ParamOp newParam1(DataType::F32);
-  builtin::ParamOp newParam2(DataType::F32);
+  builtin::ParamOp newParam1(DataType::FLOAT);
+  builtin::ParamOp newParam2(DataType::FLOAT);
 
   auto newAdd = std::make_unique<arith::AddOp>(&newParam1, &newParam2);
   auto* newAddPtr = newAdd.get();

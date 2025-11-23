@@ -25,8 +25,8 @@ TEST(GENERIC_OPERATION, OPERATIONS_INPUTS) {
   EXPECT_EQ(addOp.getInputAt(0).getDefiningOp(), &cst_1);
   EXPECT_EQ(addOp.getInputAt(1).getDefiningOp(), &cst_2);
 
-  EXPECT_EQ(addOp.getInputAt(0).getDataType(), DataType::SI32);
-  EXPECT_EQ(addOp.getInputAt(1).getDataType(), DataType::SI32);
+  EXPECT_EQ(addOp.getInputAt(0).getDataType(), DataType::SINT);
+  EXPECT_EQ(addOp.getInputAt(1).getDataType(), DataType::SINT);
 }
 
 TEST(GENERIC_OPERATION, ADDING_AS_USER_TO_INPUTS) {

@@ -4,7 +4,7 @@
 using namespace iris;
 
 TEST(CTRLFLOW, CALL_INVARIANTS) {
-  ctrlflow::CallOp op("foo", DataType::SI32, {});
+  ctrlflow::CallOp op("foo", DataType::SINT, {});
 
   EXPECT_FALSE(op.isTerminator());
   EXPECT_TRUE(op.hasSideEffects());
@@ -12,10 +12,10 @@ TEST(CTRLFLOW, CALL_INVARIANTS) {
 }
 
 TEST(CTRLFLOW, CALL_NO_INPUTS) {
-  ctrlflow::CallOp callOp("foo", DataType::SI32, {});
+  ctrlflow::CallOp callOp("foo", DataType::SINT, {});
 
   EXPECT_TRUE(callOp.hasResult());
-  EXPECT_EQ(callOp.getDataType(), DataType::SI32);
+  EXPECT_EQ(callOp.getDataType(), DataType::SINT);
 
   EXPECT_FALSE(callOp.hasInputs());
   EXPECT_EQ(callOp.getInputsNum(), 0u);
@@ -28,12 +28,12 @@ TEST(CTRLFLOW, CALL_NO_INPUTS) {
 }
 
 TEST(CTRLFLOW, CALL_ONE_INPUT) {
-  builtin::ParamOp prmOp(DataType::F32);
+  builtin::ParamOp prmOp(DataType::FLOAT);
 
-  ctrlflow::CallOp callOp("foo", DataType::SI32, {&prmOp});
+  ctrlflow::CallOp callOp("foo", DataType::SINT, {&prmOp});
 
   EXPECT_TRUE(callOp.hasResult());
-  EXPECT_EQ(callOp.getDataType(), DataType::SI32);
+  EXPECT_EQ(callOp.getDataType(), DataType::SINT);
 
   EXPECT_TRUE(callOp.hasInputs());
   EXPECT_EQ(callOp.getInputsNum(), 1u);
@@ -46,13 +46,13 @@ TEST(CTRLFLOW, CALL_ONE_INPUT) {
 }
 
 TEST(CTRLFLOW, CALL_MULTIPLE_INPUT) {
-  builtin::ParamOp prmOp1(DataType::F32);
-  builtin::ParamOp prmOp2(DataType::UI64);
+  builtin::ParamOp prmOp1(DataType::FLOAT);
+  builtin::ParamOp prmOp2(DataType::UINT);
 
-  ctrlflow::CallOp callOp("foo", DataType::SI32, {&prmOp1, &prmOp2});
+  ctrlflow::CallOp callOp("foo", DataType::SINT, {&prmOp1, &prmOp2});
 
   EXPECT_TRUE(callOp.hasResult());
-  EXPECT_EQ(callOp.getDataType(), DataType::SI32);
+  EXPECT_EQ(callOp.getDataType(), DataType::SINT);
 
   EXPECT_TRUE(callOp.hasInputs());
   EXPECT_EQ(callOp.getInputsNum(), 2u);
@@ -155,7 +155,7 @@ TEST(CTRLFLOW, RETURN_NO_INPUT) {
 }
 
 TEST(CTRLFLOW, RETURN_WITH_INPUT) {
-  builtin::ParamOp prmOp(DataType::SI32);
+  builtin::ParamOp prmOp(DataType::SINT);
 
   ctrlflow::ReturnOp retOp(&prmOp);
 
@@ -178,12 +178,12 @@ TEST(CTRLFLOW, PHI_INVARIANTS) {
 }
 
 TEST(CTRLFLOW, PHI_ONE_INPUT) {
-  builtin::ParamOp prmOp(DataType::SI32);
+  builtin::ParamOp prmOp(DataType::SINT);
 
   ctrlflow::PhiOp phiOp({&prmOp});
 
   EXPECT_TRUE(phiOp.hasResult());
-  EXPECT_EQ(phiOp.getDataType(), DataType::SI32);
+  EXPECT_EQ(phiOp.getDataType(), DataType::SINT);
 
   EXPECT_TRUE(phiOp.hasInputs());
   EXPECT_EQ(phiOp.getInputsNum(), 1u);
@@ -196,13 +196,13 @@ TEST(CTRLFLOW, PHI_ONE_INPUT) {
 }
 
 TEST(CTRLFLOW, PHI_TWO_INPUTS) {
-  builtin::ParamOp prmOp1(DataType::SI32);
-  builtin::ParamOp prmOp2(DataType::SI32);
+  builtin::ParamOp prmOp1(DataType::SINT);
+  builtin::ParamOp prmOp2(DataType::SINT);
 
   ctrlflow::PhiOp phiOp(&prmOp1, &prmOp2);
 
   EXPECT_TRUE(phiOp.hasResult());
-  EXPECT_EQ(phiOp.getDataType(), DataType::SI32);
+  EXPECT_EQ(phiOp.getDataType(), DataType::SINT);
 
   EXPECT_TRUE(phiOp.hasInputs());
   EXPECT_EQ(phiOp.getInputsNum(), 2u);
@@ -215,14 +215,14 @@ TEST(CTRLFLOW, PHI_TWO_INPUTS) {
 }
 
 TEST(CTRLFLOW, PHI_MULTIPLE_INPUTS) {
-  builtin::ParamOp prmOp1(DataType::SI32);
-  builtin::ParamOp prmOp2(DataType::SI32);
-  builtin::ParamOp prmOp3(DataType::SI32);
+  builtin::ParamOp prmOp1(DataType::SINT);
+  builtin::ParamOp prmOp2(DataType::SINT);
+  builtin::ParamOp prmOp3(DataType::SINT);
 
   ctrlflow::PhiOp phiOp({&prmOp1, &prmOp2, &prmOp3});
 
   EXPECT_TRUE(phiOp.hasResult());
-  EXPECT_EQ(phiOp.getDataType(), DataType::SI32);
+  EXPECT_EQ(phiOp.getDataType(), DataType::SINT);
 
   EXPECT_TRUE(phiOp.hasInputs());
   EXPECT_EQ(phiOp.getInputsNum(), 3u);

@@ -8,7 +8,7 @@ int main() {
 
   // bb0: parameters & constants basic block
   builder.startNewBasicBlock();
-  auto a0 = builder.createAndAddOp<builtin::ParamOp>(DataType::UI32);
+  auto a0 = builder.createAndAddOp<builtin::ParamOp>(DataType::UINT);
   auto c1 = builder.createAndAddOp<arith::ConstantOp>(
     makeConstAttribute(static_cast<uint32_t>(1)));
   auto c2 = builder.createAndAddOp<arith::ConstantOp>(
@@ -28,7 +28,7 @@ int main() {
   builder.startNewBasicBlock();
   auto v5 = builder.createAndAddOp<arith::SubOp>(a0, c1);
   auto v6 = builder.createAndAddOp<ctrlflow::CallOp>(
-    builder.getCurRegion().getName(), DataType::UI32, InputList{v5});
+    builder.getCurRegion().getName(), DataType::UINT, InputList{v5});
   auto v7 = builder.createAndAddOp<arith::MulOp>(a0, v6);
   auto& bb3 = builder.finalizeCurBasicBlock();
   bb1.linkSucc(&bb3, false);

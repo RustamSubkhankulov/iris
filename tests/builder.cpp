@@ -209,9 +209,9 @@ TEST(BUILDER, ADDING_OPS) {
   auto* phiOp1 = builder.createAndAddOp<ctrlflow::PhiOp>(nullptr, nullptr);
   auto* phiOp2 = builder.createAndAddOp<ctrlflow::PhiOp>(nullptr, nullptr);
 
-  auto* op1 = builder.createAndAddOp<builtin::ParamOp>(DataType::F32);
-  auto* op2 = builder.createAndAddOp<builtin::ParamOp>(DataType::F32);
-  auto* op3 = builder.createAndAddOp<builtin::ParamOp>(DataType::F32);
+  auto* op1 = builder.createAndAddOp<builtin::ParamOp>(DataType::FLOAT);
+  auto* op2 = builder.createAndAddOp<builtin::ParamOp>(DataType::FLOAT);
+  auto* op3 = builder.createAndAddOp<builtin::ParamOp>(DataType::FLOAT);
 
   auto& bb = builder.getCurBasicBlock();
 

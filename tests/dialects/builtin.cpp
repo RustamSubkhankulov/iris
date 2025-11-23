@@ -4,7 +4,7 @@
 using namespace iris;
 
 TEST(BUILTIN, PARAM_INVARIANTS) {
-  builtin::ParamOp op(DataType::SI32);
+  builtin::ParamOp op(DataType::SINT);
 
   EXPECT_FALSE(op.hasInputs());
   EXPECT_EQ(op.getInputsNum(), 0u);
@@ -15,10 +15,10 @@ TEST(BUILTIN, PARAM_INVARIANTS) {
 }
 
 TEST(BUILTIN, PARAM_BASIC) {
-  builtin::ParamOp prmOp(DataType::SI32);
+  builtin::ParamOp prmOp(DataType::SINT);
 
   EXPECT_TRUE(prmOp.hasResult());
-  EXPECT_EQ(prmOp.getDataType(), DataType::SI32);
+  EXPECT_EQ(prmOp.getDataType(), DataType::SINT);
 
   std::string msg;
   bool vres = prmOp.verify(msg);
@@ -39,11 +39,11 @@ TEST(BUILTIN, COPY_INVARIANTS) {
 }
 
 TEST(BUILTIN, COPY) {
-  builtin::ParamOp prmOp(DataType::SI32);
+  builtin::ParamOp prmOp(DataType::SINT);
   builtin::CopyOp copyOp(&prmOp);
 
   EXPECT_TRUE(copyOp.hasResult());
-  EXPECT_EQ(copyOp.getDataType(), DataType::SI32);
+  EXPECT_EQ(copyOp.getDataType(), DataType::SINT);
 
   std::string msg;
   bool vres = copyOp.verify(msg);

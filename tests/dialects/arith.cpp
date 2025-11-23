@@ -59,7 +59,7 @@ TEST(ARITH, DIV_INVARIANTS) {
 }
 
 TEST(ARITH, CAST_INVARIANTS) {
-  arith::CastOp op(DataType::F32, nullptr);
+  arith::CastOp op(DataType::FLOAT, nullptr);
 
   EXPECT_FALSE(op.isTerminator());
   EXPECT_FALSE(op.hasSideEffects());
@@ -172,7 +172,7 @@ TEST(ARITH, CONSTANT_BASIC) {
   arith::ConstantOp constOp(makeConstAttribute(1));
 
   EXPECT_TRUE(constOp.hasResult());
-  EXPECT_EQ(constOp.getDataType(), DataType::SI32);
+  EXPECT_EQ(constOp.getDataType(), DataType::SINT);
 
   std::string msg;
   bool vres = constOp.verify(msg);
@@ -188,7 +188,7 @@ TEST(ARITH, ADD_BASIC) {
   arith::AddOp addOp(&constOp1, &constOp2);
 
   EXPECT_TRUE(addOp.hasResult());
-  EXPECT_EQ(addOp.getDataType(), DataType::SI32);
+  EXPECT_EQ(addOp.getDataType(), DataType::SINT);
 
   std::string msg;
   bool vres = addOp.verify(msg);
@@ -204,7 +204,7 @@ TEST(ARITH, SUB_BASIC) {
   arith::SubOp subOp(&constOp1, &constOp2);
 
   EXPECT_TRUE(subOp.hasResult());
-  EXPECT_EQ(subOp.getDataType(), DataType::SI32);
+  EXPECT_EQ(subOp.getDataType(), DataType::SINT);
 
   std::string msg;
   bool vres = subOp.verify(msg);
@@ -220,7 +220,7 @@ TEST(ARITH, MUL_BASIC) {
   arith::MulOp mulOp(&constOp1, &constOp2);
 
   EXPECT_TRUE(mulOp.hasResult());
-  EXPECT_EQ(mulOp.getDataType(), DataType::SI32);
+  EXPECT_EQ(mulOp.getDataType(), DataType::SINT);
 
   std::string msg;
   bool vres = mulOp.verify(msg);
@@ -236,7 +236,7 @@ TEST(ARITH, DIV_BASIC) {
   arith::DivOp divOp(&constOp1, &constOp2);
 
   EXPECT_TRUE(divOp.hasResult());
-  EXPECT_EQ(divOp.getDataType(), DataType::SI32);
+  EXPECT_EQ(divOp.getDataType(), DataType::SINT);
 
   std::string msg;
   bool vres = divOp.verify(msg);
@@ -247,10 +247,10 @@ TEST(ARITH, DIV_BASIC) {
 
 TEST(ARITH, CAST_BASIC) {
   arith::ConstantOp cstOp(makeConstAttribute(1));
-  arith::CastOp castOp(DataType::F32, &cstOp);
+  arith::CastOp castOp(DataType::FLOAT, &cstOp);
 
   EXPECT_TRUE(castOp.hasResult());
-  EXPECT_EQ(castOp.getDataType(), DataType::F32);
+  EXPECT_EQ(castOp.getDataType(), DataType::FLOAT);
 
   std::string msg;
   bool vres = castOp.verify(msg);
@@ -282,7 +282,7 @@ TEST(ARITH, AND_BASIC) {
   arith::AndOp andOp(&constOp1, &constOp2);
 
   EXPECT_TRUE(andOp.hasResult());
-  EXPECT_EQ(andOp.getDataType(), DataType::SI32);
+  EXPECT_EQ(andOp.getDataType(), DataType::SINT);
 
   std::string msg;
   bool vres = andOp.verify(msg);
@@ -298,7 +298,7 @@ TEST(ARITH, OR_BASIC) {
   arith::OrOp orOp(&constOp1, &constOp2);
 
   EXPECT_TRUE(orOp.hasResult());
-  EXPECT_EQ(orOp.getDataType(), DataType::SI32);
+  EXPECT_EQ(orOp.getDataType(), DataType::SINT);
 
   std::string msg;
   bool vres = orOp.verify(msg);
@@ -314,7 +314,7 @@ TEST(ARITH, XOR_BASIC) {
   arith::XorOp xorOp(&constOp1, &constOp2);
 
   EXPECT_TRUE(xorOp.hasResult());
-  EXPECT_EQ(xorOp.getDataType(), DataType::SI32);
+  EXPECT_EQ(xorOp.getDataType(), DataType::SINT);
 
   std::string msg;
   bool vres = xorOp.verify(msg);
@@ -329,7 +329,7 @@ TEST(ARITH, NOT_BASIC) {
   arith::NotOp notOp(&constOp);
 
   EXPECT_TRUE(notOp.hasResult());
-  EXPECT_EQ(notOp.getDataType(), DataType::SI32);
+  EXPECT_EQ(notOp.getDataType(), DataType::SINT);
 
   std::string msg;
   bool vres = notOp.verify(msg);
@@ -345,7 +345,7 @@ TEST(ARITH, SAL_BASIC) {
   arith::SalOp salOp(&constOp1, &constOp2);
 
   EXPECT_TRUE(salOp.hasResult());
-  EXPECT_EQ(salOp.getDataType(), DataType::SI32);
+  EXPECT_EQ(salOp.getDataType(), DataType::SINT);
 
   std::string msg;
   bool vres = salOp.verify(msg);
@@ -361,7 +361,7 @@ TEST(ARITH, SAR_BASIC) {
   arith::SarOp sarOp(&constOp1, &constOp2);
 
   EXPECT_TRUE(sarOp.hasResult());
-  EXPECT_EQ(sarOp.getDataType(), DataType::SI32);
+  EXPECT_EQ(sarOp.getDataType(), DataType::SINT);
 
   std::string msg;
   bool vres = sarOp.verify(msg);

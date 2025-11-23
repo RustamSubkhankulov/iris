@@ -17,6 +17,10 @@ public:
     return false;
   }
 
+  bool hasSideEffects() const noexcept override {
+    return false;
+  }
+
   std::string_view getDialectName() const override {
     return "builtin";
   }

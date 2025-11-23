@@ -108,6 +108,8 @@ public:
 
   virtual bool isTerminator() const noexcept = 0;
 
+  virtual bool hasSideEffects() const noexcept = 0;
+
   DataType getDataType() const noexcept {
     return m_dataType;
   }

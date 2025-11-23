@@ -7,6 +7,7 @@ TEST(CTRLFLOW, CALL_INVARIANTS) {
   ctrlflow::CallOp op("foo", DataType::SI32, {});
 
   EXPECT_FALSE(op.isTerminator());
+  EXPECT_TRUE(op.hasSideEffects());
   EXPECT_TRUE(op.isa(GlobalOpcodes::CALL));
 }
 
@@ -89,6 +90,7 @@ TEST(CTRLFLOW, JUMP_INVARIANTS) {
   EXPECT_EQ(op.getInputsNum(), 0u);
 
   EXPECT_TRUE(op.isTerminator());
+  EXPECT_FALSE(op.hasSideEffects());
   EXPECT_TRUE(op.isa(GlobalOpcodes::JUMP));
 }
 
@@ -112,6 +114,7 @@ TEST(CTRLFLOW, JUMPC_INVARIANTS) {
   EXPECT_EQ(op.getInputsNum(), 1u);
 
   EXPECT_TRUE(op.isTerminator());
+  EXPECT_FALSE(op.hasSideEffects());
   EXPECT_TRUE(op.isa(GlobalOpcodes::JUMPC));
 }
 
@@ -134,6 +137,7 @@ TEST(CTRLFLOW, RETURN_INVARIANTS) {
   EXPECT_EQ(op.getDataType(), DataType::NONE);
 
   EXPECT_TRUE(op.isTerminator());
+  EXPECT_FALSE(op.hasSideEffects());
   EXPECT_TRUE(op.isa(GlobalOpcodes::RETURN));
 }
 
@@ -169,6 +173,7 @@ TEST(CTRLFLOW, PHI_INVARIANTS) {
   ctrlflow::PhiOp op({nullptr});
 
   EXPECT_FALSE(op.isTerminator());
+  EXPECT_FALSE(op.hasSideEffects());
   EXPECT_TRUE(op.isa(GlobalOpcodes::PHI));
 }
 

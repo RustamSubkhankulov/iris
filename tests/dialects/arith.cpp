@@ -7,6 +7,7 @@ TEST(ARITH, CONSTANT_INVARIANTS) {
   arith::ConstantOp op(makeConstAttribute(1));
 
   EXPECT_FALSE(op.isTerminator());
+  EXPECT_FALSE(op.hasSideEffects());
   EXPECT_TRUE(op.isa(GlobalOpcodes::CONSTANT));
 
   EXPECT_FALSE(op.hasInputs());
@@ -17,6 +18,7 @@ TEST(ARITH, ADD_INVARIANTS) {
   arith::AddOp op(nullptr, nullptr);
 
   EXPECT_FALSE(op.isTerminator());
+  EXPECT_FALSE(op.hasSideEffects());
   EXPECT_TRUE(op.isa(GlobalOpcodes::ADD));
 
   EXPECT_TRUE(op.hasInputs());
@@ -27,6 +29,7 @@ TEST(ARITH, SUB_INVARIANTS) {
   arith::SubOp op(nullptr, nullptr);
 
   EXPECT_FALSE(op.isTerminator());
+  EXPECT_FALSE(op.hasSideEffects());
   EXPECT_TRUE(op.isa(GlobalOpcodes::SUB));
 
   EXPECT_TRUE(op.hasInputs());
@@ -37,6 +40,7 @@ TEST(ARITH, MUL_INVARIANTS) {
   arith::MulOp op(nullptr, nullptr);
 
   EXPECT_FALSE(op.isTerminator());
+  EXPECT_FALSE(op.hasSideEffects());
   EXPECT_TRUE(op.isa(GlobalOpcodes::MUL));
 
   EXPECT_TRUE(op.hasInputs());
@@ -47,6 +51,7 @@ TEST(ARITH, DIV_INVARIANTS) {
   arith::DivOp op(nullptr, nullptr);
 
   EXPECT_FALSE(op.isTerminator());
+  EXPECT_FALSE(op.hasSideEffects());
   EXPECT_TRUE(op.isa(GlobalOpcodes::DIV));
 
   EXPECT_TRUE(op.hasInputs());
@@ -57,6 +62,7 @@ TEST(ARITH, CAST_INVARIANTS) {
   arith::CastOp op(DataType::F32, nullptr);
 
   EXPECT_FALSE(op.isTerminator());
+  EXPECT_FALSE(op.hasSideEffects());
   EXPECT_TRUE(op.isa(GlobalOpcodes::CAST));
 
   EXPECT_TRUE(op.hasInputs());
@@ -67,6 +73,7 @@ TEST(ARITH, COMPARE_INVARIANTS) {
   arith::CompareOp op(nullptr, nullptr, arith::CompareOp::Pred::EQ);
 
   EXPECT_FALSE(op.isTerminator());
+  EXPECT_FALSE(op.hasSideEffects());
   EXPECT_TRUE(op.isa(GlobalOpcodes::COMPARE));
 
   EXPECT_TRUE(op.hasInputs());
@@ -77,6 +84,7 @@ TEST(ARITH, AND_INVARIANTS) {
   arith::AndOp op(nullptr, nullptr);
 
   EXPECT_FALSE(op.isTerminator());
+  EXPECT_FALSE(op.hasSideEffects());
   EXPECT_TRUE(op.isa(GlobalOpcodes::AND));
 
   EXPECT_TRUE(op.hasInputs());
@@ -87,6 +95,7 @@ TEST(ARITH, OR_INVARIANTS) {
   arith::OrOp op(nullptr, nullptr);
 
   EXPECT_FALSE(op.isTerminator());
+  EXPECT_FALSE(op.hasSideEffects());
   EXPECT_TRUE(op.isa(GlobalOpcodes::OR));
 
   EXPECT_TRUE(op.hasInputs());
@@ -97,6 +106,7 @@ TEST(ARITH, XOR_INVARIANTS) {
   arith::XorOp op(nullptr, nullptr);
 
   EXPECT_FALSE(op.isTerminator());
+  EXPECT_FALSE(op.hasSideEffects());
   EXPECT_TRUE(op.isa(GlobalOpcodes::XOR));
 
   EXPECT_TRUE(op.hasInputs());
@@ -107,6 +117,7 @@ TEST(ARITH, NOT_INVARIANTS) {
   arith::NotOp op(nullptr);
 
   EXPECT_FALSE(op.isTerminator());
+  EXPECT_FALSE(op.hasSideEffects());
   EXPECT_TRUE(op.isa(GlobalOpcodes::NOT));
 
   EXPECT_TRUE(op.hasInputs());
@@ -117,6 +128,7 @@ TEST(ARITH, SAL_INVARIANTS) {
   arith::SalOp op(nullptr, nullptr);
 
   EXPECT_FALSE(op.isTerminator());
+  EXPECT_FALSE(op.hasSideEffects());
   EXPECT_TRUE(op.isa(GlobalOpcodes::SAL));
 
   EXPECT_TRUE(op.hasInputs());
@@ -127,6 +139,7 @@ TEST(ARITH, SAR_INVARIANTS) {
   arith::SarOp op(nullptr, nullptr);
 
   EXPECT_FALSE(op.isTerminator());
+  EXPECT_FALSE(op.hasSideEffects());
   EXPECT_TRUE(op.isa(GlobalOpcodes::SAR));
 
   EXPECT_TRUE(op.hasInputs());
@@ -137,6 +150,7 @@ TEST(ARITH, SHL_INVARIANTS) {
   arith::ShlOp op(nullptr, nullptr);
 
   EXPECT_FALSE(op.isTerminator());
+  EXPECT_FALSE(op.hasSideEffects());
   EXPECT_TRUE(op.isa(GlobalOpcodes::SHL));
 
   EXPECT_TRUE(op.hasInputs());
@@ -147,6 +161,7 @@ TEST(ARITH, SHR_INVARIANTS) {
   arith::ShrOp op(nullptr, nullptr);
 
   EXPECT_FALSE(op.isTerminator());
+  EXPECT_FALSE(op.hasSideEffects());
   EXPECT_TRUE(op.isa(GlobalOpcodes::SHR));
 
   EXPECT_TRUE(op.hasInputs());

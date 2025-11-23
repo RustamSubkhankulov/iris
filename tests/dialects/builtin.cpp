@@ -10,6 +10,7 @@ TEST(BUILTIN, PARAM_INVARIANTS) {
   EXPECT_EQ(op.getInputsNum(), 0u);
 
   EXPECT_FALSE(op.isTerminator());
+  EXPECT_FALSE(op.hasSideEffects());
   EXPECT_TRUE(op.isa(GlobalOpcodes::PARAM));
 }
 
@@ -33,6 +34,7 @@ TEST(BUILTIN, COPY_INVARIANTS) {
   EXPECT_EQ(op.getInputsNum(), 1u);
 
   EXPECT_FALSE(op.isTerminator());
+  EXPECT_FALSE(op.hasSideEffects());
   EXPECT_TRUE(op.isa(GlobalOpcodes::COPY));
 }
 

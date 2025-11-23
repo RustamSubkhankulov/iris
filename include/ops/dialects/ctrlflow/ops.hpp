@@ -42,6 +42,10 @@ public:
   bool isTerminator() const noexcept override {
     return true;
   }
+
+  bool hasSideEffects() const noexcept override {
+    return false;
+  }
 };
 
 class JumpOp final : public CtrFlowOp {
@@ -56,6 +60,10 @@ public:
   bool isTerminator() const noexcept override {
     return true;
   }
+
+  bool hasSideEffects() const noexcept override {
+    return false;
+  }
 };
 
 class JumpcOp final : public CtrFlowOp {
@@ -69,6 +77,10 @@ public:
 
   bool isTerminator() const noexcept override {
     return true;
+  }
+
+  bool hasSideEffects() const noexcept override {
+    return false;
   }
 
   bool verify(std::string& msg) const noexcept override {
@@ -109,6 +121,10 @@ public:
     return false;
   }
 
+  bool hasSideEffects() const noexcept override {
+    return true;
+  }
+
   std::string_view getFuncName() const {
     return m_funcName;
   }
@@ -142,6 +158,10 @@ public:
   }
 
   bool isTerminator() const noexcept override {
+    return false;
+  }
+
+  bool hasSideEffects() const noexcept override {
     return false;
   }
 

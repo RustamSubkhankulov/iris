@@ -276,9 +276,7 @@ List of available targets:
 - ``factorial`` - example of IR usage - building IR for a programm calculating factorial manually via ``iris::IRBuilder``;
 - ``domExample01`` - ``domExample03`` - examples of running Dom analysis and building IDom tree;
 - ``loopExample01`` - ``loopExample06`` - examples of running Loop analysis and building Loop tree;
-- ``DCE`` - example of optimizing IR with use of DCE pass;
-- ``ConstFold`` - example of optimizing IR with use of Constant Folding pass;
-- ``PeepHole`` - example of optimizing IR with use of PeepHole Optimizations pass;
+- ``dceBasic`` - example of optimizing IR with use of DCE pass;
 
 Static library output files are located in ``build/lib/``, and executables - in ``build/bin``.
 

@@ -6,8 +6,7 @@
 #include <ops/generic/operation.hpp>
 #include <ops/generic/user.hpp>
 
-namespace iris {
-namespace builtin {
+namespace iris::builtin {
 
 class BuiltinOp : public Operation {
 public:
@@ -59,7 +58,6 @@ public:
   }
 };
 
-} // namespace builtin
-} // namespace iris
+} // namespace iris::builtin
 
 #endif // INCLUDE_DIALECTS_BUILIN_OPS_HPP

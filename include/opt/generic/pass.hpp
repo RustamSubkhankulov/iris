@@ -8,8 +8,7 @@
 
 #include <graph/region.hpp>
 
-namespace iris {
-namespace opt {
+namespace iris::opt {
 
 class Pass {
 public:
@@ -40,7 +39,6 @@ private:
   std::vector<std::unique_ptr<Pass>> m_passes;
 };
 
-} // namespace opt
-} // namespace iris
+} // namespace iris::opt
 
 #endif // INCLUDE_OPT_GENERIC_PASS_HPP

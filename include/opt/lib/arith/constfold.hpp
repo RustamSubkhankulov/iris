@@ -3,17 +3,13 @@
 
 #include <opt/generic/pattern.hpp>
 
-namespace iris {
-namespace opt {
-namespace arith {
+namespace iris::opt::arith {
 
 class ArithConstFoldPass final : public PatternPass {
 public:
   ArithConstFoldPass();
 };
 
-} // namespace arith
-} // namespace opt
-} // namespace iris
+} // namespace iris::opt::arith
 
 #endif // INCLUDE_OPT_LIB_ARITH_CONSTFOLD_HPP

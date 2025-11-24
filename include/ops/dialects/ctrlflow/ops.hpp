@@ -13,8 +13,7 @@
 #include <ops/generic/operation.hpp>
 #include <ops/generic/user.hpp>
 
-namespace iris {
-namespace ctrlflow {
+namespace iris::ctrlflow {
 
 class CtrFlowOp : public Operation {
 public:
@@ -206,7 +205,6 @@ protected:
   }
 };
 
-} // namespace ctrlflow
-} // namespace iris
+} // namespace iris::ctrlflow
 
 #endif // INCLUDE_DIALECTS_CTRLFLOW_OPS_HPP

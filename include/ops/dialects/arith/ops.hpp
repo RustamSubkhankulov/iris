@@ -12,8 +12,7 @@
 #include <ops/generic/operation.hpp>
 #include <ops/generic/user.hpp>
 
-namespace iris {
-namespace arith {
+namespace iris::arith {
 
 class ArithOp : public Operation {
 public:
@@ -442,7 +441,6 @@ public:
   }
 };
 
-} // namespace arith
-} // namespace iris
+} // namespace iris::arith
 
 #endif // INCLUDE_DIALECTS_ARITH_OPS_HPP

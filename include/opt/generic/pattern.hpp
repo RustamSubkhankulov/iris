@@ -5,8 +5,7 @@
 #include <ops/generic/operation.hpp>
 #include <opt/generic/pass.hpp>
 
-namespace iris {
-namespace opt {
+namespace iris::opt {
 
 class PatternRewriter;
 
@@ -65,7 +64,6 @@ protected:
   std::vector<std::unique_ptr<Pattern>> m_patterns;
 };
 
-} // namespace opt
-} // namespace iris
+} // namespace iris::opt
 
 #endif // INCLUDE_OPT_GENERIC_PATTERN_HPP

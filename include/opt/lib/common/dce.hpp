@@ -3,17 +3,13 @@
 
 #include <opt/generic/pattern.hpp>
 
-namespace iris {
-namespace opt {
-namespace common {
+namespace iris::opt::common {
 
 class DCEPass final : public PatternPass {
 public:
   DCEPass();
 };
 
-} // namespace common
-} // namespace opt
-} // namespace iris
+} // namespace iris::opt::common
 
 #endif // INCLUDE_OPT_LIB_DCE_HPP

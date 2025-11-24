@@ -13,73 +13,50 @@ int main() {
   auto a1 = builder.createAndAddOp<builtin::ParamOp>(DataType::UINT);
 
   // Integer constants (signed / unsigned).
-  auto c_si10 = builder.createAndAddOp<arith::ConstantOp>(
+  auto c2 = builder.createAndAddOp<arith::ConstantOp>(
     makeConstAttribute(static_cast<std::int64_t>(10)));
-  auto c_si3 = builder.createAndAddOp<arith::ConstantOp>(
+  auto c3 = builder.createAndAddOp<arith::ConstantOp>(
     makeConstAttribute(static_cast<std::int64_t>(3)));
 
-  auto c_ui7 = builder.createAndAddOp<arith::ConstantOp>(
+  auto c4 = builder.createAndAddOp<arith::ConstantOp>(
     makeConstAttribute(static_cast<std::uint64_t>(7)));
-  auto c_ui2 = builder.createAndAddOp<arith::ConstantOp>(
+  auto c5 = builder.createAndAddOp<arith::ConstantOp>(
     makeConstAttribute(static_cast<std::uint64_t>(2)));
 
   // Floating-point constants.
-  auto c_f1_5 =
-    builder.createAndAddOp<arith::ConstantOp>(makeConstAttribute(1.5));
-  auto c_f0_5 =
-    builder.createAndAddOp<arith::ConstantOp>(makeConstAttribute(0.5));
+  auto c6 = builder.createAndAddOp<arith::ConstantOp>(makeConstAttribute(1.5));
+  auto c7 = builder.createAndAddOp<arith::ConstantOp>(makeConstAttribute(0.5));
 
   // Boolean constants.
-  auto c_true =
-    builder.createAndAddOp<arith::ConstantOp>(makeConstAttribute(true));
-  auto c_false =
+  auto c8 = builder.createAndAddOp<arith::ConstantOp>(makeConstAttribute(true));
+  auto c9 =
     builder.createAndAddOp<arith::ConstantOp>(makeConstAttribute(false));
 
-  // (10 + 3) -> constant, then * 3 -> constant as well.
-  auto add_si = builder.createAndAddOp<arith::AddOp>(c_si10, c_si3);
-  auto mul_si = builder.createAndAddOp<arith::MulOp>(add_si, c_si3);
+  auto v10 = builder.createAndAddOp<arith::AddOp>(c2, c3);
+  auto v11 = builder.createAndAddOp<arith::MulOp>(v10, c3);
 
-  // (7 & 2) -> constant, then ^ 7 -> constant.
-  auto and_ui = builder.createAndAddOp<arith::AndOp>(c_ui7, c_ui2);
-  auto xor_ui = builder.createAndAddOp<arith::XorOp>(and_ui, c_ui7);
+  auto v12 = builder.createAndAddOp<arith::AndOp>(c4, c5);
+  auto v13 = builder.createAndAddOp<arith::XorOp>(v12, c4);
 
-  // (1.5 + 0.5) / 0.5 -> all folds into a single float constant.
-  auto add_f = builder.createAndAddOp<arith::AddOp>(c_f1_5, c_f0_5);
-  auto div_f = builder.createAndAddOp<arith::DivOp>(add_f, c_f0_5);
+  auto v14 = builder.createAndAddOp<arith::AddOp>(c6, c7);
+  auto v15 = builder.createAndAddOp<arith::DivOp>(v14, c7);
 
-  // Shifts on constants.
-  auto shl_ui = builder.createAndAddOp<arith::ShlOp>(c_ui7, c_ui2);
-  auto sar_si = builder.createAndAddOp<arith::SarOp>(c_si10, c_si3);
+  /* v16 = */ builder.createAndAddOp<arith::ShlOp>(c4, c5);
+  /* v17 = */ builder.createAndAddOp<arith::SarOp>(c2, c3);
 
-  // Comparison of constants: true == false -> false.
-  auto cmp_bool = builder.createAndAddOp<arith::CompareOp>(
-    c_true, c_false, arith::CompareOp::Pred::EQ);
+  auto v18 = builder.createAndAddOp<arith::CompareOp>(
+    c8, c9, arith::CompareOp::Pred::EQ);
 
-  // A mixed expression that cannot be fully folded:
-  // add_mixed = a0 + 3
-  auto add_mixed = builder.createAndAddOp<arith::AddOp>(a0, c_si3);
+  auto v19 = builder.createAndAddOp<arith::AddOp>(a0, c3);
+  auto v20 = builder.createAndAddOp<arith::AddOp>(v11, v19);
+  /* v21 = */ builder.createAndAddOp<arith::AndOp>(v13, a1);
 
-  // sum_all = mul_si (constant after folding) + add_mixed (non-constant)
-  auto sum_all = builder.createAndAddOp<arith::AddOp>(mul_si, add_mixed);
+  auto v22 = builder.createAndAddOp<arith::CastOp>(DataType::SINT, v18);
+  auto v23 = builder.createAndAddOp<arith::CastOp>(DataType::SINT, v15);
 
-  // Use some of the constants in a way that keeps them alive:
-  // ui_result = xor_ui (constant) & a1 (non-constant)
-  auto ui_result = builder.createAndAddOp<arith::AndOp>(xor_ui, a1);
-
-  // Just to make sure folded float and cmp_bool are also "used":
-  auto cast_bool_as_int =
-    builder.createAndAddOp<arith::CastOp>(DataType::SINT, cmp_bool);
-  auto float_as_int =
-    builder.createAndAddOp<arith::CastOp>(DataType::SINT, div_f);
-
-  // Final combination: sum_all + cast_bool_as_int + float_as_int (in two
-  // steps).
-  auto tmp = builder.createAndAddOp<arith::AddOp>(sum_all, cast_bool_as_int);
-  auto final_val = builder.createAndAddOp<arith::AddOp>(tmp, float_as_int);
-
-  // Return only the final_val; other const-only subgraphs can be DCE'd later
-  // by another pass if desired, but here we only demonstrate const folding.
-  builder.createAndAddOp<ctrlflow::ReturnOp>(final_val);
+  auto v24 = builder.createAndAddOp<arith::AddOp>(v20, v22);
+  auto v25 = builder.createAndAddOp<arith::AddOp>(v24, v23);
+  builder.createAndAddOp<ctrlflow::ReturnOp>(v25);
 
   auto& bb0 = builder.finalizeCurBasicBlock();
 
@@ -89,24 +66,39 @@ int main() {
 
   std::string msg;
   if (!regionPtr->verify(msg)) {
-    std::cerr << "Verification failed (before const fold): " << msg
-              << std::endl;
+    std::cerr << "Verification failed (before ConstFold): " << msg << std::endl;
   }
 
   std::cout << "==============================" << std::endl;
   std::cout << "Region before ArithConstFold:" << std::endl;
   regionPtr->dump(std::cout);
 
-  opt::PassManager pm;
-  pm.addPass(std::make_unique<opt::arith::ArithConstFoldPass>());
-  pm.run(*regionPtr);
+  opt::PassManager pmCF;
+  pmCF.addPass(std::make_unique<opt::arith::ArithConstFoldPass>());
+  pmCF.run(*regionPtr);
 
   if (!regionPtr->verify(msg)) {
-    std::cerr << "Verification failed (after const fold): " << msg << std::endl;
+    std::cerr << "Verification failed (after ConstFold): " << msg << std::endl;
   }
 
   std::cout << "==============================" << std::endl;
   std::cout << "Region after ArithConstFold:" << std::endl;
+  regionPtr->dump(std::cout);
+
+  std::cout << "==========================" << std::endl;
+  std::cout << "Region before DCE:" << std::endl;
+  regionPtr->dump(std::cout);
+
+  opt::PassManager pmDCE;
+  pmDCE.addPass(std::make_unique<opt::common::DCEPass>());
+  pmDCE.run(*regionPtr);
+
+  if (!regionPtr->verify(msg)) {
+    std::cerr << "Verification failed (after DCE): " << msg << std::endl;
+  }
+
+  std::cout << "==========================" << std::endl;
+  std::cout << "Region after DCE (complex):" << std::endl;
   regionPtr->dump(std::cout);
 
   return 0;

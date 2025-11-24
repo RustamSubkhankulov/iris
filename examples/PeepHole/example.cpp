@@ -10,115 +10,91 @@ int main() {
   builder.startNewBasicBlock();
 
   // Parameters: signed and unsigned.
-  auto sx0 = builder.createAndAddOp<builtin::ParamOp>(DataType::SINT);
-  auto sx1 = builder.createAndAddOp<builtin::ParamOp>(DataType::SINT);
-  auto ux0 = builder.createAndAddOp<builtin::ParamOp>(DataType::UINT);
-  auto ux1 = builder.createAndAddOp<builtin::ParamOp>(DataType::UINT);
+  auto a0 = builder.createAndAddOp<builtin::ParamOp>(DataType::SINT);
+  auto a1 = builder.createAndAddOp<builtin::ParamOp>(DataType::SINT);
+  auto a2 = builder.createAndAddOp<builtin::ParamOp>(DataType::UINT);
+  auto a3 = builder.createAndAddOp<builtin::ParamOp>(DataType::UINT);
 
   // Constants for various peephole patterns.
-  auto c0_si = builder.createAndAddOp<arith::ConstantOp>(
+  auto c4 = builder.createAndAddOp<arith::ConstantOp>(
     makeConstAttribute(static_cast<std::int64_t>(0)));
-  auto c1_si = builder.createAndAddOp<arith::ConstantOp>(
+  auto c5 = builder.createAndAddOp<arith::ConstantOp>(
     makeConstAttribute(static_cast<std::int64_t>(1)));
 
-  auto c0_ui = builder.createAndAddOp<arith::ConstantOp>(
+  auto c6 = builder.createAndAddOp<arith::ConstantOp>(
     makeConstAttribute(static_cast<std::uint64_t>(0)));
-  auto c1_ui = builder.createAndAddOp<arith::ConstantOp>(
+  /* c7 = */ builder.createAndAddOp<arith::ConstantOp>(
     makeConstAttribute(static_cast<std::uint64_t>(1)));
 
-  auto cAllOnes_si = builder.createAndAddOp<arith::ConstantOp>(
+  /* c8 = */ builder.createAndAddOp<arith::ConstantOp>(
     makeConstAttribute(static_cast<std::int64_t>(-1)));
-  auto cAllOnes_ui = builder.createAndAddOp<arith::ConstantOp>(
+  auto c9 = builder.createAndAddOp<arith::ConstantOp>(
     makeConstAttribute(std::numeric_limits<std::uint64_t>::max()));
 
   // --- add peephole patterns ---
-  auto add1 = builder.createAndAddOp<arith::AddOp>(sx0, c0_si); // x + 0 -> x
-  auto add2 = builder.createAndAddOp<arith::AddOp>(c0_si, sx0); // 0 + x -> x
+  auto v10 = builder.createAndAddOp<arith::AddOp>(a0, c4);  // x + 0 -> x
+  /* v11 = */ builder.createAndAddOp<arith::AddOp>(c4, a0); // 0 + x -> x
 
   // --- sub peephole patterns ---
-  auto sub1 = builder.createAndAddOp<arith::SubOp>(sx0, c0_si); // x - 0 -> x
-  auto sub2 = builder.createAndAddOp<arith::SubOp>(sx1, sx1);   // x - x -> 0
+  auto v12 = builder.createAndAddOp<arith::SubOp>(a0, c4);  // x - 0 -> x
+  /* v13 = */ builder.createAndAddOp<arith::SubOp>(a1, a1); // x - x -> 0
 
   // --- mul peephole patterns ---
-  auto mul1 = builder.createAndAddOp<arith::MulOp>(sx0, c1_si); // x * 1 -> x
-  auto mul2 = builder.createAndAddOp<arith::MulOp>(c1_si, sx0); // 1 * x -> x
-  auto mul3 = builder.createAndAddOp<arith::MulOp>(sx0, c0_si); // x * 0 -> 0
-  auto mul4 = builder.createAndAddOp<arith::MulOp>(c0_si, sx1); // 0 * x -> 0
+  auto v14 = builder.createAndAddOp<arith::MulOp>(a0, c5);  // x * 1 -> x
+  /* v15 = */ builder.createAndAddOp<arith::MulOp>(c5, a0); // 1 * x -> x
+  /* v16 = */ builder.createAndAddOp<arith::MulOp>(a0, c4); // x * 0 -> 0
+  /* v17 = */ builder.createAndAddOp<arith::MulOp>(c4, a1); // 0 * x -> 0
 
   // --- div peephole patterns ---
-  auto div1 = builder.createAndAddOp<arith::DivOp>(sx0, c1_si); // x / 1 -> x
+  auto v18 = builder.createAndAddOp<arith::DivOp>(a0, c5); // x / 1 -> x
 
   // --- and peephole patterns (unsigned) ---
-  auto and1 = builder.createAndAddOp<arith::AndOp>(ux0, c0_ui); // x & 0 -> 0
-  auto and2 = builder.createAndAddOp<arith::AndOp>(c0_ui, ux0); // 0 & x -> 0
-  auto and3 =
-    builder.createAndAddOp<arith::AndOp>(ux0, cAllOnes_ui); // x & all1 -> x
-  auto and4 =
-    builder.createAndAddOp<arith::AndOp>(cAllOnes_ui, ux0);   // all1 & x -> x
-  auto and5 = builder.createAndAddOp<arith::AndOp>(ux1, ux1); // x & x -> x
+  /* v19 = */ builder.createAndAddOp<arith::AndOp>(a2, c6); // x & 0 -> 0
+  /* v20 = */ builder.createAndAddOp<arith::AndOp>(c6, a2); // 0 & x -> 0
+  auto v21 = builder.createAndAddOp<arith::AndOp>(a2, c9);  // x & all1 -> x
+  /* v22 = */ builder.createAndAddOp<arith::AndOp>(c9, a2); // all1 & x -> x
+  /* v23 = */ builder.createAndAddOp<arith::AndOp>(a3, a3); // x & x -> x
 
   // --- or peephole patterns (unsigned) ---
-  auto or1 = builder.createAndAddOp<arith::OrOp>(ux0, c0_ui); // x | 0 -> x
-  auto or2 = builder.createAndAddOp<arith::OrOp>(c0_ui, ux0); // 0 | x -> x
-  auto or3 =
-    builder.createAndAddOp<arith::OrOp>(ux0, cAllOnes_ui); // x | all1 -> all1
-  auto or4 =
-    builder.createAndAddOp<arith::OrOp>(cAllOnes_ui, ux0);  // all1 | x -> all1
-  auto or5 = builder.createAndAddOp<arith::OrOp>(ux1, ux1); // x | x -> x
+  /* v24 = */ builder.createAndAddOp<arith::OrOp>(a2, c6); // x | 0 -> x
+  /* v25 = */ builder.createAndAddOp<arith::OrOp>(c6, a2); // 0 | x -> x
+  auto v26 = builder.createAndAddOp<arith::OrOp>(a2, c9);  // x | all1 -> all1
+  /* v27 = */ builder.createAndAddOp<arith::OrOp>(c9, a2); // all1 | x -> all1
+  /* v28 = */ builder.createAndAddOp<arith::OrOp>(a3, a3); // x | x -> x
 
   // --- xor peephole patterns (unsigned) ---
-  auto xor1 = builder.createAndAddOp<arith::XorOp>(ux0, c0_ui); // x ^ 0 -> x
-  auto xor2 = builder.createAndAddOp<arith::XorOp>(c0_ui, ux0); // 0 ^ x -> x
-  auto xor3 = builder.createAndAddOp<arith::XorOp>(ux1, ux1);   // x ^ x -> 0
-  auto xor4 = builder.createAndAddOp<arith::XorOp>(
-    ux0, cAllOnes_ui); // x ^ all1 -> not(x)
-  auto xor5 = builder.createAndAddOp<arith::XorOp>(cAllOnes_ui,
-                                                   ux0); // all1 ^ x -> not(x)
+  /* v29 = */ builder.createAndAddOp<arith::XorOp>(a2, c6); // x ^ 0 -> x
+  /* v30 = */ builder.createAndAddOp<arith::XorOp>(c6, a2); // 0 ^ x -> x
+  /* v31 = */ builder.createAndAddOp<arith::XorOp>(a3, a3); // x ^ x -> 0
+  /* v32 = */ builder.createAndAddOp<arith::XorOp>(a2,
+                                                   c9); // x ^ all1 -> not(x)
+  /* v33 = */ builder.createAndAddOp<arith::XorOp>(c9,
+                                                   a2); // all1 ^ x -> not(x)
 
   // --- shift peephole patterns ---
-  // sal / sar: signed
-  auto sal_zero_shift =
-    builder.createAndAddOp<arith::SalOp>(sx0, c0_si); // x << 0 -> x
-  auto sal_zero_arg =
-    builder.createAndAddOp<arith::SalOp>(c0_si, sx0); // 0 << x -> 0
+  /* v34 = */ builder.createAndAddOp<arith::SalOp>(a0, c4); // x << 0 -> x
+  /* v35 = */ builder.createAndAddOp<arith::SalOp>(c4, a0); // 0 << x -> 0
 
-  auto sar_zero_shift =
-    builder.createAndAddOp<arith::SarOp>(sx0, c0_si); // x >> 0 -> x
-  auto sar_zero_arg =
-    builder.createAndAddOp<arith::SarOp>(c0_si, sx0); // 0 >> x -> 0
+  /* v36 = */ builder.createAndAddOp<arith::SarOp>(a0, c4); // x >> 0 -> x
+  /* v37 = */ builder.createAndAddOp<arith::SarOp>(c4, a0); // 0 >> x -> 0
 
-  // shl / shr: unsigned
-  auto shl_zero_shift =
-    builder.createAndAddOp<arith::ShlOp>(ux0, c0_ui); // x << 0 -> x
-  auto shl_zero_arg =
-    builder.createAndAddOp<arith::ShlOp>(c0_ui, ux0); // 0 << x -> 0
+  /* v38 = */ builder.createAndAddOp<arith::ShlOp>(a2, c6); // x << 0 -> x
+  /* v39 = */ builder.createAndAddOp<arith::ShlOp>(c6, a2); // 0 << x -> 0
 
-  auto shr_zero_shift =
-    builder.createAndAddOp<arith::ShrOp>(ux0, c0_ui); // x >> 0 -> x
-  auto shr_zero_arg =
-    builder.createAndAddOp<arith::ShrOp>(c0_ui, ux0); // 0 >> x -> 0
+  /* v40 = */ builder.createAndAddOp<arith::ShrOp>(a2, c6); // x >> 0 -> x
+  /* v41 = */ builder.createAndAddOp<arith::ShrOp>(c6, a2); // 0 >> x -> 0
 
   // --- not peephole pattern: double negation ---
-  auto not_inner = builder.createAndAddOp<arith::NotOp>(ux0);
-  auto not_outer = builder.createAndAddOp<arith::NotOp>(not_inner);
+  auto v42 = builder.createAndAddOp<arith::NotOp>(a2);
+  auto v43 = builder.createAndAddOp<arith::NotOp>(v42);
 
-  // Combine some of the optimized values so that they definitely have users.
-  // For example, take:
-  //   t0 = add1 + sub1      (both should become sx0)
-  //   t1 = mul1 + div1      (should become sx0 + sx0 after peephole)
-  //   t2 = and3 & or3       (and3 -> ux0, or3 -> all ones)
-  auto t0 = builder.createAndAddOp<arith::AddOp>(add1, sub1);
-  auto t1 = builder.createAndAddOp<arith::AddOp>(mul1, div1);
-  auto t2 = builder.createAndAddOp<arith::AndOp>(and3, or3);
+  auto v44 = builder.createAndAddOp<arith::AddOp>(v10, v12);
+  auto v45 = builder.createAndAddOp<arith::AddOp>(v14, v18);
+  /* v46 = */ builder.createAndAddOp<arith::AndOp>(v21, v26);
 
-  // Final value mixes everything a bit, including the outer
-  // not-double-negation.
-  auto t3 = builder.createAndAddOp<arith::AddOp>(t0, t1);
-  auto t4 = builder.createAndAddOp<arith::AddOp>(t3, t2);
+  /* v47 = */ builder.createAndAddOp<arith::AddOp>(v44, v45);
 
-  // Return the double-negated value to clearly show not(not(x)) -> x.
-  // After peephole, the input of return should be ux0 instead of not-not chain.
-  builder.createAndAddOp<ctrlflow::ReturnOp>(not_outer);
+  builder.createAndAddOp<ctrlflow::ReturnOp>(v43);
 
   auto& bb0 = builder.finalizeCurBasicBlock();
 
@@ -128,23 +104,39 @@ int main() {
 
   std::string msg;
   if (!regionPtr->verify(msg)) {
-    std::cerr << "Verification failed (before peephole): " << msg << std::endl;
+    std::cerr << "Verification failed (before PeepHole): " << msg << std::endl;
   }
 
   std::cout << "==============================" << std::endl;
   std::cout << "Region before ArithPeepHole:" << std::endl;
   regionPtr->dump(std::cout);
 
-  opt::PassManager pm;
-  pm.addPass(std::make_unique<opt::arith::ArithPeepHolePass>());
-  pm.run(*regionPtr);
+  opt::PassManager pmPH;
+  pmPH.addPass(std::make_unique<opt::arith::ArithPeepHolePass>());
+  pmPH.run(*regionPtr);
 
   if (!regionPtr->verify(msg)) {
-    std::cerr << "Verification failed (after peephole): " << msg << std::endl;
+    std::cerr << "Verification failed (after PeepHole): " << msg << std::endl;
   }
 
   std::cout << "==============================" << std::endl;
   std::cout << "Region after ArithPeepHole:" << std::endl;
+  regionPtr->dump(std::cout);
+
+  std::cout << "==========================" << std::endl;
+  std::cout << "Region before DCE:" << std::endl;
+  regionPtr->dump(std::cout);
+
+  opt::PassManager pmDCE;
+  pmDCE.addPass(std::make_unique<opt::common::DCEPass>());
+  pmDCE.run(*regionPtr);
+
+  if (!regionPtr->verify(msg)) {
+    std::cerr << "Verification failed (after DCE): " << msg << std::endl;
+  }
+
+  std::cout << "==========================" << std::endl;
+  std::cout << "Region after DCE (complex):" << std::endl;
   regionPtr->dump(std::cout);
 
   return 0;

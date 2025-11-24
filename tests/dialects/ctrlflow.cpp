@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <string>
 
 #include <iris.hpp>
 using namespace iris;
@@ -249,23 +250,22 @@ TEST(CTRLFLOW, JUMPC_EXFAIL_NON_BOOLEAN_INPUT) {
 TEST(CTRLFLOW, CALL_EXPECTED_EXCEPTION_INVALID_FUNC_NAME) {
   try {
     ctrlflow::CallOp call("", DataType::NONE);
+    FAIL()
+      << "Expected IrisException when creating CallOp with empty function name";
   } catch (const IrisException& exc) {
-    std::string msg = exc.what();
-    ASSERT_EQ(msg, "Invalid function name!");
-    return;
+    const std::string msg = exc.what();
+    EXPECT_EQ(msg, "Invalid function name!");
   }
-  FAIL();
 }
 
 TEST(CTRLFLOW, PHI_EXPECTED_EXCEPTION_EMPTY_INPUTS) {
   try {
     ctrlflow::PhiOp phi(InputList{});
+    FAIL() << "Expected IrisException when creating PhiOp with empty inputs";
   } catch (const IrisException& exc) {
-    std::string msg = exc.what();
-    ASSERT_EQ(msg, "Operation must have at least one input!");
-    return;
+    const std::string msg = exc.what();
+    EXPECT_EQ(msg, "Operation must have at least one input!");
   }
-  FAIL();
 }
 
 TEST(CTRLFLOW, PHI_EXFAIL_NON_HOMOGEN_INPUTS) {

@@ -3,6 +3,7 @@ find_package(GTest REQUIRED)
 
 file(GLOB_RECURSE TESTS_SOURCES CONFIGURE_DEPENDS *.cpp)
 add_executable(iris_tests ${TESTS_SOURCES})
+target_include_directories(iris_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Link libraries
 target_link_libraries(iris_tests

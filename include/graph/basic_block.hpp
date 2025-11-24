@@ -2,6 +2,7 @@
 #define INCLUDE_GRAPH_BASIC_BLOCK_HPP
 
 #include <cstdint>
+#include <list>
 #include <memory>
 #include <ostream>
 
@@ -108,7 +109,7 @@ public:
 
   //--- Operations ---
 
-  using OpList = detail::List<Operation>;
+  using OpList = std::list<std::unique_ptr<Operation>>;
   using op_iterator = OpList::iterator;
   using const_op_iterator = OpList::const_iterator;
 

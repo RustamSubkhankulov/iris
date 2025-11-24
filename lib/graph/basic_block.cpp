@@ -1,4 +1,5 @@
 #include <cassert>
+#include <iterator>
 
 #include <graph/basic_block.hpp>
 #include <graph/region.hpp>
@@ -35,7 +36,7 @@ void BasicBlock::replaceWith(BasicBlock& that) {
 void BasicBlock::insertPhiOpBack(std::unique_ptr<ctrlflow::PhiOp> op) {
   assert(!!op);
   op->setParentBasicBlock(this);
-  m_PhiOps.insertBack(std::move(op));
+  m_PhiOps.push_back(std::move(op));
 }
 
 void BasicBlock::erasePhiOp(op_iterator pos) {
@@ -56,63 +57,66 @@ void BasicBlock::doReplaceOpWith(Operation* opPtr, Operation* nodePtr) {
 void BasicBlock::replacePhiOpWith(op_iterator pos,
                                   std::unique_ptr<ctrlflow::PhiOp> op) {
   assert(!!op);
-  auto opPtr = op.get();
-  auto nodePtr = pos.get();
+  auto* opPtr = op.get();
+  auto* nodePtr = pos->get();
 
   doReplaceOpWith(opPtr, nodePtr);
 
-  m_PhiOps.insertAfter(pos, std::move(op));
-  m_PhiOps.erase(pos);
+  *pos = std::move(op);
 }
 
 void BasicBlock::replacePhiOpWith(const_op_iterator pos,
                                   std::unique_ptr<ctrlflow::PhiOp> op) {
   assert(!!op);
-  auto opPtr = op.get();
-  auto nodePtr = const_cast<Operation*>(pos.get());
-
-  doReplaceOpWith(opPtr, nodePtr);
-
-  m_PhiOps.insertAfter(pos, std::move(op));
-  m_PhiOps.erase(pos);
+  auto index = std::distance(m_PhiOps.cbegin(), pos);
+  auto it = m_PhiOps.begin();
+  std::advance(it, index);
+  replacePhiOpWith(it, std::move(op));
 }
 
 void BasicBlock::insertOpFront(std::unique_ptr<Operation> op) {
   assert(!!op);
   op->setParentBasicBlock(this);
-  m_RegOps.insertFront(std::move(op));
+  m_RegOps.push_front(std::move(op));
 }
 
 void BasicBlock::insertOpBack(std::unique_ptr<Operation> op) {
   assert(!!op);
   op->setParentBasicBlock(this);
-  m_RegOps.insertBack(std::move(op));
+  m_RegOps.push_back(std::move(op));
 }
 
 void BasicBlock::insertOpAfter(op_iterator pos, std::unique_ptr<Operation> op) {
   assert(!!op);
   op->setParentBasicBlock(this);
-  m_RegOps.insertAfter(pos, std::move(op));
+  m_RegOps.insert(std::next(pos), std::move(op));
 }
 
 void BasicBlock::insertOpAfter(const_op_iterator pos,
                                std::unique_ptr<Operation> op) {
   assert(!!op);
   op->setParentBasicBlock(this);
-  m_RegOps.insertAfter(pos, std::move(op));
+  auto index = std::distance(m_RegOps.cbegin(), pos);
+  auto it = m_RegOps.begin();
+  std::advance(it, index);
+  m_RegOps.insert(std::next(it), std::move(op));
 }
 
 void BasicBlock::insertOpBefore(op_iterator pos,
                                 std::unique_ptr<Operation> op) {
+  assert(!!op);
   op->setParentBasicBlock(this);
-  m_RegOps.insertBefore(pos, std::move(op));
+  m_RegOps.insert(pos, std::move(op));
 }
 
 void BasicBlock::insertOpBefore(const_op_iterator pos,
                                 std::unique_ptr<Operation> op) {
   assert(!!op);
   op->setParentBasicBlock(this);
-  m_RegOps.insertBefore(pos, std::move(op));
+  auto index = std::distance(m_RegOps.cbegin(), pos);
+  auto it = m_RegOps.begin();
+  std::advance(it, index);
+  m_RegOps.insert(it, std::move(op));
 }
 
 void BasicBlock::eraseOp(op_iterator pos) {
@@ -125,24 +129,21 @@ void BasicBlock::eraseOp(const_op_iterator pos) {
 
 void BasicBlock::replaceOpWith(op_iterator pos, std::unique_ptr<Operation> op) {
   assert(!!op);
-  auto opPtr = op.get();
-  auto nodePtr = pos.get();
+  auto* opPtr = op.get();
+  auto* nodePtr = pos->get();
 
   doReplaceOpWith(opPtr, nodePtr);
 
-  m_RegOps.insertAfter(pos, std::move(op));
-  m_RegOps.erase(pos);
+  *pos = std::move(op);
 }
+
 void BasicBlock::replaceOpWith(const_op_iterator pos,
                                std::unique_ptr<Operation> op) {
   assert(!!op);
-  auto opPtr = op.get();
-  auto nodePtr = const_cast<Operation*>(pos.get());
-
-  doReplaceOpWith(opPtr, nodePtr);
-
-  m_RegOps.insertAfter(pos, std::move(op));
-  m_RegOps.erase(pos);
+  auto index = std::distance(m_RegOps.cbegin(), pos);
+  auto it = m_RegOps.begin();
+  std::advance(it, index);
+  replaceOpWith(it, std::move(op));
 }
 
 void BasicBlock::dump(std::ostream& os, const std::string& bbIdent) {
@@ -171,10 +172,10 @@ void BasicBlock::dump(std::ostream& os, const std::string& bbIdent) {
 
   std::string opIdent = bbIdent + "    ";
   for (auto phiOpIt = m_PhiOps.begin(); phiOpIt != m_PhiOps.end(); ++phiOpIt) {
-    os << opIdent << *phiOpIt << std::endl;
+    os << opIdent << **phiOpIt << std::endl;
   }
   for (auto regOpIt = m_RegOps.begin(); regOpIt != m_RegOps.end(); ++regOpIt) {
-    os << opIdent << *regOpIt << std::endl;
+    os << opIdent << **regOpIt << std::endl;
   }
 }
 
@@ -235,7 +236,7 @@ bool BasicBlock::verify(std::string& msg, bool isStart, bool isFinal) {
     return false;
   }
 
-  const Operation& lastOp = m_RegOps.cback();
+  const Operation& lastOp = *m_RegOps.back();
 
   if (isFinal && !lastOp.isa(GlobalOpcodes::RETURN)) {
     msg = bbName +
@@ -273,7 +274,7 @@ bool BasicBlock::verify(std::string& msg, bool isStart, bool isFinal) {
 bool BasicBlock::verifyOps(std::string& msg, const std::string& bbName) {
   // Phi operations
   for (auto phiOpIt = m_PhiOps.begin(); phiOpIt != m_PhiOps.end(); ++phiOpIt) {
-    const Operation& op = *phiOpIt;
+    const Operation& op = **phiOpIt;
     if (!op.verify(msg)) {
       return false;
     }
@@ -282,7 +283,7 @@ bool BasicBlock::verifyOps(std::string& msg, const std::string& bbName) {
   // Regular operations
   auto regOpIt = m_RegOps.begin();
   for (std::size_t opIdx = 0U; opIdx < m_RegOps.size(); ++opIdx) {
-    const Operation& op = *regOpIt;
+    const Operation& op = **regOpIt;
     if (opIdx + 1U != m_RegOps.size() && op.isTerminator()) {
       msg =
         bbName + " - terminator operation is not the last one in the block!";

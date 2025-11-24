@@ -16,10 +16,8 @@ int main() {
   auto a3 = builder.createAndAddOp<builtin::ParamOp>(DataType::UINT);
 
   // Some constants.
-  auto c4 =
-    builder.createAndAddOp<arith::ConstantOp>(makeConstAttribute(10u));
-  auto c5 =
-    builder.createAndAddOp<arith::ConstantOp>(makeConstAttribute(20u));
+  auto c4 = builder.createAndAddOp<arith::ConstantOp>(makeConstAttribute(10u));
+  auto c5 = builder.createAndAddOp<arith::ConstantOp>(makeConstAttribute(20u));
 
   // Live computation chain: will be preserved by DCE.
   auto v6 = builder.createAndAddOp<arith::AddOp>(a0, a1);
@@ -33,10 +31,8 @@ int main() {
   /* v12 = */ builder.createAndAddOp<arith::MulOp>(v11, v11);
 
   // Dead chain #2: constants feeding into each other only.
-  auto c13 =
-    builder.createAndAddOp<arith::ConstantOp>(makeConstAttribute(5u));
-  auto с14 =
-    builder.createAndAddOp<arith::ConstantOp>(makeConstAttribute(7u));
+  auto c13 = builder.createAndAddOp<arith::ConstantOp>(makeConstAttribute(5u));
+  auto с14 = builder.createAndAddOp<arith::ConstantOp>(makeConstAttribute(7u));
   auto v15 = builder.createAndAddOp<arith::AddOp>(c13, с14);
   auto v16 = builder.createAndAddOp<builtin::CopyOp>(v15);
   /* auto v17 = */ builder.createAndAddOp<arith::SubOp>(v16, с14);

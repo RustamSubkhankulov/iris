@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <string>
 
 #include <iris.hpp>
 using namespace iris;
@@ -406,12 +407,11 @@ TEST(ARITH, COMPARE_EXFAIL_UNEXPECTED_PRED) {
   try {
     arith::CompareOp cmpOp(nullptr, nullptr,
                            static_cast<arith::CompareOp::Pred>(255U));
+    FAIL() << "Expected IrisException for unexpected CompareOp predicate value";
   } catch (const IrisException& exc) {
-    std::string msg = exc.what();
+    const std::string msg = exc.what();
     EXPECT_EQ(msg, "Unexpected predicate in CompareOp operation!");
-    return;
   }
-  FAIL();
 }
 
 TEST(ARITH, COMPARE_EXFAIL_NON_HOMOGEN_INPUTS1) {

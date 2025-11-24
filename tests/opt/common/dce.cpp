@@ -3,6 +3,10 @@
 #include <iris.hpp>
 using namespace iris;
 
+#include <test_utils.hpp>
+using iris::test::runSinglePass;
+using iris::test::verifyRegion;
+
 TEST(DCE, BASIC) {
   IRBuilder builder;
   builder.startNewRegion("foo");
@@ -27,31 +31,19 @@ TEST(DCE, BASIC) {
   ASSERT_TRUE(regionPtr->setStartBasicBlock(&bb0));
   ASSERT_TRUE(regionPtr->setFinalBasicBlock(&bb0));
 
-  std::string msg;
-  bool vres;
-
-  vres = regionPtr->verify(msg);
-  ASSERT_TRUE(vres);
-  ASSERT_TRUE(msg.empty());
-
-  opt::PassManager pm;
-  pm.addPass(std::make_unique<opt::common::DCEPass>());
-
-  ASSERT_TRUE(pm.run(*regionPtr));
-
-  vres = regionPtr->verify(msg);
-  ASSERT_TRUE(vres);
-  ASSERT_TRUE(msg.empty());
+  verifyRegion(*regionPtr);
+  ASSERT_TRUE(runSinglePass<opt::common::DCEPass>(*regionPtr));
+  verifyRegion(*regionPtr);
 
   auto bb = regionPtr->getStartBasicBlock();
   ASSERT_EQ(bb->getOps().size(), 6u);
 
   auto& ops = bb->getOps();
 
-  EXPECT_EQ(std::next(ops.begin(), 0).get(), a0);
-  EXPECT_EQ(std::next(ops.begin(), 1).get(), a1);
-  EXPECT_EQ(std::next(ops.begin(), 2).get(), a2);
-  EXPECT_EQ(std::next(ops.begin(), 3).get(), a3);
-  EXPECT_EQ(std::next(ops.begin(), 4).get(), v4);
-  EXPECT_EQ(std::next(ops.begin(), 5).get(), n6);
+  EXPECT_EQ(std::next(ops.begin(), 0)->get(), a0);
+  EXPECT_EQ(std::next(ops.begin(), 1)->get(), a1);
+  EXPECT_EQ(std::next(ops.begin(), 2)->get(), a2);
+  EXPECT_EQ(std::next(ops.begin(), 3)->get(), a3);
+  EXPECT_EQ(std::next(ops.begin(), 4)->get(), v4);
+  EXPECT_EQ(std::next(ops.begin(), 5)->get(), n6);
 }

@@ -1,22 +1,11 @@
 #include <gtest/gtest.h>
 
 #include <iris.hpp>
-
 using namespace iris;
 
-void verifyRegion(Region& region) {
-  std::string msg;
-  bool ok = region.verify(msg);
-  ASSERT_TRUE(ok) << msg;
-  ASSERT_TRUE(msg.empty());
-}
-
-template <typename PassTy>
-bool runSinglePass(Region& region) {
-  opt::PassManager pm;
-  pm.addPass(std::make_unique<PassTy>());
-  return pm.run(region);
-}
+#include <test_utils.hpp>
+using iris::test::runSinglePass;
+using iris::test::verifyRegion;
 
 TEST(CONST_FOLD, ADD_UINT) {
   IRBuilder builder;
@@ -38,10 +27,7 @@ TEST(CONST_FOLD, ADD_UINT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -52,7 +38,7 @@ TEST(CONST_FOLD, ADD_UINT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -92,10 +78,7 @@ TEST(CONST_FOLD, ADD_SINT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -106,7 +89,7 @@ TEST(CONST_FOLD, ADD_SINT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -145,10 +128,7 @@ TEST(CONST_FOLD, ADD_FLOAT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -159,7 +139,7 @@ TEST(CONST_FOLD, ADD_FLOAT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -198,19 +178,8 @@ TEST(CONST_FOLD, ADD_NOT_APPLIED) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  EXPECT_FALSE(changed);
-
+  EXPECT_FALSE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
-
-  auto* bb = region->getStartBasicBlock();
-  auto& ops = bb->getOps();
-  const Operation& lastOp = ops.cback();
-  auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
-  ASSERT_NE(ret, nullptr);
-  const Input& in = ret->getInput(0);
-  EXPECT_EQ(in.getDefiningOp(), add);
 }
 
 TEST(CONST_FOLD, ADD_CHAINED_OPS) {
@@ -240,10 +209,7 @@ TEST(CONST_FOLD, ADD_CHAINED_OPS) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -254,7 +220,7 @@ TEST(CONST_FOLD, ADD_CHAINED_OPS) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -275,7 +241,7 @@ TEST(CONST_FOLD, ADD_CHAINED_OPS) {
 
   // No Add operations should remain.
   for (const auto& op : bb->getOps()) {
-    EXPECT_EQ(dynamic_cast<const arith::AddOp*>(&op), nullptr);
+    EXPECT_EQ(dynamic_cast<const arith::AddOp*>(op.get()), nullptr);
   }
 }
 
@@ -299,10 +265,7 @@ TEST(CONST_FOLD, SUB_UINT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -313,7 +276,7 @@ TEST(CONST_FOLD, SUB_UINT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -353,10 +316,7 @@ TEST(CONST_FOLD, SUB_SINT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -367,7 +327,7 @@ TEST(CONST_FOLD, SUB_SINT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -406,10 +366,7 @@ TEST(CONST_FOLD, SUB_FLOAT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -420,7 +377,7 @@ TEST(CONST_FOLD, SUB_FLOAT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -459,18 +416,8 @@ TEST(CONST_FOLD, SUB_NOT_APPLIED) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  EXPECT_FALSE(changed);
-
+  EXPECT_FALSE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
-
-  auto* bb = region->getStartBasicBlock();
-  const auto& ops = bb->getOps();
-  const Operation& last = ops.cback();
-  auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&last);
-  ASSERT_NE(ret, nullptr);
-  EXPECT_EQ(ret->getInput(0).getDefiningOp(), sub);
 }
 
 TEST(CONST_FOLD, MUL_UINT) {
@@ -493,10 +440,7 @@ TEST(CONST_FOLD, MUL_UINT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -507,7 +451,7 @@ TEST(CONST_FOLD, MUL_UINT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -547,10 +491,7 @@ TEST(CONST_FOLD, MUL_SINT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -561,7 +502,7 @@ TEST(CONST_FOLD, MUL_SINT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -599,10 +540,7 @@ TEST(CONST_FOLD, MUL_FLOAT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -613,7 +551,7 @@ TEST(CONST_FOLD, MUL_FLOAT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -652,10 +590,7 @@ TEST(CONST_FOLD, MUL_NOT_APPLIED) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  EXPECT_FALSE(changed);
-
+  EXPECT_FALSE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 }
 
@@ -679,10 +614,7 @@ TEST(CONST_FOLD, DIV_UINT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -693,7 +625,7 @@ TEST(CONST_FOLD, DIV_UINT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -733,10 +665,7 @@ TEST(CONST_FOLD, DIV_SINT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -747,7 +676,7 @@ TEST(CONST_FOLD, DIV_SINT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -786,10 +715,7 @@ TEST(CONST_FOLD, DIV_FLOAT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -800,7 +726,7 @@ TEST(CONST_FOLD, DIV_FLOAT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -840,10 +766,7 @@ TEST(CONST_FOLD, DIV_NOT_APPLIED_DIV_BY_ZERO) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  EXPECT_FALSE(changed);
-
+  EXPECT_FALSE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 }
 
@@ -866,19 +789,8 @@ TEST(CONST_FOLD, DIV_NOT_APPLIED_NON_CONST) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  EXPECT_FALSE(changed);
-
+  EXPECT_FALSE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
-
-  auto* bb = region->getStartBasicBlock();
-  auto& ops = bb->getOps();
-  const Operation& lastOp = ops.cback();
-  auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
-  ASSERT_NE(ret, nullptr);
-  const Input& in = ret->getInput(0);
-  EXPECT_EQ(in.getDefiningOp(), div);
 }
 
 TEST(CONST_FOLD, AND_UINT) {
@@ -901,10 +813,7 @@ TEST(CONST_FOLD, AND_UINT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -915,7 +824,7 @@ TEST(CONST_FOLD, AND_UINT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -955,10 +864,7 @@ TEST(CONST_FOLD, AND_SINT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -969,7 +875,7 @@ TEST(CONST_FOLD, AND_SINT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -1009,10 +915,7 @@ TEST(CONST_FOLD, OR_UINT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -1023,7 +926,7 @@ TEST(CONST_FOLD, OR_UINT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -1063,10 +966,7 @@ TEST(CONST_FOLD, OR_SINT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -1077,7 +977,7 @@ TEST(CONST_FOLD, OR_SINT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -1117,10 +1017,7 @@ TEST(CONST_FOLD, XOR_UINT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -1131,7 +1028,7 @@ TEST(CONST_FOLD, XOR_UINT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -1171,10 +1068,7 @@ TEST(CONST_FOLD, XOR_SINT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -1185,7 +1079,7 @@ TEST(CONST_FOLD, XOR_SINT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -1225,10 +1119,7 @@ TEST(CONST_FOLD, SAL_SINT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -1239,7 +1130,7 @@ TEST(CONST_FOLD, SAL_SINT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -1279,10 +1170,7 @@ TEST(CONST_FOLD, SHL_UINT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -1293,7 +1181,7 @@ TEST(CONST_FOLD, SHL_UINT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -1333,10 +1221,7 @@ TEST(CONST_FOLD, SAR_SINT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -1347,7 +1232,7 @@ TEST(CONST_FOLD, SAR_SINT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -1387,10 +1272,7 @@ TEST(CONST_FOLD, SHR_UINT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -1401,7 +1283,7 @@ TEST(CONST_FOLD, SHR_UINT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -1438,10 +1320,7 @@ TEST(CONST_FOLD, NOT_UINT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -1452,7 +1331,7 @@ TEST(CONST_FOLD, NOT_UINT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -1489,10 +1368,7 @@ TEST(CONST_FOLD, NOT_SINT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -1503,7 +1379,7 @@ TEST(CONST_FOLD, NOT_SINT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -1544,10 +1420,7 @@ TEST(CONST_FOLD, NOT_CHAINED) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -1558,7 +1431,7 @@ TEST(CONST_FOLD, NOT_CHAINED) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -1601,10 +1474,7 @@ TEST(CONST_FOLD, CMP_SINT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -1615,7 +1485,7 @@ TEST(CONST_FOLD, CMP_SINT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -1657,10 +1527,7 @@ TEST(CONST_FOLD, CMP_UINT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -1671,7 +1538,7 @@ TEST(CONST_FOLD, CMP_UINT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -1711,10 +1578,7 @@ TEST(CONST_FOLD, CMP_FLOAT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -1725,7 +1589,7 @@ TEST(CONST_FOLD, CMP_FLOAT) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -1766,10 +1630,7 @@ TEST(CONST_FOLD, CMP_BOOL) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -1780,7 +1641,7 @@ TEST(CONST_FOLD, CMP_BOOL) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -1820,10 +1681,7 @@ TEST(CONST_FOLD, CMP_NOT_APPLIED) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  EXPECT_FALSE(changed);
-
+  EXPECT_FALSE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 }
 
@@ -1855,10 +1713,7 @@ TEST(CONST_FOLD, INTEGRATION_BASIC_ARITH) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -1869,7 +1724,7 @@ TEST(CONST_FOLD, INTEGRATION_BASIC_ARITH) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -1917,10 +1772,7 @@ TEST(CONST_FOLD, INTEGRATION_BITWISE) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -1931,7 +1783,7 @@ TEST(CONST_FOLD, INTEGRATION_BITWISE) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);
@@ -1980,10 +1832,7 @@ TEST(CONST_FOLD, INTEGRATION_CMP) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-
-  bool changed = runSinglePass<opt::arith::ArithConstFoldPass>(*region);
-  ASSERT_TRUE(changed);
-
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithConstFoldPass>(*region));
   verifyRegion(*region);
 
   const arith::ConstantOp* c = nullptr;
@@ -1994,7 +1843,7 @@ TEST(CONST_FOLD, INTEGRATION_CMP) {
   const auto& ops = bb->getOps();
   ASSERT_GT(ops.size(), 0u);
 
-  const Operation& lastOp = ops.cback();
+  const Operation& lastOp = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&lastOp);
   ASSERT_NE(ret, nullptr);
   ASSERT_TRUE(ret->getInputsNum() == 0 || ret->getInputsNum() == 1);

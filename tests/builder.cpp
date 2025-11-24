@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <string>
 
 #include <iris.hpp>
 using namespace iris;
@@ -17,12 +18,12 @@ TEST(BUILDER, EXFAIL_GET_NO_REGION) {
 
   try {
     [[maybe_unused]] auto& reg = builder.getCurRegion();
+    FAIL() << "Expected IrisException when getting current region with none "
+              "being built";
   } catch (const IrisException& exc) {
-    std::string str = exc.what();
-    EXPECT_TRUE(!str.compare("No region is building!"));
-    return;
+    const std::string str = exc.what();
+    EXPECT_EQ(str, "No region is building!");
   }
-  FAIL();
 }
 
 TEST(BUILDER, EXFAIL_DROP_NO_REGION) {
@@ -30,12 +31,12 @@ TEST(BUILDER, EXFAIL_DROP_NO_REGION) {
 
   try {
     builder.dropCurRegion();
+    FAIL() << "Expected IrisException when dropping current region with none "
+              "being built";
   } catch (const IrisException& exc) {
-    std::string str = exc.what();
-    EXPECT_TRUE(!str.compare("No region is building!"));
-    return;
+    const std::string str = exc.what();
+    EXPECT_EQ(str, "No region is building!");
   }
-  FAIL();
 }
 
 TEST(BUILDER, EXFAIL_OBTAIN_NO_REGION) {
@@ -43,12 +44,12 @@ TEST(BUILDER, EXFAIL_OBTAIN_NO_REGION) {
 
   try {
     [[maybe_unused]] auto reg = builder.obtainRegion();
+    FAIL()
+      << "Expected IrisException when obtaining region with none being built";
   } catch (const IrisException& exc) {
-    std::string str = exc.what();
-    EXPECT_TRUE(!str.compare("No region is building!"));
-    return;
+    const std::string str = exc.what();
+    EXPECT_EQ(str, "No region is building!");
   }
-  FAIL();
 }
 
 TEST(BUILDER, EXFAIL_OBTAIN_BB_ID_NO_REGION) {
@@ -56,12 +57,12 @@ TEST(BUILDER, EXFAIL_OBTAIN_BB_ID_NO_REGION) {
 
   try {
     [[maybe_unused]] auto id = builder.obtainIdForBasicBlock();
+    FAIL()
+      << "Expected IrisException when obtaining basic block id with no region";
   } catch (const IrisException& exc) {
-    std::string str = exc.what();
-    EXPECT_TRUE(!str.compare("No region is building!"));
-    return;
+    const std::string str = exc.what();
+    EXPECT_EQ(str, "No region is building!");
   }
-  FAIL();
 }
 
 TEST(BUILDER, EXFAIL_START_BB_NO_REGION) {
@@ -69,12 +70,11 @@ TEST(BUILDER, EXFAIL_START_BB_NO_REGION) {
 
   try {
     builder.startNewBasicBlock();
+    FAIL() << "Expected IrisException when starting basic block with no region";
   } catch (const IrisException& exc) {
-    std::string str = exc.what();
-    EXPECT_TRUE(!str.compare("No region is building!"));
-    return;
+    const std::string str = exc.what();
+    EXPECT_EQ(str, "No region is building!");
   }
-  FAIL();
 }
 
 TEST(BUILDER, START_NEW_REGION) {
@@ -85,7 +85,7 @@ TEST(BUILDER, START_NEW_REGION) {
   EXPECT_FALSE(builder.isBasicBlockBuilding());
 
   const auto& reg = builder.getCurRegion();
-  EXPECT_TRUE(!reg.getName().compare("foo"));
+  EXPECT_EQ(reg.getName(), "foo");
 }
 
 TEST(BUILDER, EXFAIL_GET_NO_BB) {
@@ -94,12 +94,12 @@ TEST(BUILDER, EXFAIL_GET_NO_BB) {
 
   try {
     [[maybe_unused]] auto& bb = builder.getCurBasicBlock();
+    FAIL() << "Expected IrisException when getting current basic block with "
+              "none being built";
   } catch (const IrisException& exc) {
-    std::string str = exc.what();
-    EXPECT_TRUE(!str.compare("No basic block is building!"));
-    return;
+    const std::string str = exc.what();
+    EXPECT_EQ(str, "No basic block is building!");
   }
-  FAIL();
 }
 
 TEST(BUILDER, EXFAIL_DROP_NO_BB) {
@@ -108,12 +108,12 @@ TEST(BUILDER, EXFAIL_DROP_NO_BB) {
 
   try {
     builder.dropCurBasicBlock();
+    FAIL() << "Expected IrisException when dropping basic block with none "
+              "being built";
   } catch (const IrisException& exc) {
-    std::string str = exc.what();
-    EXPECT_TRUE(!str.compare("No basic block is building!"));
-    return;
+    const std::string str = exc.what();
+    EXPECT_EQ(str, "No basic block is building!");
   }
-  FAIL();
 }
 
 TEST(BUILDER, EXFAIL_FINALIZE_NO_BB) {
@@ -122,12 +122,12 @@ TEST(BUILDER, EXFAIL_FINALIZE_NO_BB) {
 
   try {
     [[maybe_unused]] auto& bb = builder.finalizeCurBasicBlock();
+    FAIL() << "Expected IrisException when finalizing basic block with none "
+              "being built";
   } catch (const IrisException& exc) {
-    std::string str = exc.what();
-    EXPECT_TRUE(!str.compare("No basic block is building!"));
-    return;
+    const std::string str = exc.what();
+    EXPECT_EQ(str, "No basic block is building!");
   }
-  FAIL();
 }
 
 TEST(BUILDER, OBTAIN_REGION) {
@@ -136,7 +136,7 @@ TEST(BUILDER, OBTAIN_REGION) {
 
   auto reg = builder.obtainRegion();
   EXPECT_TRUE(static_cast<bool>(reg));
-  EXPECT_TRUE(!reg->getName().compare("foo"));
+  EXPECT_EQ(reg->getName(), "foo");
 
   EXPECT_FALSE(builder.isRegionBuilding());
 }
@@ -216,11 +216,11 @@ TEST(BUILDER, ADDING_OPS) {
   auto& bb = builder.getCurBasicBlock();
 
   ASSERT_EQ(2u, bb.getPhiOps().size());
-  EXPECT_EQ(phiOp1, std::next(bb.getPhiOps().begin(), 0).get());
-  EXPECT_EQ(phiOp2, std::next(bb.getPhiOps().begin(), 1).get());
+  EXPECT_EQ(phiOp1, std::next(bb.getPhiOps().begin(), 0)->get());
+  EXPECT_EQ(phiOp2, std::next(bb.getPhiOps().begin(), 1)->get());
 
   ASSERT_EQ(3u, bb.getOps().size());
-  EXPECT_EQ(op1, std::next(bb.getOps().begin(), 0).get());
-  EXPECT_EQ(op2, std::next(bb.getOps().begin(), 1).get());
-  EXPECT_EQ(op3, std::next(bb.getOps().begin(), 2).get());
+  EXPECT_EQ(op1, std::next(bb.getOps().begin(), 0)->get());
+  EXPECT_EQ(op2, std::next(bb.getOps().begin(), 1)->get());
+  EXPECT_EQ(op3, std::next(bb.getOps().begin(), 2)->get());
 }

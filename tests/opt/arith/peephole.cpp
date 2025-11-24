@@ -3,26 +3,11 @@
 #include <limits>
 
 #include <iris.hpp>
-
 using namespace iris;
 
-namespace {
-
-void verifyRegion(Region& region) {
-  std::string msg;
-  bool ok = region.verify(msg);
-  ASSERT_TRUE(ok) << msg;
-  ASSERT_TRUE(msg.empty());
-}
-
-template <typename PassTy>
-bool runSinglePass(Region& region) {
-  opt::PassManager pm;
-  pm.addPass(std::make_unique<PassTy>());
-  return pm.run(region);
-}
-
-} // namespace
+#include <test_utils.hpp>
+using iris::test::runSinglePass;
+using iris::test::verifyRegion;
 
 TEST(ARITH_PEEPHOLES, ADD_ZERO_RHS) {
   IRBuilder builder;
@@ -43,8 +28,7 @@ TEST(ARITH_PEEPHOLES, ADD_ZERO_RHS) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   auto* bb = region->getStartBasicBlock();
@@ -52,7 +36,7 @@ TEST(ARITH_PEEPHOLES, ADD_ZERO_RHS) {
 
   // No AddOp should remain
   for (const auto& op : ops) {
-    EXPECT_EQ(dynamic_cast<const arith::AddOp*>(&op), nullptr);
+    EXPECT_EQ(dynamic_cast<const arith::AddOp*>(op.get()), nullptr);
   }
 
   EXPECT_EQ(ret->getInput(0).getDefiningOp(), static_cast<Operation*>(x));
@@ -77,14 +61,13 @@ TEST(ARITH_PEEPHOLES, ADD_ZERO_LHS) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   auto* bb = region->getStartBasicBlock();
   const auto& ops = bb->getOps();
   for (const auto& op : ops) {
-    EXPECT_EQ(dynamic_cast<const arith::AddOp*>(&op), nullptr);
+    EXPECT_EQ(dynamic_cast<const arith::AddOp*>(op.get()), nullptr);
   }
 
   EXPECT_EQ(ret->getInput(0).getDefiningOp(), static_cast<Operation*>(x));
@@ -108,8 +91,7 @@ TEST(ARITH_PEEPHOLES, ADD_ZERO_NOT_APPLIED) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  EXPECT_FALSE(changed);
+  EXPECT_FALSE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   EXPECT_EQ(ret->getInput(0).getDefiningOp(), static_cast<Operation*>(add));
@@ -134,14 +116,13 @@ TEST(ARITH_PEEPHOLES, SUB_ZERO_RHS) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   auto* bb = region->getStartBasicBlock();
   const auto& ops = bb->getOps();
   for (const auto& op : ops) {
-    EXPECT_EQ(dynamic_cast<const arith::SubOp*>(&op), nullptr);
+    EXPECT_EQ(dynamic_cast<const arith::SubOp*>(op.get()), nullptr);
   }
 
   EXPECT_EQ(ret->getInput(0).getDefiningOp(), static_cast<Operation*>(x));
@@ -164,13 +145,12 @@ TEST(ARITH_PEEPHOLES, SUB_ZERO_SELF) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   auto* bb = region->getStartBasicBlock();
   const auto& ops = bb->getOps();
-  const Operation& last = ops.cback();
+  const Operation& last = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&last);
   ASSERT_NE(ret, nullptr);
 
@@ -201,8 +181,7 @@ TEST(ARITH_PEEPHOLES, MUL_ONE_RHS) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   EXPECT_EQ(ret->getInput(0).getDefiningOp(), static_cast<Operation*>(x));
@@ -227,8 +206,7 @@ TEST(ARITH_PEEPHOLES, MUL_ONE_LHS) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   EXPECT_EQ(ret->getInput(0).getDefiningOp(), static_cast<Operation*>(x));
@@ -253,13 +231,12 @@ TEST(ARITH_PEEPHOLES, MUL_ZERO_RHS) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   auto* bb = region->getStartBasicBlock();
   const auto& ops = bb->getOps();
-  const Operation& last = ops.cback();
+  const Operation& last = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&last);
   ASSERT_NE(ret, nullptr);
 
@@ -289,13 +266,12 @@ TEST(ARITH_PEEPHOLES, MUL_ZERO_LHS) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   auto* bb = region->getStartBasicBlock();
   const auto& ops = bb->getOps();
-  const Operation& last = ops.cback();
+  const Operation& last = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&last);
   ASSERT_NE(ret, nullptr);
 
@@ -324,8 +300,7 @@ TEST(ARITH_PEEPHOLES, MUL_NOT_APPLIED) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  EXPECT_FALSE(changed);
+  EXPECT_FALSE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   EXPECT_EQ(ret->getInput(0).getDefiningOp(), static_cast<Operation*>(mul));
@@ -350,8 +325,7 @@ TEST(ARITH_PEEPHOLES, DIV_ONE_RHS) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   EXPECT_EQ(ret->getInput(0).getDefiningOp(), static_cast<Operation*>(x));
@@ -376,8 +350,7 @@ TEST(ARITH_PEEPHOLES, DIV_NOT_APPLIED) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  EXPECT_FALSE(changed);
+  EXPECT_FALSE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   EXPECT_EQ(ret->getInput(0).getDefiningOp(), static_cast<Operation*>(div));
@@ -402,13 +375,12 @@ TEST(ARITH_PEEPHOLES, AND_ZERO_RHS) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   auto* bb = region->getStartBasicBlock();
   const auto& ops = bb->getOps();
-  const Operation& last = ops.cback();
+  const Operation& last = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&last);
   ASSERT_NE(ret, nullptr);
 
@@ -438,13 +410,12 @@ TEST(ARITH_PEEPHOLES, AND_ZERO_LHS) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   auto* bb = region->getStartBasicBlock();
   const auto& ops = bb->getOps();
-  const Operation& last = ops.cback();
+  const Operation& last = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&last);
   ASSERT_NE(ret, nullptr);
 
@@ -474,8 +445,7 @@ TEST(ARITH_PEEPHOLES, AND_ALL_ONES_RHS) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   EXPECT_EQ(ret->getInput(0).getDefiningOp(), static_cast<Operation*>(x));
@@ -500,8 +470,7 @@ TEST(ARITH_PEEPHOLES, AND_ALL_ONES_LHS) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   EXPECT_EQ(ret->getInput(0).getDefiningOp(), static_cast<Operation*>(x));
@@ -524,8 +493,7 @@ TEST(ARITH_PEEPHOLES, AND_SELF) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   EXPECT_EQ(ret->getInput(0).getDefiningOp(), static_cast<Operation*>(x));
@@ -550,8 +518,7 @@ TEST(ARITH_PEEPHOLES, OR_ZERO_RHS) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   EXPECT_EQ(ret->getInput(0).getDefiningOp(), static_cast<Operation*>(x));
@@ -576,8 +543,7 @@ TEST(ARITH_PEEPHOLES, OR_ZERO_LHS) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   EXPECT_EQ(ret->getInput(0).getDefiningOp(), static_cast<Operation*>(x));
@@ -602,13 +568,12 @@ TEST(ARITH_PEEPHOLES, OR_ALL_ONES_RHS) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   auto* bb = region->getStartBasicBlock();
   const auto& ops = bb->getOps();
-  const Operation& last = ops.cback();
+  const Operation& last = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&last);
   ASSERT_NE(ret, nullptr);
 
@@ -638,13 +603,12 @@ TEST(ARITH_PEEPHOLES, OR_ALL_ONES_LHS) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   auto* bb = region->getStartBasicBlock();
   const auto& ops = bb->getOps();
-  const Operation& last = ops.cback();
+  const Operation& last = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&last);
   ASSERT_NE(ret, nullptr);
 
@@ -672,13 +636,12 @@ TEST(ARITH_PEEPHOLES, XOR_SELF) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   auto* bb = region->getStartBasicBlock();
   const auto& ops = bb->getOps();
-  const Operation& last = ops.cback();
+  const Operation& last = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&last);
   ASSERT_NE(ret, nullptr);
 
@@ -708,13 +671,12 @@ TEST(ARITH_PEEPHOLES, XOR_ALL_ONES) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   auto* bb = region->getStartBasicBlock();
   const auto& ops = bb->getOps();
-  const Operation& last = ops.cback();
+  const Operation& last = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&last);
   ASSERT_NE(ret, nullptr);
 
@@ -742,8 +704,7 @@ TEST(ARITH_PEEPHOLES, SAL_ZERO_SHIFT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   EXPECT_EQ(ret->getInput(0).getDefiningOp(), static_cast<Operation*>(x));
@@ -768,8 +729,7 @@ TEST(ARITH_PEEPHOLES, SAR_ZERO_SHIFT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   EXPECT_EQ(ret->getInput(0).getDefiningOp(), static_cast<Operation*>(x));
@@ -794,8 +754,7 @@ TEST(ARITH_PEEPHOLES, SHL_ZERO_SHIFT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   EXPECT_EQ(ret->getInput(0).getDefiningOp(), static_cast<Operation*>(x));
@@ -820,8 +779,7 @@ TEST(ARITH_PEEPHOLES, SHR_ZERO_SHIFT) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   EXPECT_EQ(ret->getInput(0).getDefiningOp(), static_cast<Operation*>(x));
@@ -846,13 +804,12 @@ TEST(ARITH_PEEPHOLES, SHL_ZERO_ARG) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   auto* bb = region->getStartBasicBlock();
   const auto& ops = bb->getOps();
-  const Operation& last = ops.cback();
+  const Operation& last = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&last);
   ASSERT_NE(ret, nullptr);
 
@@ -882,13 +839,12 @@ TEST(ARITH_PEEPHOLES, SHR_ZERO_ARG) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   auto* bb = region->getStartBasicBlock();
   const auto& ops = bb->getOps();
-  const Operation& last = ops.cback();
+  const Operation& last = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&last);
   ASSERT_NE(ret, nullptr);
 
@@ -918,13 +874,12 @@ TEST(ARITH_PEEPHOLES, SAL_ZERO_ARG) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   auto* bb = region->getStartBasicBlock();
   const auto& ops = bb->getOps();
-  const Operation& last = ops.cback();
+  const Operation& last = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&last);
   ASSERT_NE(ret, nullptr);
 
@@ -954,13 +909,12 @@ TEST(ARITH_PEEPHOLES, SAR_ZERO_ARG) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   auto* bb = region->getStartBasicBlock();
   const auto& ops = bb->getOps();
-  const Operation& last = ops.cback();
+  const Operation& last = *ops.back();
   auto* ret = dynamic_cast<const ctrlflow::ReturnOp*>(&last);
   ASSERT_NE(ret, nullptr);
 
@@ -989,8 +943,7 @@ TEST(ARITH_PEEPHOLES, NOT_DOUBLE_NEGATION) {
   ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
 
   verifyRegion(*region);
-  bool changed = runSinglePass<opt::arith::ArithPeepHolePass>(*region);
-  ASSERT_TRUE(changed);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
   verifyRegion(*region);
 
   EXPECT_EQ(ret->getInput(0).getDefiningOp(), static_cast<Operation*>(x));

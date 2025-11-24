@@ -190,8 +190,8 @@ TEST(BASIC_BLOCK, PHI_OPS_INSERT_BACK) {
   bb.insertPhiOpBack(std::move(phi1));
 
   ASSERT_EQ(bb.getPhiOps().size(), 1u);
-  EXPECT_EQ(&bb.getPhiOps().back(), phi1Ptr);
-  EXPECT_EQ(bb.getPhiOps().back().getParentBasicBlock(), &bb);
+  EXPECT_EQ(bb.getPhiOps().back().get(), phi1Ptr);
+  EXPECT_EQ(bb.getPhiOps().back()->getParentBasicBlock(), &bb);
 
   auto phi2 = std::make_unique<ctrlflow::PhiOp>(nullptr, nullptr);
   auto* phi2Ptr = phi2.get();
@@ -199,9 +199,9 @@ TEST(BASIC_BLOCK, PHI_OPS_INSERT_BACK) {
   bb.insertPhiOpBack(std::move(phi2));
 
   ASSERT_EQ(bb.getPhiOps().size(), 2u);
-  EXPECT_EQ(&bb.getPhiOps().front(), phi1Ptr);
-  EXPECT_EQ(&bb.getPhiOps().back(), phi2Ptr);
-  EXPECT_EQ(bb.getPhiOps().back().getParentBasicBlock(), &bb);
+  EXPECT_EQ(bb.getPhiOps().front().get(), phi1Ptr);
+  EXPECT_EQ(bb.getPhiOps().back().get(), phi2Ptr);
+  EXPECT_EQ(bb.getPhiOps().back()->getParentBasicBlock(), &bb);
 }
 
 TEST(BASIC_BLOCK, PHI_OPS_ERASE_FRONT) {
@@ -221,15 +221,15 @@ TEST(BASIC_BLOCK, PHI_OPS_ERASE_FRONT) {
   bb.insertPhiOpBack(std::move(phi3));
 
   ASSERT_EQ(bb.getPhiOps().size(), 3u);
-  EXPECT_EQ(bb.getPhiOps().begin().get(), phi1Ptr);
-  EXPECT_EQ(std::next(bb.getPhiOps().begin(), 1).get(), phi2Ptr);
-  EXPECT_EQ(std::next(bb.getPhiOps().begin(), 2).get(), phi3Ptr);
+  EXPECT_EQ(bb.getPhiOps().begin()->get(), phi1Ptr);
+  EXPECT_EQ(std::next(bb.getPhiOps().begin(), 1)->get(), phi2Ptr);
+  EXPECT_EQ(std::next(bb.getPhiOps().begin(), 2)->get(), phi3Ptr);
 
   bb.erasePhiOp(bb.getPhiOps().begin());
 
   ASSERT_EQ(bb.getPhiOps().size(), 2u);
-  EXPECT_EQ(bb.getPhiOps().begin().get(), phi2Ptr);
-  EXPECT_EQ(std::next(bb.getPhiOps().begin(), 1).get(), phi3Ptr);
+  EXPECT_EQ(bb.getPhiOps().begin()->get(), phi2Ptr);
+  EXPECT_EQ(std::next(bb.getPhiOps().begin(), 1)->get(), phi3Ptr);
 }
 
 TEST(BASIC_BLOCK, PHI_OPS_ERASE_MID) {
@@ -249,15 +249,15 @@ TEST(BASIC_BLOCK, PHI_OPS_ERASE_MID) {
   bb.insertPhiOpBack(std::move(phi3));
 
   ASSERT_EQ(bb.getPhiOps().size(), 3u);
-  EXPECT_EQ(bb.getPhiOps().begin().get(), phi1Ptr);
-  EXPECT_EQ(std::next(bb.getPhiOps().begin(), 1).get(), phi2Ptr);
-  EXPECT_EQ(std::next(bb.getPhiOps().begin(), 2).get(), phi3Ptr);
+  EXPECT_EQ(bb.getPhiOps().begin()->get(), phi1Ptr);
+  EXPECT_EQ(std::next(bb.getPhiOps().begin(), 1)->get(), phi2Ptr);
+  EXPECT_EQ(std::next(bb.getPhiOps().begin(), 2)->get(), phi3Ptr);
 
   bb.erasePhiOp(std::next(bb.getPhiOps().begin()));
 
   ASSERT_EQ(bb.getPhiOps().size(), 2u);
-  EXPECT_EQ(bb.getPhiOps().begin().get(), phi1Ptr);
-  EXPECT_EQ(std::next(bb.getPhiOps().begin(), 1).get(), phi3Ptr);
+  EXPECT_EQ(bb.getPhiOps().begin()->get(), phi1Ptr);
+  EXPECT_EQ(std::next(bb.getPhiOps().begin(), 1)->get(), phi3Ptr);
 }
 
 TEST(BASIC_BLOCK, PHI_OPS_ERASE_BACK) {
@@ -277,15 +277,15 @@ TEST(BASIC_BLOCK, PHI_OPS_ERASE_BACK) {
   bb.insertPhiOpBack(std::move(phi3));
 
   ASSERT_EQ(bb.getPhiOps().size(), 3u);
-  EXPECT_EQ(bb.getPhiOps().begin().get(), phi1Ptr);
-  EXPECT_EQ(std::next(bb.getPhiOps().begin(), 1).get(), phi2Ptr);
-  EXPECT_EQ(std::next(bb.getPhiOps().begin(), 2).get(), phi3Ptr);
+  EXPECT_EQ(bb.getPhiOps().begin()->get(), phi1Ptr);
+  EXPECT_EQ(std::next(bb.getPhiOps().begin(), 1)->get(), phi2Ptr);
+  EXPECT_EQ(std::next(bb.getPhiOps().begin(), 2)->get(), phi3Ptr);
 
   bb.erasePhiOp(std::next(bb.getPhiOps().begin(), 2));
 
   ASSERT_EQ(bb.getPhiOps().size(), 2u);
-  EXPECT_EQ(bb.getPhiOps().begin().get(), phi1Ptr);
-  EXPECT_EQ(std::next(bb.getPhiOps().begin(), 1).get(), phi2Ptr);
+  EXPECT_EQ(bb.getPhiOps().begin()->get(), phi1Ptr);
+  EXPECT_EQ(std::next(bb.getPhiOps().begin(), 1)->get(), phi2Ptr);
 }
 
 TEST(BASIC_BLOCK, PHI_OP_ERASE_LAST) {
@@ -297,7 +297,7 @@ TEST(BASIC_BLOCK, PHI_OP_ERASE_LAST) {
   bb.insertPhiOpBack(std::move(phi));
 
   ASSERT_EQ(bb.getPhiOps().size(), 1u);
-  EXPECT_EQ(bb.getPhiOps().begin().get(), phiPtr);
+  EXPECT_EQ(bb.getPhiOps().begin()->get(), phiPtr);
 
   bb.erasePhiOp(bb.getPhiOps().begin());
 
@@ -342,9 +342,9 @@ TEST(BASIC_BLOCK, PHI_OPS_REPLACE) {
   EXPECT_EQ(copy.getInputAt(0).getDefiningOp(), newPhiPtr);
 
   ASSERT_EQ(bb.getPhiOps().size(), 3u);
-  EXPECT_EQ(bb.getPhiOps().begin().get(), phi1Ptr);
-  EXPECT_EQ(std::next(bb.getPhiOps().begin()).get(), newPhiPtr);
-  EXPECT_EQ(std::next(bb.getPhiOps().begin(), 2).get(), phi3Ptr);
+  EXPECT_EQ(bb.getPhiOps().begin()->get(), phi1Ptr);
+  EXPECT_EQ(std::next(bb.getPhiOps().begin())->get(), newPhiPtr);
+  EXPECT_EQ(std::next(bb.getPhiOps().begin(), 2)->get(), phi3Ptr);
 }
 
 TEST(BASIC_BLOCK, OPS_INSERT_BACK) {
@@ -356,8 +356,8 @@ TEST(BASIC_BLOCK, OPS_INSERT_BACK) {
   bb.insertOpBack(std::move(op1));
 
   ASSERT_EQ(bb.getOps().size(), 1u);
-  EXPECT_EQ(&bb.getOps().back(), op1ptr);
-  EXPECT_EQ(bb.getOps().back().getParentBasicBlock(), &bb);
+  EXPECT_EQ(bb.getOps().back().get(), op1ptr);
+  EXPECT_EQ(bb.getOps().back()->getParentBasicBlock(), &bb);
 
   auto op2 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op2ptr = op2.get();
@@ -365,9 +365,9 @@ TEST(BASIC_BLOCK, OPS_INSERT_BACK) {
   bb.insertOpBack(std::move(op2));
 
   ASSERT_EQ(bb.getOps().size(), 2u);
-  EXPECT_EQ(&bb.getOps().front(), op1ptr);
-  EXPECT_EQ(&bb.getOps().back(), op2ptr);
-  EXPECT_EQ(bb.getOps().back().getParentBasicBlock(), &bb);
+  EXPECT_EQ(bb.getOps().front().get(), op1ptr);
+  EXPECT_EQ(bb.getOps().back().get(), op2ptr);
+  EXPECT_EQ(bb.getOps().back()->getParentBasicBlock(), &bb);
 }
 
 TEST(BASIC_BLOCK, OPS_INSERT_FRONT) {
@@ -379,8 +379,8 @@ TEST(BASIC_BLOCK, OPS_INSERT_FRONT) {
   bb.insertOpFront(std::move(op1));
 
   ASSERT_EQ(bb.getOps().size(), 1u);
-  EXPECT_EQ(&bb.getOps().front(), op1ptr);
-  EXPECT_EQ(bb.getOps().front().getParentBasicBlock(), &bb);
+  EXPECT_EQ(bb.getOps().front().get(), op1ptr);
+  EXPECT_EQ(bb.getOps().front()->getParentBasicBlock(), &bb);
 
   auto op2 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op2ptr = op2.get();
@@ -388,9 +388,9 @@ TEST(BASIC_BLOCK, OPS_INSERT_FRONT) {
   bb.insertOpFront(std::move(op2));
 
   ASSERT_EQ(bb.getOps().size(), 2u);
-  EXPECT_EQ(&bb.getOps().back(), op1ptr);
-  EXPECT_EQ(&bb.getOps().front(), op2ptr);
-  EXPECT_EQ(bb.getOps().front().getParentBasicBlock(), &bb);
+  EXPECT_EQ(bb.getOps().back().get(), op1ptr);
+  EXPECT_EQ(bb.getOps().front().get(), op2ptr);
+  EXPECT_EQ(bb.getOps().front()->getParentBasicBlock(), &bb);
 }
 
 TEST(BASIC_BLOCK, OPS_INSERT_AFTER) {
@@ -406,8 +406,8 @@ TEST(BASIC_BLOCK, OPS_INSERT_AFTER) {
   bb.insertOpBack(std::move(op2));
 
   ASSERT_EQ(bb.getOps().size(), 2u);
-  EXPECT_EQ(&bb.getOps().front(), op1ptr);
-  EXPECT_EQ(&bb.getOps().back(), op2ptr);
+  EXPECT_EQ(bb.getOps().front().get(), op1ptr);
+  EXPECT_EQ(bb.getOps().back().get(), op2ptr);
 
   auto op3 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op3ptr = op3.get();
@@ -415,12 +415,12 @@ TEST(BASIC_BLOCK, OPS_INSERT_AFTER) {
   bb.insertOpAfter(bb.getOps().begin(), std::move(op3));
 
   ASSERT_EQ(bb.getOps().size(), 3u);
-  EXPECT_EQ(std::next(bb.getOps().begin(), 0).get(), op1ptr);
-  EXPECT_EQ(std::next(bb.getOps().begin(), 1).get(), op3ptr);
-  EXPECT_EQ(std::next(bb.getOps().begin(), 2).get(), op2ptr);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 0)->get(), op1ptr);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 1)->get(), op3ptr);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 2)->get(), op2ptr);
 
-  EXPECT_EQ(&bb.getOps().front(), op1ptr);
-  EXPECT_EQ(&bb.getOps().back(), op2ptr);
+  EXPECT_EQ(bb.getOps().front().get(), op1ptr);
+  EXPECT_EQ(bb.getOps().back().get(), op2ptr);
 }
 
 TEST(BASIC_BLOCK, OPS_INSERT_AFTER_LAST) {
@@ -436,8 +436,8 @@ TEST(BASIC_BLOCK, OPS_INSERT_AFTER_LAST) {
   bb.insertOpBack(std::move(op2));
 
   ASSERT_EQ(bb.getOps().size(), 2u);
-  EXPECT_EQ(&bb.getOps().front(), op1ptr);
-  EXPECT_EQ(&bb.getOps().back(), op2ptr);
+  EXPECT_EQ(bb.getOps().front().get(), op1ptr);
+  EXPECT_EQ(bb.getOps().back().get(), op2ptr);
 
   auto op3 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op3ptr = op3.get();
@@ -445,12 +445,12 @@ TEST(BASIC_BLOCK, OPS_INSERT_AFTER_LAST) {
   bb.insertOpAfter(std::next(bb.getOps().begin()), std::move(op3));
 
   ASSERT_EQ(bb.getOps().size(), 3u);
-  EXPECT_EQ(std::next(bb.getOps().begin(), 0).get(), op1ptr);
-  EXPECT_EQ(std::next(bb.getOps().begin(), 1).get(), op2ptr);
-  EXPECT_EQ(std::next(bb.getOps().begin(), 2).get(), op3ptr);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 0)->get(), op1ptr);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 1)->get(), op2ptr);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 2)->get(), op3ptr);
 
-  EXPECT_EQ(&bb.getOps().front(), op1ptr);
-  EXPECT_EQ(&bb.getOps().back(), op3ptr);
+  EXPECT_EQ(bb.getOps().front().get(), op1ptr);
+  EXPECT_EQ(bb.getOps().back().get(), op3ptr);
 }
 
 TEST(BASIC_BLOCK, OPS_INSERT_BEFORE) {
@@ -466,8 +466,8 @@ TEST(BASIC_BLOCK, OPS_INSERT_BEFORE) {
   bb.insertOpBack(std::move(op2));
 
   ASSERT_EQ(bb.getOps().size(), 2u);
-  EXPECT_EQ(&bb.getOps().front(), op1ptr);
-  EXPECT_EQ(&bb.getOps().back(), op2ptr);
+  EXPECT_EQ(bb.getOps().front().get(), op1ptr);
+  EXPECT_EQ(bb.getOps().back().get(), op2ptr);
 
   auto op3 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op3ptr = op3.get();
@@ -475,12 +475,12 @@ TEST(BASIC_BLOCK, OPS_INSERT_BEFORE) {
   bb.insertOpBefore(std::next(bb.getOps().begin()), std::move(op3));
 
   ASSERT_EQ(bb.getOps().size(), 3u);
-  EXPECT_EQ(std::next(bb.getOps().begin(), 0).get(), op1ptr);
-  EXPECT_EQ(std::next(bb.getOps().begin(), 1).get(), op3ptr);
-  EXPECT_EQ(std::next(bb.getOps().begin(), 2).get(), op2ptr);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 0)->get(), op1ptr);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 1)->get(), op3ptr);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 2)->get(), op2ptr);
 
-  EXPECT_EQ(&bb.getOps().front(), op1ptr);
-  EXPECT_EQ(&bb.getOps().back(), op2ptr);
+  EXPECT_EQ(bb.getOps().front().get(), op1ptr);
+  EXPECT_EQ(bb.getOps().back().get(), op2ptr);
 }
 
 TEST(BASIC_BLOCK, OPS_INSERT_BEFORE_FIRST) {
@@ -496,8 +496,8 @@ TEST(BASIC_BLOCK, OPS_INSERT_BEFORE_FIRST) {
   bb.insertOpBack(std::move(op2));
 
   ASSERT_EQ(bb.getOps().size(), 2u);
-  EXPECT_EQ(&bb.getOps().front(), op1ptr);
-  EXPECT_EQ(&bb.getOps().back(), op2ptr);
+  EXPECT_EQ(bb.getOps().front().get(), op1ptr);
+  EXPECT_EQ(bb.getOps().back().get(), op2ptr);
 
   auto op3 = std::make_unique<builtin::ParamOp>(DataType::FLOAT);
   auto* op3ptr = op3.get();
@@ -505,12 +505,12 @@ TEST(BASIC_BLOCK, OPS_INSERT_BEFORE_FIRST) {
   bb.insertOpBefore(bb.getOps().begin(), std::move(op3));
 
   ASSERT_EQ(bb.getOps().size(), 3u);
-  EXPECT_EQ(std::next(bb.getOps().begin(), 0).get(), op3ptr);
-  EXPECT_EQ(std::next(bb.getOps().begin(), 1).get(), op1ptr);
-  EXPECT_EQ(std::next(bb.getOps().begin(), 2).get(), op2ptr);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 0)->get(), op3ptr);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 1)->get(), op1ptr);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 2)->get(), op2ptr);
 
-  EXPECT_EQ(&bb.getOps().front(), op3ptr);
-  EXPECT_EQ(&bb.getOps().back(), op2ptr);
+  EXPECT_EQ(bb.getOps().front().get(), op3ptr);
+  EXPECT_EQ(bb.getOps().back().get(), op2ptr);
 }
 
 TEST(BASIC_BLOCK, OPS_ERASE_FRONT) {
@@ -532,11 +532,11 @@ TEST(BASIC_BLOCK, OPS_ERASE_FRONT) {
 
   ASSERT_EQ(bb.getOps().size(), 2u);
 
-  EXPECT_EQ(std::next(bb.getOps().begin(), 0).get(), op2ptr);
-  EXPECT_EQ(std::next(bb.getOps().begin(), 1).get(), op3ptr);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 0)->get(), op2ptr);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 1)->get(), op3ptr);
 
-  EXPECT_EQ(&bb.getOps().front(), op2ptr);
-  EXPECT_EQ(&bb.getOps().back(), op3ptr);
+  EXPECT_EQ(bb.getOps().front().get(), op2ptr);
+  EXPECT_EQ(bb.getOps().back().get(), op3ptr);
 }
 
 TEST(BASIC_BLOCK, OPS_ERASE_MID) {
@@ -558,11 +558,11 @@ TEST(BASIC_BLOCK, OPS_ERASE_MID) {
 
   ASSERT_EQ(bb.getOps().size(), 2u);
 
-  EXPECT_EQ(std::next(bb.getOps().begin(), 0).get(), op1ptr);
-  EXPECT_EQ(std::next(bb.getOps().begin(), 1).get(), op3ptr);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 0)->get(), op1ptr);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 1)->get(), op3ptr);
 
-  EXPECT_EQ(&bb.getOps().front(), op1ptr);
-  EXPECT_EQ(&bb.getOps().back(), op3ptr);
+  EXPECT_EQ(bb.getOps().front().get(), op1ptr);
+  EXPECT_EQ(bb.getOps().back().get(), op3ptr);
 }
 
 TEST(BASIC_BLOCK, OPS_ERASE_BACK) {
@@ -584,11 +584,11 @@ TEST(BASIC_BLOCK, OPS_ERASE_BACK) {
 
   ASSERT_EQ(bb.getOps().size(), 2u);
 
-  EXPECT_EQ(std::next(bb.getOps().begin(), 0).get(), op1ptr);
-  EXPECT_EQ(std::next(bb.getOps().begin(), 1).get(), op2ptr);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 0)->get(), op1ptr);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 1)->get(), op2ptr);
 
-  EXPECT_EQ(&bb.getOps().front(), op1ptr);
-  EXPECT_EQ(&bb.getOps().back(), op2ptr);
+  EXPECT_EQ(bb.getOps().front().get(), op1ptr);
+  EXPECT_EQ(bb.getOps().back().get(), op2ptr);
 }
 
 TEST(BASIC_BLOCK, OPS_REPLACE) {
@@ -629,9 +629,9 @@ TEST(BASIC_BLOCK, OPS_REPLACE) {
   EXPECT_EQ(copy.getInputAt(0).getDefiningOp(), newAddPtr);
 
   ASSERT_EQ(bb.getOps().size(), 3u);
-  EXPECT_EQ(std::next(bb.getOps().begin(), 0).get(), op1ptr);
-  EXPECT_EQ(std::next(bb.getOps().begin(), 1).get(), newAddPtr);
-  EXPECT_EQ(std::next(bb.getOps().begin(), 2).get(), op3ptr);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 0)->get(), op1ptr);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 1)->get(), newAddPtr);
+  EXPECT_EQ(std::next(bb.getOps().begin(), 2)->get(), op3ptr);
 }
 
 TEST(BASIC_BLOCK, EXFAIL_ORPHAN) {

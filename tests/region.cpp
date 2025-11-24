@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <string>
 
 #include <iris.hpp>
 using namespace iris;
@@ -25,12 +26,11 @@ TEST(REGION, NAMING) {
 TEST(REGION, EXFAIL_INVALID_NAME) {
   try {
     Region region("");
+    FAIL() << "Expected IrisException when constructing Region with empty name";
   } catch (const IrisException& exc) {
-    std::string str = exc.what();
+    const std::string str = exc.what();
     EXPECT_EQ(str, "Region is assigned with an empty name!");
-    return;
   }
-  FAIL();
 }
 
 TEST(REGION, BASIC_BLOCK_ID_PROVIDERS) {
@@ -620,13 +620,12 @@ TEST(REGION, EXFAIL_COLLECT_DOM_INFO_NO_START_BB) {
 
   try {
     region.collectDomInfo();
+    FAIL() << "Expected IrisException when collecting DomInfo with no start bb";
   } catch (const IrisException& exc) {
     std::string str = exc.what();
-    ASSERT_EQ(str,
+    EXPECT_EQ(str,
               "Cannot collect dom info with no start basic block specified!");
-    return;
   }
-  FAIL();
 }
 
 TEST(REGION, EXFAIL_GET_DFS_NO_START_BB) {
@@ -634,12 +633,11 @@ TEST(REGION, EXFAIL_GET_DFS_NO_START_BB) {
 
   try {
     [[maybe_unused]] auto dfs = region.getDFS();
+    FAIL() << "Expected IrisException when getting DFS with no start bb";
   } catch (const IrisException& exc) {
     std::string str = exc.what();
-    ASSERT_EQ(str, "Cannot run DFS with no start basic block specified!");
-    return;
+    EXPECT_EQ(str, "Cannot run DFS with no start basic block specified!");
   }
-  FAIL();
 }
 
 TEST(REGION, EXFAIL_GET_RPO_NO_START_BB) {
@@ -647,10 +645,9 @@ TEST(REGION, EXFAIL_GET_RPO_NO_START_BB) {
 
   try {
     [[maybe_unused]] auto rpo = region.getRPO();
+    FAIL() << "Expected IrisException when getting RPO with no start bb";
   } catch (const IrisException& exc) {
     std::string str = exc.what();
-    ASSERT_EQ(str, "Cannot run RPO with no start basic block specified!");
-    return;
+    EXPECT_EQ(str, "Cannot run RPO with no start basic block specified!");
   }
-  FAIL();
 }

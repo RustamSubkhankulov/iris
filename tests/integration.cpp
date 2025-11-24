@@ -3,6 +3,9 @@
 #include <iris.hpp>
 using namespace iris;
 
+#include <test_utils.hpp>
+using iris::test::verifyRegion;
+
 TEST(INTEGRATION, FACTORIAL_IR) {
 
   IRBuilder builder;
@@ -49,11 +52,5 @@ TEST(INTEGRATION, FACTORIAL_IR) {
   ASSERT_TRUE(regionPtr->setStartBasicBlock(&bb0));
   ASSERT_TRUE(regionPtr->setFinalBasicBlock(&bb2));
 
-  std::string msg;
-  bool vres;
-
-  vres = regionPtr->verify(msg);
-
-  ASSERT_TRUE(vres);
-  ASSERT_TRUE(msg.empty());
+  verifyRegion(*regionPtr);
 }

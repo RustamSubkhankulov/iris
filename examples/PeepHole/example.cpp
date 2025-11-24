@@ -29,8 +29,7 @@ int main() {
   auto cAllOnes_si = builder.createAndAddOp<arith::ConstantOp>(
     makeConstAttribute(static_cast<std::int64_t>(-1)));
   auto cAllOnes_ui = builder.createAndAddOp<arith::ConstantOp>(
-    makeConstAttribute(
-      std::numeric_limits<std::uint64_t>::max()));
+    makeConstAttribute(std::numeric_limits<std::uint64_t>::max()));
 
   // --- add peephole patterns ---
   auto add1 = builder.createAndAddOp<arith::AddOp>(sx0, c0_si); // x + 0 -> x
@@ -50,25 +49,31 @@ int main() {
   auto div1 = builder.createAndAddOp<arith::DivOp>(sx0, c1_si); // x / 1 -> x
 
   // --- and peephole patterns (unsigned) ---
-  auto and1 = builder.createAndAddOp<arith::AndOp>(ux0, c0_ui);       // x & 0 -> 0
-  auto and2 = builder.createAndAddOp<arith::AndOp>(c0_ui, ux0);       // 0 & x -> 0
-  auto and3 = builder.createAndAddOp<arith::AndOp>(ux0, cAllOnes_ui); // x & all1 -> x
-  auto and4 = builder.createAndAddOp<arith::AndOp>(cAllOnes_ui, ux0); // all1 & x -> x
-  auto and5 = builder.createAndAddOp<arith::AndOp>(ux1, ux1);         // x & x -> x
+  auto and1 = builder.createAndAddOp<arith::AndOp>(ux0, c0_ui); // x & 0 -> 0
+  auto and2 = builder.createAndAddOp<arith::AndOp>(c0_ui, ux0); // 0 & x -> 0
+  auto and3 =
+    builder.createAndAddOp<arith::AndOp>(ux0, cAllOnes_ui); // x & all1 -> x
+  auto and4 =
+    builder.createAndAddOp<arith::AndOp>(cAllOnes_ui, ux0);   // all1 & x -> x
+  auto and5 = builder.createAndAddOp<arith::AndOp>(ux1, ux1); // x & x -> x
 
   // --- or peephole patterns (unsigned) ---
-  auto or1 = builder.createAndAddOp<arith::OrOp>(ux0, c0_ui);       // x | 0 -> x
-  auto or2 = builder.createAndAddOp<arith::OrOp>(c0_ui, ux0);       // 0 | x -> x
-  auto or3 = builder.createAndAddOp<arith::OrOp>(ux0, cAllOnes_ui); // x | all1 -> all1
-  auto or4 = builder.createAndAddOp<arith::OrOp>(cAllOnes_ui, ux0); // all1 | x -> all1
-  auto or5 = builder.createAndAddOp<arith::OrOp>(ux1, ux1);         // x | x -> x
+  auto or1 = builder.createAndAddOp<arith::OrOp>(ux0, c0_ui); // x | 0 -> x
+  auto or2 = builder.createAndAddOp<arith::OrOp>(c0_ui, ux0); // 0 | x -> x
+  auto or3 =
+    builder.createAndAddOp<arith::OrOp>(ux0, cAllOnes_ui); // x | all1 -> all1
+  auto or4 =
+    builder.createAndAddOp<arith::OrOp>(cAllOnes_ui, ux0);  // all1 | x -> all1
+  auto or5 = builder.createAndAddOp<arith::OrOp>(ux1, ux1); // x | x -> x
 
   // --- xor peephole patterns (unsigned) ---
-  auto xor1 = builder.createAndAddOp<arith::XorOp>(ux0, c0_ui);       // x ^ 0 -> x
-  auto xor2 = builder.createAndAddOp<arith::XorOp>(c0_ui, ux0);       // 0 ^ x -> x
-  auto xor3 = builder.createAndAddOp<arith::XorOp>(ux1, ux1);         // x ^ x -> 0
-  auto xor4 = builder.createAndAddOp<arith::XorOp>(ux0, cAllOnes_ui); // x ^ all1 -> not(x)
-  auto xor5 = builder.createAndAddOp<arith::XorOp>(cAllOnes_ui, ux0); // all1 ^ x -> not(x)
+  auto xor1 = builder.createAndAddOp<arith::XorOp>(ux0, c0_ui); // x ^ 0 -> x
+  auto xor2 = builder.createAndAddOp<arith::XorOp>(c0_ui, ux0); // 0 ^ x -> x
+  auto xor3 = builder.createAndAddOp<arith::XorOp>(ux1, ux1);   // x ^ x -> 0
+  auto xor4 = builder.createAndAddOp<arith::XorOp>(
+    ux0, cAllOnes_ui); // x ^ all1 -> not(x)
+  auto xor5 = builder.createAndAddOp<arith::XorOp>(cAllOnes_ui,
+                                                   ux0); // all1 ^ x -> not(x)
 
   // --- shift peephole patterns ---
   // sal / sar: signed
@@ -106,7 +111,8 @@ int main() {
   auto t1 = builder.createAndAddOp<arith::AddOp>(mul1, div1);
   auto t2 = builder.createAndAddOp<arith::AndOp>(and3, or3);
 
-  // Final value mixes everything a bit, including the outer not-double-negation.
+  // Final value mixes everything a bit, including the outer
+  // not-double-negation.
   auto t3 = builder.createAndAddOp<arith::AddOp>(t0, t1);
   auto t4 = builder.createAndAddOp<arith::AddOp>(t3, t2);
 
@@ -122,8 +128,7 @@ int main() {
 
   std::string msg;
   if (!regionPtr->verify(msg)) {
-    std::cerr << "Verification failed (before peephole): " << msg
-              << std::endl;
+    std::cerr << "Verification failed (before peephole): " << msg << std::endl;
   }
 
   std::cout << "==============================" << std::endl;
@@ -135,8 +140,7 @@ int main() {
   pm.run(*regionPtr);
 
   if (!regionPtr->verify(msg)) {
-    std::cerr << "Verification failed (after peephole): " << msg
-              << std::endl;
+    std::cerr << "Verification failed (after peephole): " << msg << std::endl;
   }
 
   std::cout << "==============================" << std::endl;

@@ -17,7 +17,7 @@ void PatternRewriter::eraseOp(Operation& op) {
 
   auto& regOps = bb->getOps();
   for (auto it = regOps.begin(); it != regOps.end(); ++it) {
-    if (&*it == &op) {
+    if (it->get() == &op) {
       bb->eraseOp(it);
       return;
     }
@@ -25,7 +25,7 @@ void PatternRewriter::eraseOp(Operation& op) {
 
   auto& phiOps = bb->getPhiOps();
   for (auto it = phiOps.begin(); it != phiOps.end(); ++it) {
-    if (&*it == &op) {
+    if (it->get() == &op) {
       bb->erasePhiOp(it);
       return;
     }
@@ -49,7 +49,7 @@ void PatternRewriter::replaceOpWith(Operation& op,
 
   auto& regOps = bb->getOps();
   for (auto it = regOps.begin(); it != regOps.end(); ++it) {
-    if (&*it == &op) {
+    if (it->get() == &op) {
       newOp->setID(preservedID);
       bb->replaceOpWith(it, std::move(newOp));
       return;
@@ -58,7 +58,7 @@ void PatternRewriter::replaceOpWith(Operation& op,
 
   auto& phiOps = bb->getPhiOps();
   for (auto it = phiOps.begin(); it != phiOps.end(); ++it) {
-    if (&*it == &op) {
+    if (it->get() == &op) {
       auto phiOp = std::unique_ptr<ctrlflow::PhiOp>(
         static_cast<ctrlflow::PhiOp*>(newOp.release()));
 
@@ -89,7 +89,7 @@ bool PatternPass::run(Region& region) {
         BBchanged = false;
 
         for (auto it = opList.begin(); it != opList.end(); ++it) {
-          Operation& op = *it;
+          Operation& op = **it;
 
           for (const auto& pattern : m_patterns) {
             if (pattern->matchAndRewrite(op, rewriter)) {

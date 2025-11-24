@@ -67,12 +67,13 @@ int main() {
   auto ui_result = builder.createAndAddOp<arith::AndOp>(xor_ui, a1);
 
   // Just to make sure folded float and cmp_bool are also "used":
-  auto cast_bool_as_int = builder.createAndAddOp<arith::CastOp>(
-    DataType::SINT, cmp_bool);
+  auto cast_bool_as_int =
+    builder.createAndAddOp<arith::CastOp>(DataType::SINT, cmp_bool);
   auto float_as_int =
     builder.createAndAddOp<arith::CastOp>(DataType::SINT, div_f);
 
-  // Final combination: sum_all + cast_bool_as_int + float_as_int (in two steps).
+  // Final combination: sum_all + cast_bool_as_int + float_as_int (in two
+  // steps).
   auto tmp = builder.createAndAddOp<arith::AddOp>(sum_all, cast_bool_as_int);
   auto final_val = builder.createAndAddOp<arith::AddOp>(tmp, float_as_int);
 
@@ -101,8 +102,7 @@ int main() {
   pm.run(*regionPtr);
 
   if (!regionPtr->verify(msg)) {
-    std::cerr << "Verification failed (after const fold): " << msg
-              << std::endl;
+    std::cerr << "Verification failed (after const fold): " << msg << std::endl;
   }
 
   std::cout << "==============================" << std::endl;

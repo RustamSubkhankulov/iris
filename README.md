@@ -359,13 +359,25 @@ See corresponding tests - ``tests/opt/arith/constfold.cpp``.
   - ``shr(x, 0)`` -> ``x``, ``shr(0, x)`` -> ``0``
 - Double negation:
   - ``not(not(x))`` -> ``x``
+- To expose constant–constant sub-expressions for `ArithConstFoldPass`, the
+peephole pass applies *rotate* patterns to integer `add`/`mul` when an inner operation is used only by a single outer operation:
+  - ``add``:
+    - ``(x + C1) + C2``  ->  ``x + (C1 + C2)``
+    - ``(C1 + x) + C2``  ->  ``x + (C1 + C2)``
+    - ``C2 + (x + C1)``  ->  ``x + (C1 + C2)``
+    - ``C2 + (C1 + x)``  ->  ``x + (C1 + C2)``
+  - ``mul``:
+    - ``(C1 * x) * C2``  ->  ``x * (C1 * C2)``
+    - ``(x * C1) * C2``  ->  ``x * (C1 * C2)``
+    - ``C2 * (C1 * x)``  ->  ``x * (C1 * C2)``
+    - ``C2 * (x * C1)``  ->  ``x * (C1 * C2)``
 
 IR before ``ArithPeepHolePass``:
 ```text
 peephole:
   ^bb0 <start> <final> :
-      a0.si builtin.param -> (v10,v11,v12,v14,v15,v16,v18,v34,v35,v36,v37)
-      a1.si builtin.param -> (v13,v13,v17)
+      a0.si builtin.param -> (v10,v11,v12,v14,v15,v16,v18,v34,v35,v36,v37,v50)
+      a1.si builtin.param -> (v13,v13,v17,v54)
       a2.ui builtin.param -> (v19,v20,v21,v22,v24,v25,v26,v27,v29,v30,v32,v33,v38,v39,v40,v41,v42)
       a3.ui builtin.param -> (v23,v23,v28,v28,v31,v31)
       c4.si arith.const (0) -> (v10,v11,v12,v16,v17,v34,v35,v36,v37)
@@ -407,21 +419,29 @@ peephole:
       v40.ui arith.shr (a2 : ui, c6 : ui)
       v41.ui arith.shr (c6 : ui, a2 : ui)
       v42.ui arith.not (a2 : ui) -> (v43)
-      v43.ui arith.not (v42 : ui) -> (n48)
+      v43.ui arith.not (v42 : ui) -> (n56)
       v44.si arith.add (v10 : si, v12 : si) -> (v47)
       v45.si arith.add (v14 : si, v18 : si) -> (v47)
       v46.ui arith.and (v21 : ui, v26 : ui)
       v47.si arith.add (v44 : si, v45 : si)
-      n48 ctrlflow.return (v43 : ui)
+      c48.si arith.const (10) -> (v50)
+      c49.si arith.const (5) -> (v51)
+      v50.si arith.add (a0 : si, c48 : si) -> (v51)
+      v51.si arith.add (v50 : si, c49 : si)
+      c52.si arith.const (2) -> (v54)
+      c53.si arith.const (3) -> (v55)
+      v54.si arith.mul (c52 : si, a1 : si) -> (v55)
+      v55.si arith.mul (v54 : si, c53 : si)
+      n56 ctrlflow.return (v43 : ui)
 ```
 
 IR after ``ArithPeepHolePass``:
 ```text
 peephole:
   ^bb0 <start> <final> :
-      a0.si builtin.param -> (v44,v44,v45,v45)
-      a1.si builtin.param
-      a2.ui builtin.param -> (v32,v33,n48)
+      a0.si builtin.param -> (v44,v44,v45,v45,v51)
+      a1.si builtin.param -> (v55)
+      a2.ui builtin.param -> (v32,v33,n56)
       a3.ui builtin.param
       c4.si arith.const (0)
       c5.si arith.const (1)
@@ -444,7 +464,15 @@ peephole:
       v44.si arith.add (a0 : si, a0 : si) -> (v47)
       v45.si arith.add (a0 : si, a0 : si) -> (v47)
       v47.si arith.add (v44 : si, v45 : si)
-      n48 ctrlflow.return (a2 : ui)
+      c48.si arith.const (10) -> (v50)
+      c49.si arith.const (5) -> (v50)
+      v50.si arith.add (c48 : si, c49 : si) -> (v51)
+      v51.si arith.add (a0 : si, v50 : si)
+      c52.si arith.const (2) -> (v54)
+      c53.si arith.const (3) -> (v54)
+      v54.si arith.mul (c52 : si, c53 : si) -> (v55)
+      v55.si arith.mul (a1 : si, v54 : si)
+      n56 ctrlflow.return (a2 : ui)
 ```
 
 See corresponding example - ``examples/PeepHole``.

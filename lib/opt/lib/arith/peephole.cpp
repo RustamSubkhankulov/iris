@@ -152,6 +152,81 @@ public:
   }
 };
 
+// (x + C1) + C2  ->  x + (C1 + C2)
+// (C1 + x) + C2  ->  x + (C1 + C2)
+// C2 + (x + C1)  ->  x + (C1 + C2)
+// C2 + (C1 + x)  ->  x + (C1 + C2)
+class AddRotateConstantsPattern final
+  : public ArithBinaryPeepholePattern<AddRotateConstantsPattern,
+                                      iris::arith::AddOp> {
+public:
+  bool rewrite(iris::arith::AddOp& op,
+               [[maybe_unused]] PatternRewriter& /*rewriter*/) const {
+    // Only for integer types (avoid FP reassociation issues).
+    if (!isInteger(op.getDataType())) {
+      return false;
+    }
+
+    return tryRotate(op, /*innerOnLHS=*/true) ||
+           tryRotate(op, /*innerOnLHS=*/false);
+  }
+
+private:
+  static bool tryRotate(iris::arith::AddOp& outer, bool innerOnLHS) {
+    Input& innerInput = innerOnLHS ? outer.getInputX() : outer.getInputY();
+    Input& otherInput = innerOnLHS ? outer.getInputY() : outer.getInputX();
+
+    auto* innerDef = innerInput.getDefiningOp();
+    auto* innerAdd = dynamic_cast<iris::arith::AddOp*>(innerDef);
+    if (!innerAdd) {
+      return false;
+    }
+
+    auto* outerConst = getConstFromInput(otherInput);
+    if (!outerConst) {
+      return false;
+    }
+
+    if (innerAdd->getUsersNum() != 1) {
+      return false;
+    }
+
+    const auto& users = innerAdd->getUsers();
+    const auto& soleUser = users.front();
+    if (soleUser.getUserOp() != &outer) {
+      return false;
+    }
+
+    Input& inX = innerAdd->getInputX();
+    Input& inY = innerAdd->getInputY();
+
+    auto* innerConstX = getConstFromInput(inX);
+    auto* innerConstY = getConstFromInput(inY);
+
+    // Either both are const or both are non-const
+    if (!!innerConstX == !!innerConstY) {
+      return false;
+    }
+
+    auto* innerConst = innerConstX ? innerConstX : innerConstY;
+    Operation* varOp = innerConstX ? inY.getDefiningOp() : inX.getDefiningOp();
+    if (!varOp) {
+      return false;
+    }
+
+    // Perform rotation:
+    //   innerAdd := add(innerConst, outerConst)
+    //   outer    := add(varOp, innerAdd)
+    innerAdd->setInput(0, innerConst);
+    innerAdd->setInput(1, outerConst);
+
+    outer.setInput(0, varOp);
+    outer.setInput(1, innerAdd);
+
+    return true;
+  }
+};
+
 // --- sub patterns -----------------------------------------------------------
 
 // sub(x, 0) -> x
@@ -287,6 +362,81 @@ public:
     auto newConst =
       std::make_unique<iris::arith::ConstantOp>(std::move(zeroAttr));
     rewriter.replaceOpWith(op, std::move(newConst));
+    return true;
+  }
+};
+
+// (C1 * x) * C2  ->  x * (C1 * C2)
+// (x * C1) * C2  ->  x * (C1 * C2)
+// C2 * (C1 * x)  ->  x * (C1 * C2)
+// C2 * (x * C1)  ->  x * (C1 * C2)
+class MulRotateConstantsPattern final
+  : public ArithBinaryPeepholePattern<MulRotateConstantsPattern,
+                                      iris::arith::MulOp> {
+public:
+  bool rewrite(iris::arith::MulOp& op,
+               [[maybe_unused]] PatternRewriter& /*rewriter*/) const {
+    // Only for integer types (avoid FP reassociation issues).
+    if (!isInteger(op.getDataType())) {
+      return false;
+    }
+
+    return tryRotate(op, /*innerOnLHS=*/true) ||
+           tryRotate(op, /*innerOnLHS=*/false);
+  }
+
+private:
+  static bool tryRotate(iris::arith::MulOp& outer, bool innerOnLHS) {
+    Input& innerInput = innerOnLHS ? outer.getInputX() : outer.getInputY();
+    Input& otherInput = innerOnLHS ? outer.getInputY() : outer.getInputX();
+
+    auto* innerDef = innerInput.getDefiningOp();
+    auto* innerMul = dynamic_cast<iris::arith::MulOp*>(innerDef);
+    if (!innerMul) {
+      return false;
+    }
+
+    auto* outerConst = getConstFromInput(otherInput);
+    if (!outerConst) {
+      return false;
+    }
+
+    if (innerMul->getUsersNum() != 1) {
+      return false;
+    }
+
+    const auto& users = innerMul->getUsers();
+    const auto& soleUser = users.front();
+    if (soleUser.getUserOp() != &outer) {
+      return false;
+    }
+
+    Input& inX = innerMul->getInputX();
+    Input& inY = innerMul->getInputY();
+
+    auto* innerConstX = getConstFromInput(inX);
+    auto* innerConstY = getConstFromInput(inY);
+
+    // Either both are const or both are non-const
+    if (!!innerConstX == !!innerConstY) {
+      return false;
+    }
+
+    auto* innerConst = innerConstX ? innerConstX : innerConstY;
+    Operation* varOp = innerConstX ? inY.getDefiningOp() : inX.getDefiningOp();
+    if (!varOp) {
+      return false;
+    }
+
+    // Perform rotation:
+    //   innerMul := mul(innerConst, outerConst)
+    //   outer    := mul(varOp, innerMul)
+    innerMul->setInput(0, Input(innerConst));
+    innerMul->setInput(1, Input(outerConst));
+
+    outer.setInput(0, Input(varOp));
+    outer.setInput(1, Input(innerMul));
+
     return true;
   }
 };
@@ -922,6 +1072,7 @@ ArithPeepHolePass::ArithPeepHolePass() {
   // add
   addPattern<AddZeroRhsPattern>();
   addPattern<AddZeroLhsPattern>();
+  addPattern<AddRotateConstantsPattern>();
 
   // sub
   addPattern<SubZeroRhsPattern>();
@@ -932,6 +1083,7 @@ ArithPeepHolePass::ArithPeepHolePass() {
   addPattern<MulOneLhsPattern>();
   addPattern<MulZeroRhsPattern>();
   addPattern<MulZeroLhsPattern>();
+  addPattern<MulRotateConstantsPattern>();
 
   // div
   addPattern<DivOneRhsPattern>();

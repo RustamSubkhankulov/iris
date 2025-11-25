@@ -97,6 +97,124 @@ TEST(ARITH_PEEPHOLES, ADD_ZERO_NOT_APPLIED) {
   EXPECT_EQ(ret->getInput(0).getDefiningOp(), static_cast<Operation*>(add));
 }
 
+TEST(ARITH_PEEPHOLES, ADD_ROTATE_CONSTANTS) {
+  IRBuilder builder;
+  builder.startNewRegion("ph_add_rotate_constants");
+  builder.startNewBasicBlock();
+
+  auto* x = builder.createAndAddOp<builtin::ParamOp>(DataType::SINT);
+  auto* c10 =
+    builder.createAndAddOp<arith::ConstantOp>(makeConstAttribute(int64_t{10}));
+  auto* c5 =
+    builder.createAndAddOp<arith::ConstantOp>(makeConstAttribute(int64_t{5}));
+
+  auto* addInner = builder.createAndAddOp<arith::AddOp>(x, c10); // x + 10
+  auto* addOuter = builder.createAndAddOp<arith::AddOp>(addInner,
+                                                        c5); // (x + 10) + 5
+  builder.createAndAddOp<ctrlflow::ReturnOp>(addOuter);
+
+  auto& bb0 = builder.finalizeCurBasicBlock();
+  auto region = builder.obtainRegion();
+  ASSERT_TRUE(region);
+  ASSERT_TRUE(region->setStartBasicBlock(&bb0));
+  ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
+
+  verifyRegion(*region);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
+  verifyRegion(*region);
+
+  auto* bb = region->getStartBasicBlock();
+  const auto& ops = bb->getOps();
+  ASSERT_FALSE(ops.empty());
+
+  auto* retAfter = dynamic_cast<const ctrlflow::ReturnOp*>(ops.back().get());
+  ASSERT_NE(retAfter, nullptr);
+
+  auto* outerAfter =
+    dynamic_cast<const arith::AddOp*>(retAfter->getInput(0).getDefiningOp());
+  ASSERT_NE(outerAfter, nullptr);
+  EXPECT_EQ(outerAfter, addOuter);
+
+  auto* outerLhs = outerAfter->getInputX().getDefiningOp();
+  auto* outerRhs = outerAfter->getInputY().getDefiningOp();
+
+  ASSERT_EQ(outerLhs, static_cast<Operation*>(x));
+  auto* innerAfter = dynamic_cast<const arith::AddOp*>(outerRhs);
+  ASSERT_NE(innerAfter, nullptr);
+  EXPECT_EQ(innerAfter, addInner);
+
+  auto* innerLhsConst = dynamic_cast<const arith::ConstantOp*>(
+    innerAfter->getInputX().getDefiningOp());
+  auto* innerRhsConst = dynamic_cast<const arith::ConstantOp*>(
+    innerAfter->getInputY().getDefiningOp());
+  ASSERT_NE(innerLhsConst, nullptr);
+  ASSERT_NE(innerRhsConst, nullptr);
+
+  EXPECT_NE(innerAfter->getInputX().getDefiningOp(),
+            static_cast<Operation*>(x));
+  EXPECT_NE(innerAfter->getInputY().getDefiningOp(),
+            static_cast<Operation*>(x));
+
+  EXPECT_TRUE((innerLhsConst == c10 && innerRhsConst == c5) ||
+              (innerLhsConst == c5 && innerRhsConst == c10));
+}
+
+TEST(ARITH_PEEPHOLES, ADD_ROTATE_NOT_APPLIED_MULTIUSE) {
+  IRBuilder builder;
+  builder.startNewRegion("ph_add_rotate_multiuse");
+  builder.startNewBasicBlock();
+
+  auto* x = builder.createAndAddOp<builtin::ParamOp>(DataType::SINT);
+  auto* c10 =
+    builder.createAndAddOp<arith::ConstantOp>(makeConstAttribute(int64_t{10}));
+  auto* c5 =
+    builder.createAndAddOp<arith::ConstantOp>(makeConstAttribute(int64_t{5}));
+
+  auto* addInner = builder.createAndAddOp<arith::AddOp>(x, c10); // x + 10
+  auto* addOuter = builder.createAndAddOp<arith::AddOp>(addInner,
+                                                        c5); // (x + 10) + 5
+  builder.createAndAddOp<arith::SubOp>(addInner, x);
+
+  builder.createAndAddOp<ctrlflow::ReturnOp>(addOuter);
+
+  auto& bb0 = builder.finalizeCurBasicBlock();
+  auto region = builder.obtainRegion();
+  ASSERT_TRUE(region);
+  ASSERT_TRUE(region->setStartBasicBlock(&bb0));
+  ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
+
+  verifyRegion(*region);
+  runSinglePass<opt::arith::ArithPeepHolePass>(*region);
+  verifyRegion(*region);
+
+  auto* bb = region->getStartBasicBlock();
+  const auto& ops = bb->getOps();
+  ASSERT_FALSE(ops.empty());
+
+  auto* retAfter = dynamic_cast<const ctrlflow::ReturnOp*>(ops.back().get());
+  ASSERT_NE(retAfter, nullptr);
+
+  auto* outerAfter =
+    dynamic_cast<const arith::AddOp*>(retAfter->getInput(0).getDefiningOp());
+  ASSERT_NE(outerAfter, nullptr);
+
+  auto* innerAfter =
+    dynamic_cast<const arith::AddOp*>(outerAfter->getInputX().getDefiningOp());
+  ASSERT_NE(innerAfter, nullptr);
+
+  auto* lhsDef = innerAfter->getInputX().getDefiningOp();
+  auto* rhsDef = innerAfter->getInputY().getDefiningOp();
+
+  bool lhsIsX = (lhsDef == static_cast<Operation*>(x));
+  bool rhsIsX = (rhsDef == static_cast<Operation*>(x));
+
+  ASSERT_TRUE(lhsIsX ^ rhsIsX); // exactly one is x
+
+  auto* lhsConst = dynamic_cast<const arith::ConstantOp*>(lhsDef);
+  auto* rhsConst = dynamic_cast<const arith::ConstantOp*>(rhsDef);
+  EXPECT_TRUE(lhsConst == c10 || rhsConst == c10);
+}
+
 TEST(ARITH_PEEPHOLES, SUB_ZERO_RHS) {
   IRBuilder builder;
   builder.startNewRegion("ph_sub_zero_rhs");
@@ -304,6 +422,124 @@ TEST(ARITH_PEEPHOLES, MUL_NOT_APPLIED) {
   verifyRegion(*region);
 
   EXPECT_EQ(ret->getInput(0).getDefiningOp(), static_cast<Operation*>(mul));
+}
+
+TEST(ARITH_PEEPHOLES, MUL_ROTATE_CONSTANTS) {
+  IRBuilder builder;
+  builder.startNewRegion("ph_mul_rotate_constants");
+  builder.startNewBasicBlock();
+
+  auto* y = builder.createAndAddOp<builtin::ParamOp>(DataType::SINT);
+  auto* c2 =
+    builder.createAndAddOp<arith::ConstantOp>(makeConstAttribute(int64_t{2}));
+  auto* c3 =
+    builder.createAndAddOp<arith::ConstantOp>(makeConstAttribute(int64_t{3}));
+
+  auto* mulInner = builder.createAndAddOp<arith::MulOp>(c2, y); // 2 * y
+  auto* mulOuter = builder.createAndAddOp<arith::MulOp>(mulInner,
+                                                        c3); // (2 * y) * 3
+  builder.createAndAddOp<ctrlflow::ReturnOp>(mulOuter);
+
+  auto& bb0 = builder.finalizeCurBasicBlock();
+  auto region = builder.obtainRegion();
+  ASSERT_TRUE(region);
+  ASSERT_TRUE(region->setStartBasicBlock(&bb0));
+  ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
+
+  verifyRegion(*region);
+  ASSERT_TRUE(runSinglePass<opt::arith::ArithPeepHolePass>(*region));
+  verifyRegion(*region);
+
+  auto* bb = region->getStartBasicBlock();
+  const auto& ops = bb->getOps();
+  ASSERT_FALSE(ops.empty());
+
+  auto* retAfter = dynamic_cast<const ctrlflow::ReturnOp*>(ops.back().get());
+  ASSERT_NE(retAfter, nullptr);
+
+  auto* outerAfter =
+    dynamic_cast<const arith::MulOp*>(retAfter->getInput(0).getDefiningOp());
+  ASSERT_NE(outerAfter, nullptr);
+  EXPECT_EQ(outerAfter, mulOuter);
+
+  auto* outerLhs = outerAfter->getInputX().getDefiningOp();
+  auto* outerRhs = outerAfter->getInputY().getDefiningOp();
+
+  ASSERT_EQ(outerLhs, static_cast<Operation*>(y));
+  auto* innerAfter = dynamic_cast<const arith::MulOp*>(outerRhs);
+  ASSERT_NE(innerAfter, nullptr);
+  EXPECT_EQ(innerAfter, mulInner);
+
+  auto* innerLhsConst = dynamic_cast<const arith::ConstantOp*>(
+    innerAfter->getInputX().getDefiningOp());
+  auto* innerRhsConst = dynamic_cast<const arith::ConstantOp*>(
+    innerAfter->getInputY().getDefiningOp());
+  ASSERT_NE(innerLhsConst, nullptr);
+  ASSERT_NE(innerRhsConst, nullptr);
+
+  EXPECT_NE(innerAfter->getInputX().getDefiningOp(),
+            static_cast<Operation*>(y));
+  EXPECT_NE(innerAfter->getInputY().getDefiningOp(),
+            static_cast<Operation*>(y));
+
+  EXPECT_TRUE((innerLhsConst == c2 && innerRhsConst == c3) ||
+              (innerLhsConst == c3 && innerRhsConst == c2));
+}
+
+TEST(ARITH_PEEPHOLES, MUL_ROTATE_NOT_APPLIED_MULTIUSE) {
+  IRBuilder builder;
+  builder.startNewRegion("ph_mul_rotate_multiuse");
+  builder.startNewBasicBlock();
+
+  auto* y = builder.createAndAddOp<builtin::ParamOp>(DataType::SINT);
+  auto* c2 =
+    builder.createAndAddOp<arith::ConstantOp>(makeConstAttribute(int64_t{2}));
+  auto* c3 =
+    builder.createAndAddOp<arith::ConstantOp>(makeConstAttribute(int64_t{3}));
+
+  auto* mulInner = builder.createAndAddOp<arith::MulOp>(y, c2); // 2 * y
+  auto* mulOuter = builder.createAndAddOp<arith::MulOp>(mulInner,
+                                                        c3); // (2 * y) * 3
+  builder.createAndAddOp<arith::SubOp>(mulInner, y);
+
+  builder.createAndAddOp<ctrlflow::ReturnOp>(mulOuter);
+
+  auto& bb0 = builder.finalizeCurBasicBlock();
+  auto region = builder.obtainRegion();
+  ASSERT_TRUE(region);
+  ASSERT_TRUE(region->setStartBasicBlock(&bb0));
+  ASSERT_TRUE(region->setFinalBasicBlock(&bb0));
+
+  verifyRegion(*region);
+  runSinglePass<opt::arith::ArithPeepHolePass>(*region);
+  verifyRegion(*region);
+
+  auto* bb = region->getStartBasicBlock();
+  const auto& ops = bb->getOps();
+  ASSERT_FALSE(ops.empty());
+
+  auto* retAfter = dynamic_cast<const ctrlflow::ReturnOp*>(ops.back().get());
+  ASSERT_NE(retAfter, nullptr);
+
+  auto* outerAfter =
+    dynamic_cast<const arith::MulOp*>(retAfter->getInput(0).getDefiningOp());
+  ASSERT_NE(outerAfter, nullptr);
+
+  auto* innerAfter =
+    dynamic_cast<const arith::MulOp*>(outerAfter->getInputX().getDefiningOp());
+  ASSERT_NE(innerAfter, nullptr);
+
+  auto* lhsDef = innerAfter->getInputX().getDefiningOp();
+  auto* rhsDef = innerAfter->getInputY().getDefiningOp();
+
+  bool lhsIsX = (lhsDef == static_cast<Operation*>(y));
+  bool rhsIsX = (rhsDef == static_cast<Operation*>(y));
+
+  ASSERT_TRUE(lhsIsX ^ rhsIsX); // exactly one is x
+
+  auto* lhsConst = dynamic_cast<const arith::ConstantOp*>(lhsDef);
+  auto* rhsConst = dynamic_cast<const arith::ConstantOp*>(rhsDef);
+  EXPECT_TRUE(lhsConst == c2 || rhsConst == c2);
 }
 
 TEST(ARITH_PEEPHOLES, DIV_ONE_RHS) {

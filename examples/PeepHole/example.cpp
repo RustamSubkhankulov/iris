@@ -94,6 +94,23 @@ int main() {
 
   /* v47 = */ builder.createAndAddOp<arith::AddOp>(v44, v45);
 
+  // --- rotate peephole patterns (add/mul with constants) ---
+  auto c48 = builder.createAndAddOp<arith::ConstantOp>(
+    makeConstAttribute(static_cast<std::int64_t>(10)));
+  auto c49 = builder.createAndAddOp<arith::ConstantOp>(
+    makeConstAttribute(static_cast<std::int64_t>(5)));
+
+  auto v50 = builder.createAndAddOp<arith::AddOp>(a0, c48);   // (a0 + 10)
+  /* v51 = */ builder.createAndAddOp<arith::AddOp>(v50, c49); // (a0 + 10) + 5
+
+  auto c52 = builder.createAndAddOp<arith::ConstantOp>(
+    makeConstAttribute(static_cast<std::int64_t>(2)));
+  auto c53 = builder.createAndAddOp<arith::ConstantOp>(
+    makeConstAttribute(static_cast<std::int64_t>(3)));
+
+  auto v54 = builder.createAndAddOp<arith::MulOp>(c52, a1);   // (2 * a1)
+  /* v55 = */ builder.createAndAddOp<arith::MulOp>(v54, c53); // (2 * a1) * 3
+
   builder.createAndAddOp<ctrlflow::ReturnOp>(v43);
 
   auto& bb0 = builder.finalizeCurBasicBlock();
